@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assist AI - Medical Diabetes Assistant</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .urgency-high { border-left: 4px solid #ef4444; }
+        .urgency-medium { border-left: 4px solid #f59e0b; }
+        .urgency-low { border-left: 4px solid #10b981; }
+        .score-high { color: #10b981; }
+        .score-medium { color: #f59e0b; }
+        .score-low { color: #ef4444; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // Mock backend functions (to be replaced with actual ICP canister calls)
+        const mockBackend = {
+            patients: [
+                { id: "P001", name: "Sarah Johnson", age: 47, diabetes_type: "Type 2", hba1c: "6.9%", medications: ["Metformin 1000mg BID", "Lisinopril 15mg daily"] },
+                { id: "P002", name: "Michael Thompson", age: 19, diabetes_type: "Type 1", hba1c: "7.8%", medications: ["Insulin Pump (Aspart)"] },
+                { id: "P003", name: "Carlos Rodriguez", age: 64, diabetes_type: "Type 2", hba1c: "6.8%", medications: ["Metformin 1000mg BID", "Semaglutide 1mg weekly"] }
+            ],
+            queries: [],
+            queryCounter: 0,
+
+            async getAllPatients() {
+                return this.patients;
+            },
+
+            async getPatient(id) {
+                return this.patients.find(p => p.id === id);
+            },
+
+            async processQuery(patientId, query) {
+                this.queryCounter++;
+                const newQuery = {
+                    id: `Q${this.queryCounter}`,
+                    timestamp: new Date().toISOString(),
+                    patient_id: patientId,
+                    original_query: query,
+                    ai_response: this.generateMockResponse(query),
+                    doctor_response: null,
+                    status: "pending_review",
+                    urgency_level: this.determineUrgency(query),
+                    safety_score: Math.floor(Math.random() * 20) + 80, // 80-100
+                    confidence_score: Math.floor(Math.random() * 30) + 70 // 70-100
+                };
+                this.queries.push(newQuery);
+                return newQuery;
+            },
+
+            generateMockResponse(query) {
+                const queryLower = query.toLowerCase();
+                if (queryLower.includes('blood sugar') && queryLower.includes('high')) {
+                    return "I understand your concern about elevated blood sugar. Here are some immediate steps: 1) Check for ketones, 2) Stay hydrated, 3) Consider light activity, 4) Contact your healthcare provider if symptoms persist.";
+                } else if (queryLower.includes('low') && queryLower.includes('dizzy')) {
+                    return "Dizziness with low blood sugar requires immediate attention. Follow the 15-15 rule: consume 15g fast-acting carbs, recheck in 15 minutes. If symptoms persist, seek emergency care.";
+                } else {
+                    return "Thank you for your question. While I cannot provide specific medical advice, I recommend monitoring symptoms closely and contacting your healthcare provider if concerns persist.";
+                }
+            },
+
+            determineUrgency(query) {
+                const queryLower = query.toLowerCase();
+                if (queryLower.includes('chest pain') || queryLower.includes('emergency') || queryLower.includes('unconscious')) {
+                    return 'high';
+                } else if (queryLower.includes('dizzy') || queryLower.includes('nausea') || queryLower.includes('high blood sugar')) {
+                    return 'medium';
+                } else {
+                    return 'low';
+                }
+            },
+
+            async getPendingQueries() {
+                return this.queries.filter(q => q.status === 'pending_review');
+            },
+
+            async reviewQuery(queryId, doctorResponse, approved) {
+                const query = this.queries.find(q => q.id === queryId);
+                if (query) {
+                    query.doctor_response = doctorResponse;
+                    query.status = approved ? 'completed' : 'reviewed';
+                }
+                return query;
+            },
+
+            async getPatientQueries(patientId) {
+                return this.queries.filter(q => q.patient_id === patientId);
+            }
+        };
+
+        // Main App Component
+        function App() {
+            const [userRole, setUserRole] = useState('');
+            const [selectedPatient, setSelectedPatient] = useState('');
+
+            if (!userRole) {
+                return (
+                    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                        <div className="max-w-md w-full space-y-8">
+                            <div className="text-center">
+                                <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
+                                    Assist AI - Medical Assistant
+                                </h2>
+                                <p className="mt-2 text-sm text-gray-600">
+                                    AI-Powered Diabetes Care Platform
+                                </p>
+                            </div>
+                            <div className="space-y-4">
+                                <button
+                                    onClick={() => setUserRole('patient')}
+                                    className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                >
+                                    Patient Portal
+                                </button>
+                                <button
+                                    onClick={() => setUserRole('doctor')}
+                                    className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                                >
+                                    Doctor Portal
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    <nav className="bg-white shadow">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="flex justify-between h-16">
+                                <div className="flex items-center">
+                                    <h1 className="text-xl font-semibold text-gray-900">
+                                        Assist AI - {userRole === 'patient' ? 'Patient' : 'Doctor'} Portal
+                                    </h1>
+                                </div>
+                                <div className="flex items-center">
+                                    <button
+                                        onClick={() => {setUserRole(''); setSelectedPatient('');}}
+                                        className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+                                    >
+                                        Logout
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </nav>
+
+                    <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+                        {userRole === 'patient' ? 
+                            <PatientPortal selectedPatient={selectedPatient} setSelectedPatient={setSelectedPatient} /> : 
+                            <DoctorPortal />
+                        }
+                    </div>
+                </div>
+            );
+        }
+
+        // Patient Portal Component
+        function PatientPortal({ selectedPatient, setSelectedPatient }) {
+            const [patients, setPatients] = useState([]);
+            const [query, setQuery] = useState('');
+            const [patientQueries, setPatientQueries] = useState([]);
+            const [loading, setLoading] = useState(false);
+
+            useEffect(() => {
+                loadPatients();
+            }, []);
+
+            useEffect(() => {
+                if (selectedPatient) {
+                    loadPatientQueries();
+                }
+            }, [selectedPatient]);
+
+            const loadPatients = async () => {
+                const data = await mockBackend.getAllPatients();
+                setPatients(data);
+                if (data.length > 0 && !selectedPatient) {
+                    setSelectedPatient(data[0].id);
+                }
+            };
+
+            const loadPatientQueries = async () => {
+                const queries = await mockBackend.getPatientQueries(selectedPatient);
+                setPatientQueries(queries);
+            };
+
+            const handleSubmitQuery = async (e) => {
+                e.preventDefault();
+                if (!query.trim()) return;
+
+                setLoading(true);
+                try {
+                    await mockBackend.processQuery(selectedPatient, query);
+                    setQuery('');
+                    await loadPatientQueries();
+                } catch (error) {
+                    console.error('Error submitting query:', error);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            const currentPatient = patients.find(p => p.id === selectedPatient);
+
+            return (
+                <div className="space-y-6">
+                    {/* Patient Selection */}
+                    <div className="bg-white overflow-hidden shadow rounded-lg">
+                        <div className="px-4 py-5 sm:p-6">
+                            <h3 className="text-lg leading-6 font-medium text-gray-900">Patient Selection</h3>
+                            <div className="mt-2">
+                                <select
+                                    value={selectedPatient}
+                                    onChange={(e) => setSelectedPatient(e.target.value)}
+                                    className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                                >
+                                    {patients.map(patient => (
+                                        <option key={patient.id} value={patient.id}>
+                                            {patient.name} - {patient.diabetes_type} (HbA1c: {patient.hba1c})
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Current Patient Info */}
+                    {currentPatient && (
+                        <div className="bg-white overflow-hidden shadow rounded-lg">
+                            <div className="px-4 py-5 sm:p-6">
+                                <h3 className="text-lg leading-6 font-medium text-gray-900">{currentPatient.name}</h3>
+                                <div className="mt-2 grid grid-cols-2 gap-4">
+                                    <div>
+                                        <p className="text-sm text-gray-600">Age: {currentPatient.age}</p>
+                                        <p className="text-sm text-gray-600">Type: {currentPatient.diabetes_type}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-600">HbA1c: {currentPatient.hba1c}</p>
+                                        <p className="text-sm text-gray-600">Medications: {currentPatient.medications.length}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Query Submission */}
+                    <div className="bg-white overflow-hidden shadow rounded-lg">
+                        <div className="px-4 py-5 sm:p-6">
+                            <h3 className="text-lg leading-6 font-medium text-gray-900">Ask a Question</h3>
+                            <form onSubmit={handleSubmitQuery} className="mt-4">
+                                <textarea
+                                    value={query}
+                                    onChange={(e) => setQuery(e.target.value)}
+                                    placeholder="Describe your symptoms or ask a question about your diabetes management..."
+                                    className="w-full h-32 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    disabled={loading}
+                                />
+                                <button
+                                    type="submit"
+                                    disabled={loading || !query.trim()}
+                                    className={`mt-3 w-full py-2 px-4 rounded-md text-white font-medium ${
+                                        loading || !query.trim() 
+                                            ? 'bg-gray-400 cursor-not-allowed' 
+                                            : 'bg-blue-600 hover:bg-blue-700'
+                                    }`}
+                                >
+                                    {loading ? 'Processing...' : 'Submit Query'}
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    {/* Previous Queries */}
+                    <div className="bg-white overflow-hidden shadow rounded-lg">
+                        <div className="px-4 py-5 sm:p-6">
+                            <h3 className="text-lg leading-6 font-medium text-gray-900">Your Recent Queries</h3>
+                            <div className="mt-4 space-y-4">
+                                {patientQueries.length === 0 ? (
+                                    <p className="text-gray-500">No queries yet.</p>
+                                ) : (
+                                    patientQueries.map(query => (
+                                        <QueryCard key={query.id} query={query} showPatientName={false} />
+                                    ))
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Doctor Portal Component
+        function DoctorPortal() {
+            const [pendingQueries, setPendingQueries] = useState([]);
+            const [selectedQuery, setSelectedQuery] = useState(null);
+            const [doctorResponse, setDoctorResponse] = useState('');
+
+            useEffect(() => {
+                loadPendingQueries();
+            }, []);
+
+            const loadPendingQueries = async () => {
+                const queries = await mockBackend.getPendingQueries();
+                setPendingQueries(queries);
+            };
+
+            const handleReviewQuery = async (queryId, approved) => {
+                await mockBackend.reviewQuery(queryId, doctorResponse, approved);
+                setSelectedQuery(null);
+                setDoctorResponse('');
+                await loadPendingQueries();
+            };
+
+            return (
+                <div className="space-y-6">
+                    <div className="bg-white overflow-hidden shadow rounded-lg">
+                        <div className="px-4 py-5 sm:p-6">
+                            <h3 className="text-lg leading-6 font-medium text-gray-900">
+                                Pending Reviews ({pendingQueries.length})
+                            </h3>
+                            <div className="mt-4 space-y-4">
+                                {pendingQueries.length === 0 ? (
+                                    <p className="text-gray-500">No pending queries for review.</p>
+                                ) : (
+                                    pendingQueries.map(query => (
+                                        <div key={query.id} className="border rounded-lg p-4">
+                                            <QueryCard query={query} showPatientName={true} />
+                                            <button
+                                                onClick={() => setSelectedQuery(query)}
+                                                className="mt-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                                            >
+                                                Review
+                                            </button>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Review Modal */}
+                    {selectedQuery && (
+                        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
+                            <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-2xl shadow-lg rounded-md bg-white">
+                                <div className="mt-3">
+                                    <h3 className="text-lg font-medium text-gray-900 mb-4">Review Query</h3>
+                                    <QueryCard query={selectedQuery} showPatientName={true} />
+                                    
+                                    <div className="mt-4">
+                                        <label className="block text-sm font-medium text-gray-700">Doctor Response:</label>
+                                        <textarea
+                                            value={doctorResponse}
+                                            onChange={(e) => setDoctorResponse(e.target.value)}
+                                            placeholder="Edit the AI response or provide your own..."
+                                            className="mt-1 w-full h-32 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            defaultValue={selectedQuery.ai_response}
+                                        />
+                                    </div>
+
+                                    <div className="flex justify-end space-x-3 mt-6">
+                                        <button
+                                            onClick={() => setSelectedQuery(null)}
+                                            className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            onClick={() => handleReviewQuery(selectedQuery.id, true)}
+                                            className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+                                        >
+                                            Approve & Send
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        // Query Card Component
+        function QueryCard({ query, showPatientName }) {
+            const getUrgencyClass = (level) => {
+                switch(level) {
+                    case 'high': return 'urgency-high bg-red-50';
+                    case 'medium': return 'urgency-medium bg-yellow-50';
+                    default: return 'urgency-low bg-green-50';
+                }
+            };
+
+            const getScoreClass = (score) => {
+                if (score >= 80) return 'score-high';
+                if (score >= 60) return 'score-medium';
+                return 'score-low';
+            };
+
+            return (
+                <div className={`p-4 rounded-lg ${getUrgencyClass(query.urgency_level)}`}>
+                    <div className="flex justify-between items-start mb-2">
+                        <div>
+                            {showPatientName && (
+                                <p className="text-sm font-medium text-gray-900">Patient: {query.patient_id}</p>
+                            )}
+                            <p className="text-xs text-gray-500">
+                                {new Date(query.timestamp).toLocaleString()} • 
+                                <span className={`ml-1 font-medium ${query.urgency_level === 'high' ? 'text-red-600' : query.urgency_level === 'medium' ? 'text-yellow-600' : 'text-green-600'}`}>
+                                    {query.urgency_level.toUpperCase()} PRIORITY
+                                </span>
+                            </p>
+                        </div>
+                        <div className="flex space-x-2 text-xs">
+                            <span className={`font-medium ${getScoreClass(query.safety_score)}`}>
+                                Safety: {query.safety_score}%
+                            </span>
+                            <span className={`font-medium ${getScoreClass(query.confidence_score)}`}>
+                                Confidence: {query.confidence_score}%
+                            </span>
+                        </div>
+                    </div>
+
+                    <div className="space-y-3">
+                        <div>
+                            <p className="text-sm font-medium text-gray-700">Query:</p>
+                            <p className="text-sm text-gray-900 bg-white p-2 rounded border">
+                                {query.original_query}
+                            </p>
+                        </div>
+
+                        <div>
+                            <p className="text-sm font-medium text-gray-700">AI Response:</p>
+                            <p className="text-sm text-gray-900 bg-white p-2 rounded border">
+                                {query.ai_response}
+                            </p>
+                        </div>
+
+                        {query.doctor_response && (
+                            <div>
+                                <p className="text-sm font-medium text-gray-700">Doctor's Final Response:</p>
+                                <p className="text-sm text-gray-900 bg-blue-50 p-2 rounded border border-blue-200">
+                                    {query.doctor_response}
+                                </p>
+                            </div>
+                        )}
+
+                        <div className="flex justify-between items-center pt-2 border-t">
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                query.status === 'completed' ? 'bg-green-100 text-green-800' :
+                                query.status === 'reviewed' ? 'bg-blue-100 text-blue-800' :
+                                'bg-yellow-100 text-yellow-800'
+                            }`}>
+                                {query.status.replace('_', ' ').toUpperCase()}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Render the app
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

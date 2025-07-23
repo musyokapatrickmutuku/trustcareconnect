@@ -1,0 +1,27 @@
+{
+  "name": "assist-ai-icp-simplified",
+  "version": "1.0.0",
+  "description": "Simplified Assist AI medical assistant built for Internet Computer Protocol",
+  "scripts": {
+    "build": "dfx build",
+    "start": "dfx start --background",
+    "deploy": "dfx deploy",
+    "stop": "dfx stop",
+    "clean": "dfx canister --network local delete --all",
+    "test": "npm run test:backend && npm run test:frontend",
+    "test:backend": "echo 'Backend tests would run here'",
+    "test:frontend": "echo 'Frontend tests would run here'"
+  },
+  "keywords": [
+    "icp",
+    "motoko",
+    "medical-ai",
+    "diabetes",
+    "healthcare"
+  ],
+  "devDependencies": {
+    "@dfinity/agent": "^0.20.0",
+    "@dfinity/candid": "^0.20.0",
+    "@dfinity/principal": "^0.20.0"
+  }
+}
