@@ -143,11 +143,11 @@ dfx deploy --network ic
 
 ## Future Enhancements
 
-1. **Real LLM Integration**: Add HTTP outcalls for actual AI API
+1. **Real LLM Integration**: Add HTTP outcalls for actual AI API e.g. a finetuned local LLM on diabetis 
 2. **Internet Identity**: Implement proper ICP authentication
 3. **Advanced UI**: Migrate to full React/TypeScript project
 4. **Medical Records**: Expand patient data management
-5. **Notifications**: Real-time alerts for urgent queries
+5. **Notifications**: Real-time alerts for all queries with the relevant urgency requirements 
 6. **Analytics**: Usage metrics and outcome tracking
 
 ## File Structure
@@ -177,4 +177,4 @@ This is a simplified demonstration version. For production use:
 
 ## License
 
-Educational/Demo purposes - Based on original Assist AI project architecture.
+Educational/Demo purposes 
