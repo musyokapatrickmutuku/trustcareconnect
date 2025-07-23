@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assist AI - Medical Diabetes Assistant (Demo)</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .urgency-high { border-left: 4px solid #ef4444; }
+        .urgency-medium { border-left: 4px solid #f59e0b; }
+        .urgency-low { border-left: 4px solid #10b981; }
+        .score-high { color: #10b981; }
+        .score-medium { color: #f59e0b; }
+        .score-low { color: #ef4444; }
+        .demo-banner {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-banner">
+        <h2 class="text-xl font-bold">🩺 Assist AI - ICP Simplified Demo</h2>
+        <p class="text-sm opacity-90">Medical AI Assistant for Diabetes Care • Built with Motoko & React</p>
+        <p class="text-xs opacity-75 mt-1">
+            Repository: <a href="https://github.com/musyokapatrickmutuku/assist-ai-icp-simplified" 
+            class="underline text-white hover:text-blue-200">GitHub</a>
+        </p>
+    </div>
+    
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // Mock backend functions (simulates the Motoko canister)
+        const mockBackend = {
+            patients: [
+                { 
+                    id: "P001", 
+                    name: "Sarah Johnson", 
+                    age: 47, 
+                    diabetes_type: "Type 2", 
+                    hba1c: "6.9%", 
+                    medications: ["Metformin 1000mg BID", "Lisinopril 15mg daily", "Empagliflozin 10mg daily"],
+                    profile: "Well-controlled Type 2, African American female"
+                },
+                { 
+                    id: "P002", 
+                    name: "Michael Thompson", 
+                    age: 19, 
+                    diabetes_type: "Type 1", 
+                    hba1c: "7.8%", 
+                    medications: ["Insulin Pump (Aspart)", "Basal 1.2 units/hour"],
+                    profile: "College student with insulin pump"
+                },
+                { 
+                    id: "P003", 
+                    name: "Carlos Rodriguez", 
+                    age: 64, 
+                    diabetes_type: "Type 2", 
+                    hba1c: "6.8%", 
+                    medications: ["Metformin 1000mg BID", "Semaglutide 1mg weekly", "Lisinopril 20mg daily"],
+                    profile: "Older patient with complications and comorbidities"
+                }
+            ],
+            queries: [],
+            queryCounter: 0,
+
+            async getAllPatients() {
+                return this.patients;
+            },
+
+            async getPatient(id) {
+                return this.patients.find(p => p.id === id);
+            },
+
+            async processQuery(patientId, query) {
+                this.queryCounter++;
+                const newQuery = {
+                    id: `Q${this.queryCounter}`,
+                    timestamp: new Date().toISOString(),
+                    patient_id: patientId,
+                    original_query: query,
+                    ai_response: this.generateMockResponse(query, patientId),
+                    doctor_response: null,
+                    status: "pending_review",
+                    urgency_level: this.determineUrgency(query),
+                    safety_score: this.calculateSafetyScore(query),
+                    confidence_score: this.calculateConfidenceScore(query, patientId)
+                };
+                this.queries.push(newQuery);
+                return newQuery;
+            },
+
+            generateMockResponse(query, patientId) {
+                const queryLower = query.toLowerCase();
+                const patient = this.patients.find(p => p.id === patientId);
+                
+                if (queryLower.includes('blood sugar') && queryLower.includes('high')) {
+                    return `I understand your concern about elevated blood sugar, ${patient.name}. Given your ${patient.diabetes_type} diabetes and current HbA1c of ${patient.hba1c}, here are some immediate steps:
+
+1. **Check for ketones** if you have testing strips available
+2. **Stay well hydrated** with water (avoid sugary drinks)
+3. **Light activity** like a 10-15 minute walk can help if you feel well
+4. **Review recent factors** - unusual meals, missed medications, stress, illness
+
+Your current medications (${patient.medications.slice(0,2).join(', ')}) should help bring levels down. If readings remain above 250 mg/dL for more than 2 hours or you experience symptoms like excessive thirst, frequent urination, or nausea, please contact your healthcare provider promptly.
+
+Continue monitoring and keep a log to discuss at your next appointment.`;
+                } 
+                
+                else if (queryLower.includes('low') && (queryLower.includes('dizzy') || queryLower.includes('hypoglycemia'))) {
+                    return `Dizziness with low blood sugar requires immediate attention, ${patient.name}. If your glucose is below 70 mg/dL:
+
+**Immediate Actions:**
+1. **15-15 Rule**: Consume 15g fast-acting carbs (4 glucose tablets, 1/2 cup juice, or 1 tbsp honey)
+2. **Wait & Recheck**: Test blood sugar again in 15 minutes
+3. **Repeat if needed**: If still low, repeat step 1
+4. **Follow-up snack**: Once normalized, have a small snack with protein
+
+${patient.diabetes_type === 'Type 1' ? 
+    '**Important for Type 1**: Consider if insulin timing or carb counting needs adjustment.' :
+    '**Note**: Your medications may increase hypoglycemia risk - discuss with your doctor.'
+}
+
+If symptoms persist, worsen, or you lose consciousness, call emergency services immediately. Please report this episode to your healthcare provider to potentially adjust your treatment plan.`;
+                }
+                
+                else if (queryLower.includes('medication') || queryLower.includes('dose')) {
+                    return `Thank you for your medication question, ${patient.name}. I see you're currently taking ${patient.medications.join(', ')}.
+
+**Important**: I cannot recommend changes to your medication regimen, as this requires professional medical evaluation considering:
+- Your current HbA1c of ${patient.hba1c}
+- Your complete medical history
+- Potential drug interactions
+- Individual response patterns
+
+**What you can do:**
+1. **Keep taking** your current medications as prescribed
+2. **Monitor** blood sugars if you have concerns
+3. **Document** any symptoms or side effects
+4. **Contact your healthcare provider** for medication adjustments
+
+${patient.age > 60 ? 
+    'Given your age, medication management requires extra attention to kidney function and potential interactions.' :
+    'Your healthcare team can optimize your regimen based on your lifestyle and treatment goals.'
+}
+
+Never stop or change diabetes medications without medical supervision.`;
+                }
+                
+                else if (queryLower.includes('diet') || queryLower.includes('food') || queryLower.includes('carb')) {
+                    return `Great question about nutrition, ${patient.name}! Diet is crucial for ${patient.diabetes_type} diabetes management.
+
+**General Guidelines:**
+1. **Carbohydrate awareness** - Focus on complex carbs, fiber-rich foods
+2. **Portion control** - Use plate method (1/2 vegetables, 1/4 protein, 1/4 starch)
+3. **Consistent timing** - Regular meals help with blood sugar stability
+4. **Protein inclusion** - Helps slow glucose absorption
+
+${patient.diabetes_type === 'Type 1' ? 
+    '**For Type 1**: Carb counting is essential for insulin dosing. Work with a dietitian familiar with pump therapy.' :
+    '**For Type 2**: Weight management may improve insulin sensitivity and glucose control.'
+}
+
+**Recommendations:**
+- Consider meeting with a registered dietitian
+- Keep a food/blood sugar log to identify patterns
+- Focus on whole foods rather than processed items
+
+Your current HbA1c of ${patient.hba1c} suggests your overall management is working well. A dietitian can help optimize your meal plan while maintaining these good results.`;
+                }
+                
+                else {
+                    return `Thank you for your question, ${patient.name}. While I cannot provide specific medical advice, I can offer some general guidance:
+
+**For ${patient.diabetes_type} diabetes management:**
+1. **Monitor regularly** - Check blood sugars as recommended
+2. **Take medications consistently** - Continue your current regimen: ${patient.medications.slice(0,2).join(', ')}
+3. **Stay active** - Regular physical activity helps with glucose control
+4. **Maintain routine** - Consistent meal times and sleep schedule
+
+**When to contact your healthcare provider:**
+- Blood sugars consistently outside target range
+- New or worsening symptoms
+- Questions about medication adjustments
+- Emergency symptoms (chest pain, difficulty breathing, loss of consciousness)
+
+Your HbA1c of ${patient.hba1c} indicates ${patient.hba1c < '7.0%' ? 'excellent' : patient.hba1c < '8.0%' ? 'good' : 'needs improvement'} control. Keep up the great work with your diabetes management!
+
+For personalized advice, please consult with your healthcare team who know your complete medical history.`;
+                }
+            },
+
+            determineUrgency(query) {
+                const queryLower = query.toLowerCase();
+                const highUrgencyKeywords = ['chest pain', 'can\'t breathe', 'unconscious', 'severe pain', 'emergency', 'blood sugar over 400', 'ketones'];
+                const mediumUrgencyKeywords = ['dizzy', 'nausea', 'headache', 'high blood sugar', 'low blood sugar', 'hypoglycemia', 'hyperglycemia', 'vomiting'];
+                
+                if (highUrgencyKeywords.some(keyword => queryLower.includes(keyword))) {
+                    return 'high';
+                } else if (mediumUrgencyKeywords.some(keyword => queryLower.includes(keyword))) {
+                    return 'medium';
+                } else {
+                    return 'low';
+                }
+            },
+
+            calculateSafetyScore(query) {
+                let score = 95; // Start high for demo
+                const queryLower = query.toLowerCase();
+                
+                // High-risk symptoms lower safety score (more attention needed)
+                if (queryLower.includes('chest pain') || queryLower.includes('unconscious')) score = 60;
+                else if (queryLower.includes('severe') || queryLower.includes('emergency')) score = 70;
+                else if (queryLower.includes('dizzy') || queryLower.includes('nausea')) score = 85;
+                
+                return score;
+            },
+
+            calculateConfidenceScore(query, patientId) {
+                let score = 85; // Base confidence
+                const patient = this.patients.find(p => p.id === patientId);
+                const queryLower = query.toLowerCase();
+                
+                // Complex cases reduce confidence
+                if (queryLower.includes('emergency') || queryLower.includes('severe')) score -= 20;
+                if (patient.age > 65) score -= 5; // Elderly patients more complex
+                if (patient.diabetes_type === 'Type 1') score -= 5; // Type 1 more complex
+                
+                // Simple queries increase confidence
+                if (queryLower.includes('diet') || queryLower.includes('general')) score += 10;
+                
+                return Math.max(60, Math.min(95, score));
+            },
+
+            async getPendingQueries() {
+                return this.queries.filter(q => q.status === 'pending_review');
+            },
+
+            async reviewQuery(queryId, doctorResponse, approved) {
+                const query = this.queries.find(q => q.id === queryId);
+                if (query) {
+                    query.doctor_response = doctorResponse || query.ai_response;
+                    query.status = approved ? 'completed' : 'reviewed';
+                }
+                return query;
+            },
+
+            async getPatientQueries(patientId) {
+                return this.queries.filter(q => q.patient_id === patientId);
+            }
+        };
+
+        // Main App Component
+        function App() {
+            const [userRole, setUserRole] = useState('');
+            const [selectedPatient, setSelectedPatient] = useState('');
+
+            if (!userRole) {
+                return (
+                    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                        <div className="max-w-md w-full space-y-8">
+                            <div className="text-center">
+                                <div className="mx-auto h-16 w-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                                    <span className="text-2xl">🩺</span>
+                                </div>
+                                <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
+                                    Assist AI Medical Assistant
+                                </h2>
+                                <p className="mt-2 text-sm text-gray-600">
+                                    AI-Powered Diabetes Care Platform
+                                </p>
+                                <p className="mt-1 text-xs text-gray-500">
+                                    Built with Motoko (ICP) + React • Demo Version
+                                </p>
+                            </div>
+                            <div className="space-y-4">
+                                <button
+                                    onClick={() => setUserRole('patient')}
+                                    className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                                >
+                                    👤 Patient Portal
+                                    <span className="ml-2 text-xs opacity-75">(Submit queries)</span>
+                                </button>
+                                <button
+                                    onClick={() => setUserRole('doctor')}
+                                    className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
+                                >
+                                    👨‍⚕️ Doctor Portal
+                                    <span className="ml-2 text-xs opacity-75">(Review & approve)</span>
+                                </button>
+                            </div>
+                            <div className="mt-6 text-center">
+                                <p className="text-xs text-gray-500">
+                                    Try sample queries: "My blood sugar is high at 250", "I feel dizzy and low", "Diet questions"
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    <nav className="bg-white shadow">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="flex justify-between h-16">
+                                <div className="flex items-center">
+                                    <span className="text-2xl mr-3">🩺</span>
+                                    <h1 className="text-xl font-semibold text-gray-900">
+                                        Assist AI - {userRole === 'patient' ? 'Patient' : 'Doctor'} Portal
+                                    </h1>
+                                </div>
+                                <div className="flex items-center space-x-4">
+                                    <span className="text-sm text-gray-500">Demo Mode</span>
+                                    <button
+                                        onClick={() => {setUserRole(''); setSelectedPatient('');}}
+                                        className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition-colors"
+                                    >
+                                        Switch Role
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </nav>
+
+                    <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+                        {userRole === 'patient' ? 
+                            <PatientPortal selectedPatient={selectedPatient} setSelectedPatient={setSelectedPatient} /> : 
+                            <DoctorPortal />
+                        }
+                    </div>
+                </div>
+            );
+        }
+
+        // Patient Portal Component
+        function PatientPortal({ selectedPatient, setSelectedPatient }) {
+            const [patients, setPatients] = useState([]);
+            const [query, setQuery] = useState('');
+            const [patientQueries, setPatientQueries] = useState([]);
+            const [loading, setLoading] = useState(false);
+
+            useEffect(() => {
+                loadPatients();
+            }, []);
+
+            useEffect(() => {
+                if (selectedPatient) {
+                    loadPatientQueries();
+                }
+            }, [selectedPatient]);
+
+            const loadPatients = async () => {
+                const data = await mockBackend.getAllPatients();
+                setPatients(data);
+                if (data.length > 0 && !selectedPatient) {
+                    setSelectedPatient(data[0].id);
+                }
+            };
+
+            const loadPatientQueries = async () => {
+                const queries = await mockBackend.getPatientQueries(selectedPatient);
+                setPatientQueries(queries);
+            };
+
+            const handleSubmitQuery = async (e) => {
+                e.preventDefault();
+                if (!query.trim()) return;
+
+                setLoading(true);
+                try {
+                    // Simulate processing delay
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                    await mockBackend.processQuery(selectedPatient, query);
+                    setQuery('');
+                    await loadPatientQueries();
+                } catch (error) {
+                    console.error('Error submitting query:', error);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            const currentPatient = patients.find(p => p.id === selectedPatient);
+
+            const sampleQueries = [
+                "My blood sugar reading is 250 mg/dL this morning, what should I do?",
+                "I'm feeling dizzy and think my blood sugar might be low",
+                "What foods should I avoid with Type 2 diabetes?",
+                "I forgot to take my medication yesterday, should I double dose today?"
+            ];
+
+            return (
+                <div className="space-y-6">
+                    {/* Patient Selection */}
+                    <div className="bg-white overflow-hidden shadow rounded-lg">
+                        <div className="px-4 py-5 sm:p-6">
+                            <h3 className="text-lg leading-6 font-medium text-gray-900">👤 Patient Selection</h3>
+                            <div className="mt-2">
+                                <select
+                                    value={selectedPatient}
+                                    onChange={(e) => setSelectedPatient(e.target.value)}
+                                    className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                                >
+                                    {patients.map(patient => (
+                                        <option key={patient.id} value={patient.id}>
+                                            {patient.name} - {patient.diabetes_type} (HbA1c: {patient.hba1c})
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Current Patient Info */}
+                    {currentPatient && (
+                        <div className="bg-white overflow-hidden shadow rounded-lg">
+                            <div className="px-4 py-5 sm:p-6">
+                                <h3 className="text-lg leading-6 font-medium text-gray-900">📋 {currentPatient.name}</h3>
+                                <p className="text-sm text-gray-600 mt-1">{currentPatient.profile}</p>
+                                <div className="mt-3 grid grid-cols-2 gap-4">
+                                    <div>
+                                        <p className="text-sm text-gray-600">Age: <span className="font-medium">{currentPatient.age}</span></p>
+                                        <p className="text-sm text-gray-600">Type: <span className="font-medium">{currentPatient.diabetes_type}</span></p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-600">HbA1c: <span className="font-medium">{currentPatient.hba1c}</span></p>
+                                        <p className="text-sm text-gray-600">Medications: <span className="font-medium">{currentPatient.medications.length}</span></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Query Submission */}
+                    <div className="bg-white overflow-hidden shadow rounded-lg">
+                        <div className="px-4 py-5 sm:p-6">
+                            <h3 className="text-lg leading-6 font-medium text-gray-900">💬 Ask a Question</h3>
+                            <form onSubmit={handleSubmitQuery} className="mt-4">
+                                <textarea
+                                    value={query}
+                                    onChange={(e) => setQuery(e.target.value)}
+                                    placeholder="Describe your symptoms or ask a question about your diabetes management..."
+                                    className="w-full h-32 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    disabled={loading}
+                                />
+                                <button
+                                    type="submit"
+                                    disabled={loading || !query.trim()}
+                                    className={`mt-3 w-full py-2 px-4 rounded-md text-white font-medium transition-colors ${
+                                        loading || !query.trim() 
+                                            ? 'bg-gray-400 cursor-not-allowed' 
+                                            : 'bg-blue-600 hover:bg-blue-700'
+                                    }`}
+                                >
+                                    {loading ? '🔄 Processing with AI...' : '📤 Submit Query'}
+                                </button>
+                            </form>
+                            
+                            {/* Sample queries */}
+                            <div className="mt-4">
+                                <p className="text-sm text-gray-600 mb-2">💡 Try these sample queries:</p>
+                                <div className="grid grid-cols-1 gap-2">
+                                    {sampleQueries.map((sample, idx) => (
+                                        <button
+                                            key={idx}
+                                            onClick={() => setQuery(sample)}
+                                            className="text-left text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-50 p-2 rounded border border-blue-200 transition-colors"
+                                            disabled={loading}
+                                        >
+                                            "{sample}"
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Previous Queries */}
+                    <div className="bg-white overflow-hidden shadow rounded-lg">
+                        <div className="px-4 py-5 sm:p-6">
+                            <h3 className="text-lg leading-6 font-medium text-gray-900">📚 Your Recent Queries</h3>
+                            <div className="mt-4 space-y-4">
+                                {patientQueries.length === 0 ? (
+                                    <p className="text-gray-500 text-center py-8">No queries yet. Submit your first question above!</p>
+                                ) : (
+                                    patientQueries.map(query => (
+                                        <QueryCard key={query.id} query={query} showPatientName={false} />
+                                    ))
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Doctor Portal Component
+        function DoctorPortal() {
+            const [pendingQueries, setPendingQueries] = useState([]);
+            const [selectedQuery, setSelectedQuery] = useState(null);
+            const [doctorResponse, setDoctorResponse] = useState('');
+
+            useEffect(() => {
+                loadPendingQueries();
+            }, []);
+
+            const loadPendingQueries = async () => {
+                const queries = await mockBackend.getPendingQueries();
+                setPendingQueries(queries);
+            };
+
+            const handleReviewQuery = async (queryId, approved) => {
+                await mockBackend.reviewQuery(queryId, doctorResponse, approved);
+                setSelectedQuery(null);
+                setDoctorResponse('');
+                await loadPendingQueries();
+            };
+
+            const getStats = () => {
+                const high = pendingQueries.filter(q => q.urgency_level === 'high').length;
+                const medium = pendingQueries.filter(q => q.urgency_level === 'medium').length;
+                const low = pendingQueries.filter(q => q.urgency_level === 'low').length;
+                return { high, medium, low };
+            };
+
+            const stats = getStats();
+
+            return (
+                <div className="space-y-6">
+                    {/* Stats Dashboard */}
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div className="bg-white overflow-hidden shadow rounded-lg">
+                            <div className="p-5">
+                                <div className="flex items-center">
+                                    <div className="flex-shrink-0">
+                                        <span className="text-2xl">📊</span>
+                                    </div>
+                                    <div className="ml-5 w-0 flex-1">
+                                        <dl>
+                                            <dt className="text-sm font-medium text-gray-500 truncate">Total Pending</dt>
+                                            <dd className="text-lg font-medium text-gray-900">{pendingQueries.length}</dd>
+                                        </dl>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-white overflow-hidden shadow rounded-lg">
+                            <div className="p-5">
+                                <div className="flex items-center">
+                                    <div className="flex-shrink-0">
+                                        <span className="text-2xl">🚨</span>
+                                    </div>
+                                    <div className="ml-5 w-0 flex-1">
+                                        <dl>
+                                            <dt className="text-sm font-medium text-gray-500 truncate">High Priority</dt>
+                                            <dd className="text-lg font-medium text-red-600">{stats.high}</dd>
+                                        </dl>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-white overflow-hidden shadow rounded-lg">
+                            <div className="p-5">
+                                <div className="flex items-center">
+                                    <div className="flex-shrink-0">
+                                        <span className="text-2xl">⚠️</span>
+                                    </div>
+                                    <div className="ml-5 w-0 flex-1">
+                                        <dl>
+                                            <dt className="text-sm font-medium text-gray-500 truncate">Medium Priority</dt>
+                                            <dd className="text-lg font-medium text-yellow-600">{stats.medium}</dd>
+                                        </dl>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-white overflow-hidden shadow rounded-lg">
+                            <div className="p-5">
+                                <div className="flex items-center">
+                                    <div className="flex-shrink-0">
+                                        <span className="text-2xl">✅</span>
+                                    </div>
+                                    <div className="ml-5 w-0 flex-1">
+                                        <dl>
+                                            <dt className="text-sm font-medium text-gray-500 truncate">Low Priority</dt>
+                                            <dd className="text-lg font-medium text-green-600">{stats.low}</dd>
+                                        </dl>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Pending Reviews */}
+                    <div className="bg-white overflow-hidden shadow rounded-lg">
+                        <div className="px-4 py-5 sm:p-6">
+                            <h3 className="text-lg leading-6 font-medium text-gray-900">
+                                👨‍⚕️ Pending Reviews ({pendingQueries.length})
+                            </h3>
+                            <div className="mt-4 space-y-4">
+                                {pendingQueries.length === 0 ? (
+                                    <div className="text-center py-8">
+                                        <span className="text-4xl mb-4 block">✨</span>
+                                        <p className="text-gray-500">No pending queries for review.</p>
+                                        <p className="text-sm text-gray-400 mt-2">
+                                            Switch to Patient Portal to submit test queries.
+                                        </p>
+                                    </div>
+                                ) : (
+                                    pendingQueries
+                                        .sort((a, b) => {
+                                            const urgencyOrder = { high: 3, medium: 2, low: 1 };
+                                            return urgencyOrder[b.urgency_level] - urgencyOrder[a.urgency_level];
+                                        })
+                                        .map(query => (
+                                        <div key={query.id} className="border rounded-lg p-4">
+                                            <QueryCard query={query} showPatientName={true} />
+                                            <button
+                                                onClick={() => {
+                                                    setSelectedQuery(query);
+                                                    setDoctorResponse(query.ai_response);
+                                                }}
+                                                className="mt-3 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors"
+                                            >
+                                                🔍 Review & Approve
+                                            </button>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Review Modal */}
+                    {selectedQuery && (
+                        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+                            <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white">
+                                <div className="mt-3">
+                                    <h3 className="text-lg font-medium text-gray-900 mb-4">
+                                        👨‍⚕️ Review Query - {selectedQuery.id}
+                                    </h3>
+                                    <QueryCard query={selectedQuery} showPatientName={true} />
+                                    
+                                    <div className="mt-6">
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            📝 Doctor's Response (Edit as needed):
+                                        </label>
+                                        <textarea
+                                            value={doctorResponse}
+                                            onChange={(e) => setDoctorResponse(e.target.value)}
+                                            placeholder="Edit the AI response or provide your own..."
+                                            className="w-full h-40 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        />
+                                        <p className="mt-1 text-xs text-gray-500">
+                                            💡 The AI response is pre-loaded. You can edit it or write a completely new response.
+                                        </p>
+                                    </div>
+
+                                    <div className="flex justify-end space-x-3 mt-6">
+                                        <button
+                                            onClick={() => {
+                                                setSelectedQuery(null);
+                                                setDoctorResponse('');
+                                            }}
+                                            className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition-colors"
+                                        >
+                                            ❌ Cancel
+                                        </button>
+                                        <button
+                                            onClick={() => handleReviewQuery(selectedQuery.id, true)}
+                                            className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition-colors"
+                                            disabled={!doctorResponse.trim()}
+                                        >
+                                            ✅ Approve & Send to Patient
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        // Query Card Component
+        function QueryCard({ query, showPatientName }) {
+            const getUrgencyClass = (level) => {
+                switch(level) {
+                    case 'high': return 'urgency-high bg-red-50';
+                    case 'medium': return 'urgency-medium bg-yellow-50';
+                    default: return 'urgency-low bg-green-50';
+                }
+            };
+
+            const getScoreClass = (score) => {
+                if (score >= 80) return 'score-high';
+                if (score >= 60) return 'score-medium';
+                return 'score-low';
+            };
+
+            const getUrgencyEmoji = (level) => {
+                switch(level) {
+                    case 'high': return '🚨';
+                    case 'medium': return '⚠️';
+                    default: return '✅';
+                }
+            };
+
+            return (
+                <div className={`p-4 rounded-lg ${getUrgencyClass(query.urgency_level)}`}>
+                    <div className="flex justify-between items-start mb-3">
+                        <div>
+                            {showPatientName && (
+                                <p className="text-sm font-medium text-gray-900">👤 Patient: {query.patient_id}</p>
+                            )}
+                            <p className="text-xs text-gray-500">
+                                🕒 {new Date(query.timestamp).toLocaleString()} • 
+                                <span className={`ml-1 font-medium ${
+                                    query.urgency_level === 'high' ? 'text-red-600' : 
+                                    query.urgency_level === 'medium' ? 'text-yellow-600' : 'text-green-600'
+                                }`}>
+                                    {getUrgencyEmoji(query.urgency_level)} {query.urgency_level.toUpperCase()} PRIORITY
+                                </span>
+                            </p>
+                        </div>
+                        <div className="flex space-x-3 text-xs">
+                            <span className={`font-medium ${getScoreClass(query.safety_score)}`}>
+                                🛡️ Safety: {query.safety_score}%
+                            </span>
+                            <span className={`font-medium ${getScoreClass(query.confidence_score)}`}>
+                                🎯 Confidence: {query.confidence_score}%
+                            </span>
+                        </div>
+                    </div>
+
+                    <div className="space-y-3">
+                        <div>
+                            <p className="text-sm font-medium text-gray-700">❓ Patient Query:</p>
+                            <p className="text-sm text-gray-900 bg-white p-3 rounded border italic">
+                                "{query.original_query}"
+                            </p>
+                        </div>
+
+                        <div>
+                            <p className="text-sm font-medium text-gray-700">🤖 AI Response:</p>
+                            <div className="text-sm text-gray-900 bg-white p-3 rounded border">
+                                {query.ai_response.split('\n').map((line, idx) => (
+                                    <p key={idx} className={line.trim() === '' ? 'mb-2' : 'mb-1'}>
+                                        {line}
+                                    </p>
+                                ))}
+                            </div>
+                        </div>
+
+                        {query.doctor_response && (
+                            <div>
+                                <p className="text-sm font-medium text-gray-700">👨‍⚕️ Doctor's Final Response:</p>
+                                <div className="text-sm text-gray-900 bg-blue-50 p-3 rounded border border-blue-200">
+                                    {query.doctor_response.split('\n').map((line, idx) => (
+                                        <p key={idx} className={line.trim() === '' ? 'mb-2' : 'mb-1'}>
+                                            {line}
+                                        </p>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="flex justify-between items-center pt-2 border-t">
+                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                                query.status === 'completed' ? 'bg-green-100 text-green-800' :
+                                query.status === 'reviewed' ? 'bg-blue-100 text-blue-800' :
+                                'bg-yellow-100 text-yellow-800'
+                            }`}>
+                                {query.status === 'completed' ? '✅' : 
+                                 query.status === 'reviewed' ? '👀' : '⏳'} 
+                                {query.status.replace('_', ' ').toUpperCase()}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Render the app
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
