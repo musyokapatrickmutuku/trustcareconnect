@@ -2,7 +2,8 @@
   "canisters": {
     "assist_backend": {
       "main": "src/assist_backend/main.mo",
-      "type": "motoko"
+      "type": "motoko",
+      "dependencies": ["ic:aaaaa-aa"]
     },
     "assist_frontend": {
       "dependencies": [

@@ -6,6 +6,10 @@ import Iter "mo:base/Iter";
 import Result "mo:base/Result";
 import Option "mo:base/Option";
 import Debug "mo:base/Debug";
+import Blob "mo:base/Blob";
+import Cycles "mo:base/ExperimentalCycles";
+import Nat "mo:base/Nat";
+import Error "mo:base/Error";
 
 actor AssistAI {
     // Types for our medical AI system
@@ -41,6 +45,115 @@ actor AssistAI {
         safety_score: Nat;
         confidence_score: Nat;
         urgency_level: Text;
+    };
+
+    // HTTP types for external API calls
+    public type HttpRequestArgs = {
+        url: Text;
+        max_response_bytes: ?Nat64;
+        headers: [HttpHeader];
+        body: ?[Nat8];
+        method: HttpMethod;
+        transform: ?TransformRawResponseFunction;
+    };
+
+    public type HttpHeader = {
+        name: Text;
+        value: Text;
+    };
+
+    public type HttpMethod = {
+        #get;
+        #post;
+        #head;
+    };
+
+    public type HttpResponsePayload = {
+        status: Nat;
+        headers: [HttpHeader];
+        body: [Nat8];
+    };
+
+    public type TransformRawResponseFunction = {
+        function: shared query TransformRawResponse -> async HttpResponsePayload;
+        context: Blob;
+    };
+
+    public type TransformRawResponse = {
+        status: Nat;
+        body: [Nat8];
+        headers: [HttpHeader];
+        context: Blob;
+    };
+
+    // Management canister interface for HTTP outcalls
+    public type ManagementCanisterActor = actor {
+        http_request: HttpRequestArgs -> async HttpResponsePayload;
+    };
+
+    private let management_canister: ManagementCanisterActor = actor("aaaaa-aa");
+
+    // API Configuration - Replace with your actual API key
+    private let DEEPSEEK_API_URL = "https://api.novita.ai/v3/openai/chat/completions";
+    private let API_KEY = "sk_9vqnx9o3Gertrye-gnmkuC4OxiyNtQIXT20XC0f9P70
+"; // TODO: Replace with actual API key
+    
+    // Helper function to convert Text to [Nat8]
+    private func textToBytes(text: Text) : [Nat8] {
+        Blob.toArray(Text.encodeUtf8(text))
+    };
+
+    // Helper function to convert [Nat8] to Text
+    private func bytesToText(bytes: [Nat8]) : Text {
+        switch (Text.decodeUtf8(Blob.fromArray(bytes))) {
+            case (?text) { text };
+            case null { "" };
+        }
+    };
+
+    // Function to call Deepseek API
+    private func callDeepseekAPI(prompt: Text) : async Result.Result<Text, Text> {
+        let requestBody = "{\"model\":\"deepseek/deepseek-r1-0528\",\"messages\":[{\"role\":\"system\",\"content\":\"You are a medical AI assistant specializing in diabetes care. Provide safe, evidence-based guidance while always recommending patients consult their healthcare providers for personalized advice. Keep responses concise and actionable.\"},{\"role\":\"user\",\"content\":\"" # prompt # "\"}],\"max_tokens\":500,\"temperature\":0.3}";
+        
+        let requestBodyBytes = textToBytes(requestBody);
+        
+        let httpRequest: HttpRequestArgs = {
+            url = DEEPSEEK_API_URL;
+            max_response_bytes = ?2048;
+            headers = [
+                { name = "Content-Type"; value = "application/json" },
+                { name = "Authorization"; value = "Bearer " # API_KEY }
+            ];
+            body = ?requestBodyBytes;
+            method = #post;
+            transform = null;
+        };
+
+        // Add cycles for the HTTP outcall (2M cycles should be enough)
+        Cycles.add(2_000_000);
+        
+        try {
+            let httpResponse = await management_canister.http_request(httpRequest);
+            
+            if (httpResponse.status == 200) {
+                let responseText = bytesToText(httpResponse.body);
+                // Parse JSON response to extract the message content
+                // For now, return raw response - you may want to add JSON parsing
+                #ok(responseText)
+            } else {
+                #err("HTTP Error: " # Nat.toText(httpResponse.status))
+            }
+        } catch (error) {
+            #err("Network Error: " # Error.message(error))
+        }
+    };
+
+    // Fallback function for when API call fails
+    private func getFallbackResponse(query_text: Text, patient: PatientProfile) : Text {
+        "I apologize, but I'm currently unable to process your query due to a technical issue. " #
+        "Please contact your healthcare provider directly for immediate medical concerns. " #
+        "If this is an emergency, please call emergency services. " #
+        "For routine diabetes management questions, please try again later or consult with your medical team."
     };
 
     // Stable storage for persistence
@@ -125,7 +238,7 @@ actor AssistAI {
             case null { #err("Patient not found") };
             case (?patient) {
                 // Generate AI response with safety scoring
-                let ai_response = generateAIResponse(input.query, patient);
+                let ai_response = await generateAIResponse(input.query, patient);
                 
                 // Create unique query ID
                 query_counter += 1;
@@ -152,31 +265,30 @@ actor AssistAI {
         }
     };
 
-    // Generate AI response with safety scoring
-    private func generateAIResponse(query_text: Text, patient: PatientProfile) : AIResponse {
-        let query_lower = Text.toLowercase(query_text);
+    // Generate AI response with LLM integration and safety scoring
+    private func generateAIResponse(query_text: Text, patient: PatientProfile) : async AIResponse {
+        // Create detailed prompt with patient context
+        let patient_context = "Patient Profile: " # patient.name # ", Age: " # Nat.toText(patient.age) # 
+                             ", Diabetes Type: " # patient.diabetes_type # ", HbA1c: " # patient.hba1c # 
+                             ", Current Medications: " # Text.join(", ", patient.medications.vals());
         
-        // Simple medical AI response generation
-        let response = if (Text.contains(query_lower, #text "blood sugar") and Text.contains(query_lower, #text "high")) {
-            "I understand your concern about elevated blood sugar. Based on your profile as a " # patient.diabetes_type # " diabetes patient with HbA1c of " # patient.hba1c # ", here are some general recommendations:\n\n" #
-            "1. Check for ketones if you have testing strips\n" #
-            "2. Stay well hydrated with water\n" #
-            "3. Consider light activity like walking if you feel well\n" #
-            "4. Review recent factors: meals, medications, stress\n\n" #
-            "If readings remain elevated or you have symptoms like excessive thirst or nausea, please contact your healthcare provider promptly."
-        } else if (Text.contains(query_lower, #text "low") and Text.contains(query_lower, #text "dizzy")) {
-            "Dizziness with low blood sugar requires immediate attention. If your glucose is below 70 mg/dL:\n\n" #
-            "1. Follow the 15-15 rule: 15g fast-acting carbs, recheck in 15 minutes\n" #
-            "2. Options: 4 glucose tablets, 1/2 cup juice, 1 tbsp honey\n" #
-            "3. Once normalized, have a small snack with protein\n\n" #
-            "If symptoms persist or worsen, seek emergency care. Please inform your doctor about this episode."
-        } else {
-            "Thank you for your question about diabetes management. While I cannot provide specific medical advice, I recommend:\n\n" #
-            "1. Monitor your symptoms closely\n" #
-            "2. Follow your current treatment plan with " # Text.join(", ", patient.medications.vals()) # "\n" #
-            "3. Contact your healthcare provider if symptoms persist\n" #
-            "4. Seek immediate medical attention for emergency symptoms\n\n" #
-            "Your healthcare team is best equipped to provide personalized guidance."
+        let full_prompt = patient_context # "\n\nPatient Query: " # query_text # 
+                         "\n\nPlease provide safe, evidence-based medical guidance for this diabetes patient. " #
+                         "Always recommend consulting healthcare providers for personalized advice.";
+        
+        // Try to get response from Deepseek API
+        let api_result = await callDeepseekAPI(full_prompt);
+        
+        let response = switch (api_result) {
+            case (#ok(llm_response)) {
+                // Parse JSON response to extract message content
+                // For now, using raw response - you may want to add proper JSON parsing
+                parseDeepseekResponse(llm_response)
+            };
+            case (#err(error)) {
+                Debug.print("LLM API Error: " # error);
+                getFallbackResponse(query_text, patient)
+            };
         };
 
         // Calculate safety and confidence scores
@@ -190,6 +302,34 @@ actor AssistAI {
             confidence_score = confidence_score;
             urgency_level = urgency_level;
         }
+    };
+
+    // Helper function to parse Deepseek API response
+    private func parseDeepseekResponse(jsonResponse: Text) : Text {
+        // Simple JSON parsing - extract content from choices[0].message.content
+        // This is a basic implementation - for production, use proper JSON parsing
+        let lines = Text.split(jsonResponse, #char '\n');
+        for (line in lines) {
+            if (Text.contains(line, #text "\"content\"")) {
+                let parts = Text.split(line, #text "\"content\":");
+                switch (parts.next()) {
+                    case (?_) {
+                        switch (parts.next()) {
+                            case (?content_part) {
+                                let cleaned = Text.replace(content_part, #text "\"", "");
+                                let cleaned2 = Text.replace(cleaned, #text ",", "");
+                                let cleaned3 = Text.replace(cleaned2, #text "}", "");
+                                return Text.trim(cleaned3, #char ' ');
+                            };
+                            case null { };
+                        }
+                    };
+                    case null { };
+                }
+            }
+        };
+        // If parsing fails, return a safe default
+        "I apologize, but I'm having trouble processing your request right now. Please consult your healthcare provider for personalized medical advice."
     };
 
     // Safety scoring logic
