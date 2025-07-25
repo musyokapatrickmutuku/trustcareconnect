@@ -1,7 +1,7 @@
 {
-  "name": "assist-ai-icp-simplified",
+  "name": "trustcareconnect",
   "version": "1.0.0",
-  "description": "Simplified Assist AI medical assistant built for Internet Computer Protocol",
+  "description": "TrustCareConnect - AI-powered medical assistant for diabetes care built on Internet Computer Protocol",
   "scripts": {
     "build": "dfx build",
     "start": "dfx start --background",

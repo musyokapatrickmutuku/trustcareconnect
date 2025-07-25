@@ -1,10 +1,10 @@
-# Assist AI - Simplified ICP Version
+# TrustCareConnect
 
-A simplified medical AI assistant for diabetes patients built on the Internet Computer Protocol (ICP) using Motoko and React.
+An AI-powered medical assistant for diabetes care built on the Internet Computer Protocol (ICP) using Motoko and React.
 
 ## Overview
 
-This is a simplified version of the Assist AI medical assistant, rebuilt using the IC-Vibe-Coding-Template-Motoko structure. It demonstrates the core functionality of the original system while leveraging ICP's blockchain capabilities.
+TrustCareConnect is a medical AI assistant specifically designed for diabetes care, built using the IC-Vibe-Coding-Template-Motoko structure. It demonstrates advanced healthcare AI capabilities while leveraging ICP's blockchain infrastructure for security and decentralization.
 
 ## Core Features
 
@@ -40,7 +40,7 @@ This is a simplified version of the Assist AI medical assistant, rebuilt using t
 
 1. **Clone and navigate to project**:
 ```bash
-cd assist_v1_icp_simplified
+cd trustcareconnect
 ```
 
 2. **Install dependencies**:
@@ -153,7 +153,7 @@ dfx deploy --network ic
 ## File Structure
 
 ```
-assist_v1_icp_simplified/
+trustcareconnect/
 ├── dfx.json                     # ICP project configuration
 ├── mops.toml                    # Motoko package manager
 ├── package.json                 # Node.js dependencies
