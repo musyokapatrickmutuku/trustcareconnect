@@ -1,7 +1,7 @@
 {
   "name": "trustcareconnect",
   "version": "1.0.0",
-  "description": "TrustCareConnect - AI-powered medical assistant for diabetes care built on Internet Computer Protocol",
+  "description": "AI-driven diabetes care platform with human oversight - combines AI efficiency with physician safety validation on blockchain infrastructure",
   "scripts": {
     "build": "dfx build",
     "start": "dfx start --background",
