@@ -1,0 +1,510 @@
+/* TrustCareConnect MVP Styles - Simple & Lightweight */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f9f9f9;
+  color: #333;
+  line-height: 1.6;
+}
+
+.app {
+  min-height: 100vh;
+}
+
+/* Header */
+.header {
+  background: #4a90e2;
+  color: white;
+  padding: 1rem;
+  border-bottom: 3px solid #357abd;
+}
+
+.header h1 {
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+}
+
+.nav {
+  display: flex;
+  gap: 1rem;
+}
+
+.nav button {
+  background: transparent;
+  color: white;
+  border: 2px solid white;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.nav button:hover,
+.nav button.active {
+  background: white;
+  color: #4a90e2;
+}
+
+/* Message */
+.message {
+  background: #d4edda;
+  color: #155724;
+  padding: 0.75rem;
+  margin: 1rem;
+  border-radius: 4px;
+  border: 1px solid #c3e6cb;
+}
+
+/* Main Content */
+.main {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+/* Home View */
+.home-view h2 {
+  color: #4a90e2;
+  margin-bottom: 1rem;
+}
+
+.stats-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin: 2rem 0;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1rem;
+  text-align: center;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-number {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #4a90e2;
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.instructions {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin-top: 2rem;
+}
+
+.instruction-section {
+  margin-bottom: 1.5rem;
+}
+
+.instruction-section h4 {
+  color: #4a90e2;
+  margin-bottom: 0.5rem;
+}
+
+.instruction-section ol {
+  margin-left: 1.5rem;
+}
+
+/* User Info */
+.user-info {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.user-info h2 {
+  color: #4a90e2;
+  margin: 0;
+}
+
+.logout-btn {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.logout-btn:hover {
+  background: #c82333;
+}
+
+/* Forms */
+.register-form,
+.query-form {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin-bottom: 2rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #4a90e2;
+}
+
+button {
+  background: #4a90e2;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background: #357abd;
+}
+
+button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+/* Query Cards */
+.query-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin-bottom: 1.5rem;
+  border-left: 5px solid #4a90e2;
+}
+
+.query-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.query-card h4 {
+  color: #4a90e2;
+  margin: 0;
+}
+
+/* Status Badges */
+.status {
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+.status.pending {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status.under-review {
+  background: #cce7ff;
+  color: #004085;
+}
+
+.status.completed {
+  background: #d4edda;
+  color: #155724;
+}
+
+/* Response */
+.response {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 4px;
+  margin: 1rem 0;
+  border-left: 3px solid #28a745;
+}
+
+.response strong {
+  color: #28a745;
+}
+
+/* Response Form */
+.response-form {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 2px solid #eee;
+}
+
+.response-form textarea {
+  margin-bottom: 0.5rem;
+}
+
+/* Take Button */
+.take-btn {
+  background: #28a745;
+  margin-top: 1rem;
+}
+
+.take-btn:hover {
+  background: #218838;
+}
+
+/* Sections */
+.submit-query-section,
+.pending-queries-section,
+.my-queries-section,
+.queries-section,
+.my-patients-section,
+.unassigned-patients-section {
+  margin-bottom: 2rem;
+}
+
+.submit-query-section h3,
+.pending-queries-section h3,
+.my-queries-section h3,
+.queries-section h3,
+.my-patients-section h3,
+.unassigned-patients-section h3 {
+  color: #4a90e2;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+/* Warning message */
+.warning {
+  color: #856404;
+  background: #fff3cd;
+  padding: 1rem;
+  border-radius: 4px;
+  border: 1px solid #ffeaa7;
+  margin: 1rem 0;
+}
+
+/* Assignment waiting */
+.assignment-waiting {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.assignment-waiting h3 {
+  color: #4a90e2;
+  margin-bottom: 1rem;
+}
+
+/* Doctor Tabs */
+.doctor-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid #eee;
+}
+
+.doctor-tabs button {
+  background: transparent;
+  border: none;
+  padding: 1rem 1.5rem;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  font-size: 1rem;
+  color: #666;
+  transition: all 0.3s;
+}
+
+.doctor-tabs button.active {
+  color: #4a90e2;
+  border-bottom-color: #4a90e2;
+}
+
+.doctor-tabs button:hover {
+  color: #4a90e2;
+  background: #f8f9fa;
+}
+
+/* Patient Cards */
+.patient-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin-bottom: 1.5rem;
+  border-left: 5px solid #28a745;
+}
+
+.patient-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.patient-card h4 {
+  color: #28a745;
+  margin: 0;
+}
+
+.condition-badge {
+  background: #e7f3ff;
+  color: #004085;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+.patient-actions {
+  margin-top: 1rem;
+}
+
+/* Patient Assignment Buttons */
+.assign-btn {
+  background: #28a745;
+  margin-top: 1rem;
+}
+
+.assign-btn:hover {
+  background: #218838;
+}
+
+.unassign-btn {
+  background: #dc3545;
+  margin-top: 1rem;
+}
+
+.unassign-btn:hover {
+  background: #c82333;
+}
+
+/* AI-Assisted Response Styles */
+.ai-assisted-response {
+  margin-top: 1rem;
+  border-top: 2px solid #e9ecef;
+  padding-top: 1rem;
+}
+
+.ai-draft {
+  background: #f8f9fa;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.ai-draft h5 {
+  color: #6c757d;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ai-draft-content {
+  background: white;
+  padding: 1rem;
+  border-radius: 4px;
+  border: 1px solid #dee2e6;
+  margin: 0.5rem 0;
+}
+
+.ai-draft-content p {
+  margin: 0;
+  color: #495057;
+  line-height: 1.5;
+}
+
+.use-ai-draft-btn {
+  background: #17a2b8;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.3s;
+}
+
+.use-ai-draft-btn:hover {
+  background: #138496;
+}
+
+.response-form label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  color: #495057;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .main {
+    padding: 1rem;
+  }
+  
+  .header h1 {
+    font-size: 1.5rem;
+  }
+  
+  .nav {
+    flex-direction: column;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .user-info {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+  
+  .query-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}

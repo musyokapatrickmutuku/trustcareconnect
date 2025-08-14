@@ -1,22 +1,16 @@
 {
   "canisters": {
-    "assist_backend": {
-      "main": "src/assist_backend/main.mo",
-      "type": "motoko",
-      "dependencies": ["ic:aaaaa-aa"]
+    "backend": {
+      "main": "src/backend/main.mo",
+      "type": "motoko"
     },
-    "assist_frontend": {
-      "dependencies": [
-        "assist_backend"
-      ],
+    "frontend": {
+      "dependencies": ["backend"],
+      "source": ["dist/frontend/"],
+      "type": "assets",
       "frontend": {
-        "entrypoint": "src/assist_frontend/src/index.html"
-      },
-      "source": [
-        "src/assist_frontend/assets",
-        "dist/assist_frontend/"
-      ],
-      "type": "assets"
+        "entrypoint": "dist/frontend/index.html"
+      }
     }
   },
   "defaults": {
@@ -29,6 +23,10 @@
     "local": {
       "bind": "127.0.0.1:4943",
       "type": "ephemeral"
+    },
+    "ic": {
+      "providers": ["https://icp-api.io"],
+      "type": "persistent"
     }
   },
   "version": 1

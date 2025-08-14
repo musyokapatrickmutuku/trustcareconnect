@@ -1,6 +1,32 @@
 # TrustCareConnect
 **AI-Driven Diabetes Care Platform with Human Oversight**
 
+## 🚀 Quick Start (5 minutes)
+
+### Windows Users:
+```cmd
+# Clone and run
+git clone <repo-url>
+cd trustcareconnect
+start-local.bat
+```
+
+### macOS/Linux Users:
+```bash
+# Clone and run  
+git clone <repo-url>
+cd trustcareconnect
+./start-local.sh
+```
+
+**What this does:**
+1. ✅ Starts ICP local replica  
+2. ✅ Deploys backend + frontend canisters
+3. ✅ Starts AI proxy server
+4. ✅ Provides testing URLs
+
+**Full deployment guide:** [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)
+
 ## 🎯 Core Problem Statement
 
 **The Challenge**: Diabetes patients need immediate, safe, and personalized medical guidance, but healthcare providers can't provide 24/7 availability in light of different emmergency situations, where the patient is unable to reach a doctor. 

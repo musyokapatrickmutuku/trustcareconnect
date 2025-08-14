@@ -1,27 +1,42 @@
 {
   "name": "trustcareconnect",
   "version": "1.0.0",
-  "description": "AI-driven diabetes care platform with human oversight - combines AI efficiency with physician safety validation on blockchain infrastructure",
+  "type": "module",
+  "description": "Minimal MVP healthcare communication app for testing product-market fit on ICP",
   "scripts": {
-    "build": "dfx build",
+    "build": "npm run build:frontend",
+    "build:frontend": "cd src/frontend && npm run build && cd ../.. && cp -r src/frontend/build/* dist/frontend/",
     "start": "dfx start --background",
     "deploy": "dfx deploy",
+    "deploy:local": "dfx deploy --network local",
     "stop": "dfx stop",
-    "clean": "dfx canister --network local delete --all",
-    "test": "npm run test:backend && npm run test:frontend",
-    "test:backend": "echo 'Backend tests would run here'",
-    "test:frontend": "echo 'Frontend tests would run here'"
+    "clean": "dfx canister --network local delete --all && rm -rf dist/",
+    "dev": "npm run start && npm run deploy:local",
+    "test": "echo 'Tests to be implemented'"
   },
   "keywords": [
     "icp",
-    "motoko",
+    "javascript",
+    "react",
     "medical-ai",
-    "diabetes",
-    "healthcare"
+    "healthcare",
+    "mvp"
   ],
+  "dependencies": {
+    "@dfinity/agent": "^3.2.1",
+    "@dfinity/auth-client": "^3.2.1",
+    "@dfinity/candid": "^3.2.1",
+    "@dfinity/identity": "^3.2.1",
+    "@dfinity/principal": "^3.2.1",
+    "@rollup/plugin-typescript": "^12.1.4",
+    "azle": "^0.21.0",
+    "typescript": "^5.9.2"
+  },
   "devDependencies": {
-    "@dfinity/agent": "^0.20.0",
-    "@dfinity/candid": "^0.20.0",
-    "@dfinity/principal": "^0.20.0"
+    "@rollup/plugin-commonjs": "^25.0.8",
+    "@rollup/plugin-node-resolve": "^15.3.1",
+    "@types/node": "^24.2.1",
+    "rollup": "^3.29.5",
+    "tslib": "^2.8.1"
   }
 }
