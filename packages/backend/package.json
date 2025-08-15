@@ -1,0 +1,29 @@
+{
+  "name": "@trustcareconnect/backend",
+  "version": "1.0.0",
+  "description": "TrustCareConnect ICP Motoko Backend",
+  "main": "src/main.mo",
+  "scripts": {
+    "build": "dfx build",
+    "deploy": "dfx deploy",
+    "deploy:local": "dfx deploy --network local",
+    "deploy:ic": "dfx deploy --network ic",
+    "start": "dfx start --background",
+    "stop": "dfx stop",
+    "test": "echo 'Backend tests to be implemented'",
+    "clean": "dfx canister --network local delete --all"
+  },
+  "keywords": [
+    "icp",
+    "motoko",
+    "blockchain",
+    "healthcare",
+    "backend"
+  ],
+  "author": "TrustCareConnect Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@dfinity/agent": "^3.2.1",
+    "@dfinity/candid": "^3.2.1"
+  }
+}

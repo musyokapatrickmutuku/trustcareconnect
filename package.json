@@ -1,27 +1,62 @@
 {
   "name": "trustcareconnect",
   "version": "1.0.0",
-  "type": "module",
-  "description": "Minimal MVP healthcare communication app for testing product-market fit on ICP",
-  "scripts": {
-    "build": "npm run build:frontend",
-    "build:frontend": "cd src/frontend && npm run build && cd ../.. && cp -r src/frontend/build/* dist/frontend/",
-    "start": "dfx start --background",
-    "deploy": "dfx deploy",
-    "deploy:local": "dfx deploy --network local",
-    "stop": "dfx stop",
-    "clean": "dfx canister --network local delete --all && rm -rf dist/",
-    "dev": "npm run start && npm run deploy:local",
-    "test": "echo 'Tests to be implemented'"
-  },
-  "keywords": [
-    "icp",
-    "javascript",
-    "react",
-    "medical-ai",
-    "healthcare",
-    "mvp"
+  "description": "AI-driven healthcare communication platform with human oversight",
+  "private": true,
+  "workspaces": [
+    "packages/*"
   ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:ai-proxy\" \"npm run dev:frontend\"",
+    "dev:backend": "cd packages/backend && dfx start --background && dfx deploy",
+    "dev:ai-proxy": "cd packages/ai-proxy && npm run dev",
+    "dev:frontend": "cd packages/frontend && npm start",
+    "build": "npm run build:backend && npm run build:ai-proxy && npm run build:frontend",
+    "build:backend": "cd packages/backend && dfx build",
+    "build:ai-proxy": "cd packages/ai-proxy && npm run build",
+    "build:frontend": "cd packages/frontend && npm run build",
+    "test": "npm run test:backend && npm run test:ai-proxy && npm run test:frontend",
+    "test:backend": "cd packages/backend && npm test",
+    "test:ai-proxy": "cd packages/ai-proxy && npm test",
+    "test:frontend": "cd packages/frontend && npm test",
+    "lint": "npm run lint:backend && npm run lint:ai-proxy && npm run lint:frontend",
+    "lint:backend": "echo 'Backend linting not implemented'",
+    "lint:ai-proxy": "cd packages/ai-proxy && npm run lint",
+    "lint:frontend": "cd packages/frontend && npm run lint",
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\"",
+    "clean": "rm -rf packages/*/node_modules packages/*/build packages/*/dist",
+    "setup": "npm install && npm run setup:packages",
+    "setup:packages": "npm run setup:ai-proxy && npm run setup:frontend",
+    "setup:ai-proxy": "cd packages/ai-proxy && npm install",
+    "setup:frontend": "cd packages/frontend && npm install",
+    "deploy:local": "npm run build && npm run deploy:local:backend && npm run deploy:local:ai-proxy",
+    "deploy:local:backend": "cd packages/backend && dfx deploy --network local",
+    "deploy:local:ai-proxy": "cd packages/ai-proxy && npm run start",
+    "deploy:production": "npm run build && npm run deploy:prod:backend && npm run deploy:prod:ai-proxy && npm run deploy:prod:frontend",
+    "deploy:prod:backend": "cd packages/backend && dfx deploy --network ic",
+    "deploy:prod:ai-proxy": "echo 'Production AI proxy deployment not configured'",
+    "deploy:prod:frontend": "echo 'Production frontend deployment not configured'",
+    
+    "legacy:build": "npm run legacy:build:frontend",
+    "legacy:build:frontend": "cd src/frontend && npm run build && cd ../.. && cp -r src/frontend/build/* dist/frontend/",
+    "legacy:start": "dfx start --background",
+    "legacy:deploy": "dfx deploy",
+    "legacy:deploy:local": "dfx deploy --network local",
+    "legacy:stop": "dfx stop",
+    "legacy:clean": "dfx canister --network local delete --all && rm -rf dist/",
+    "legacy:dev": "npm run legacy:start && npm run legacy:deploy:local"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "prettier": "^3.0.0",
+    "husky": "^8.0.3",
+    "lint-staged": "^15.0.0",
+    "@rollup/plugin-commonjs": "^25.0.8",
+    "@rollup/plugin-node-resolve": "^15.3.1",
+    "@types/node": "^24.2.1",
+    "rollup": "^3.29.5",
+    "tslib": "^2.8.1"
+  },
   "dependencies": {
     "@dfinity/agent": "^3.2.1",
     "@dfinity/auth-client": "^3.2.1",
@@ -32,11 +67,41 @@
     "azle": "^0.21.0",
     "typescript": "^5.9.2"
   },
-  "devDependencies": {
-    "@rollup/plugin-commonjs": "^25.0.8",
-    "@rollup/plugin-node-resolve": "^15.3.1",
-    "@types/node": "^24.2.1",
-    "rollup": "^3.29.5",
-    "tslib": "^2.8.1"
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/trustcareconnect.git"
+  },
+  "keywords": [
+    "healthcare",
+    "ai",
+    "icp",
+    "blockchain",
+    "medical",
+    "telemedicine",
+    "javascript",
+    "react",
+    "medical-ai",
+    "mvp"
+  ],
+  "author": "TrustCareConnect Team",
+  "license": "MIT",
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "prettier --write",
+      "git add"
+    ],
+    "*.{json,md}": [
+      "prettier --write",
+      "git add"
+    ]
   }
 }

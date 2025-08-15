@@ -1,0 +1,51 @@
+{
+  "environment": "production",
+  "icp": {
+    "host": "https://icp-api.io",
+    "canisterIds": {
+      "backend": "${REACT_APP_BACKEND_CANISTER_ID}"
+    }
+  },
+  "aiProxy": {
+    "host": "${AI_PROXY_HOST}",
+    "timeout": 30000,
+    "providers": {
+      "openai": {
+        "enabled": true,
+        "model": "gpt-3.5-turbo",
+        "maxTokens": 500
+      },
+      "claude": {
+        "enabled": true,
+        "model": "claude-3-haiku-20240307",
+        "maxTokens": 500
+      },
+      "mock": {
+        "enabled": false,
+        "delay": 1000
+      }
+    }
+  },
+  "frontend": {
+    "host": "${FRONTEND_HOST}",
+    "apiTimeout": 10000
+  },
+  "logging": {
+    "level": "info",
+    "enableConsole": false,
+    "enableFile": true
+  },
+  "security": {
+    "cors": {
+      "origins": [
+        "${FRONTEND_HOST}",
+        "*.ic0.app",
+        "*.internetcomputer.org"
+      ]
+    },
+    "rateLimit": {
+      "windowMs": 900000,
+      "max": 1000
+    }
+  }
+}

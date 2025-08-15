@@ -1,0 +1,268 @@
+/* TrustCareConnect App Component Styles */
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header styles */
+.header {
+  background: white;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid #e5e7eb;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+/* Navigation styles */
+.nav {
+  display: flex;
+  gap: 1rem;
+}
+
+.nav button {
+  padding: 0.5rem 0.75rem;
+  border: none;
+  background: none;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.nav button:hover {
+  color: #111827;
+  background-color: #f3f4f6;
+}
+
+.nav button.active {
+  color: #2563eb;
+  background-color: #eff6ff;
+}
+
+/* Main content area */
+.main {
+  flex: 1;
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 1.5rem;
+  width: 100%;
+}
+
+/* Message display */
+.message {
+  border: 1px solid;
+  padding: 0.75rem 1rem;
+  border-radius: 0.375rem;
+  margin-bottom: 1rem;
+  position: relative;
+  animation: slideIn 0.3s ease-out;
+}
+
+.message.success {
+  background-color: #dcfce7;
+  border-color: #16a34a;
+  color: #166534;
+}
+
+.message.error {
+  background-color: #fef2f2;
+  border-color: #dc2626;
+  color: #991b1b;
+}
+
+.message.warning {
+  background-color: #fefce8;
+  border-color: #ca8a04;
+  color: #854d0e;
+}
+
+.message.info {
+  background-color: #eff6ff;
+  border-color: #2563eb;
+  color: #1d4ed8;
+}
+
+/* Portal-specific styles */
+.patient-portal,
+.doctor-portal {
+  max-width: 100%;
+}
+
+.patient-registration,
+.doctor-registration {
+  max-width: 28rem;
+  margin: 0 auto;
+}
+
+/* Card components */
+.card {
+  background: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.card-header {
+  display: flex;
+  justify-content: between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.card-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+/* Button variants */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  border: 1px solid transparent;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background-color: #2563eb;
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: #1d4ed8;
+}
+
+.btn-secondary {
+  background-color: #f3f4f6;
+  color: #374151;
+  border-color: #d1d5db;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: #e5e7eb;
+}
+
+.btn-danger {
+  background-color: #dc2626;
+  color: white;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background-color: #b91c1c;
+}
+
+.btn-success {
+  background-color: #16a34a;
+  color: white;
+}
+
+.btn-success:hover:not(:disabled) {
+  background-color: #15803d;
+}
+
+/* Form styles */
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.form-input {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  background-color: white;
+  font-size: 0.875rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.form-input.error {
+  border-color: #dc2626;
+}
+
+.form-select {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  background-color: white;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.5rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+  padding-right: 2.5rem;
+  font-size: 0.875rem;
+}
+
+.form-textarea {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  background-color: white;
+  font-size: 0.875rem;
+  resize: vertical;
+  min-height: 4rem;
+}
+
+.form-textarea:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .main {
+    padding: 1rem;
+  }
+  
+  .nav {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .card {
+    padding: 1rem;
+  }
+  
+  .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

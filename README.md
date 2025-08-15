@@ -1,91 +1,45 @@
-# TrustCareConnect
-**AI-Driven Diabetes Care Platform with Human Oversight**
+# 🏥 TrustCareConnect
 
-## 🚀 Quick Start (5 minutes)
+> AI-driven healthcare communication platform with human oversight, built on Internet Computer Protocol (ICP)
 
-### Windows Users:
-```cmd
-# Clone and run
-git clone <repo-url>
-cd trustcareconnect
-start-local.bat
+[![CI Status](https://github.com/your-username/trustcareconnect/workflows/CI/badge.svg)](https://github.com/your-username/trustcareconnect/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Node Version](https://img.shields.io/badge/node-%3E%3D16.0.0-brightgreen)](https://nodejs.org/)
+
+## ✨ Overview
+
+TrustCareConnect is a secure, decentralized healthcare communication platform that connects patients with doctors through AI-assisted consultations. The platform ensures all AI-generated responses are reviewed and approved by licensed healthcare professionals before reaching patients.
+
+### 🎯 Key Features
+
+- **🤖 AI-Assisted Consultations**: Smart draft responses using OpenAI GPT and Claude
+- **👨‍⚕️ Human Oversight**: Mandatory physician review for all AI responses
+- **🔐 Blockchain Security**: Secure data storage on Internet Computer Protocol
+- **📱 Dual Interface**: Separate portals for patients and healthcare providers
+- **⚡ Real-time Updates**: Live query status and response notifications
+- **🔒 Privacy First**: HIPAA-compliant design with end-to-end security
+
+## 🏗️ Architecture
+
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   React Frontend│◄──►│   AI Proxy      │◄──►│  ICP Backend    │
+│                 │    │                 │    │                 │
+│ - Patient Portal│    │ - OpenAI API    │    │ - Motoko Smart  │
+│ - Doctor Portal │    │ - Claude API    │    │   Contracts     │
+│ - Query Mgmt    │    │ - Mock Responses│    │ - Data Storage  │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
 
-### macOS/Linux Users:
-```bash
-# Clone and run  
-git clone <repo-url>
-cd trustcareconnect
-./start-local.sh
-```
+## 🚀 Quick Start
 
-**What this does:**
-1. ✅ Starts ICP local replica  
-2. ✅ Deploys backend + frontend canisters
-3. ✅ Starts AI proxy server
-4. ✅ Provides testing URLs
-
-**Full deployment guide:** [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)
-
-## 🎯 Core Problem Statement
-
-**The Challenge**: Diabetes patients need immediate, safe, and personalized medical guidance, but healthcare providers can't provide 24/7 availability in light of different emmergency situations, where the patient is unable to reach a doctor. 
-
-**Our Solution**: A human-in-the-loop AI system that combines the efficiency of AI with the safety of physician oversight, built on blockchain infrastructure for trust and security.
-
-## 🏗️ System Architecture
-
-TrustCareConnect bridges the gap between AI efficiency and medical safety through:
-- **Safety-Scored AI Responses**: Every AI recommendation includes quantified risk assessment
-- **Mandatory Doctor Review**: All AI responses require physician approval before patient delivery
-- **Blockchain Security**: Immutable medical interaction records on Internet Computer Protocol
-- **Personalized Care**: Patient-specific responses based on diabetes type, HbA1c, and medications
-
-## ⚙️ Core Functionality
-
-### 1. Human-in-the-Loop AI Architecture
-- **AI Response Generation**: Pretrained LLM provides initial medical guidance
-- **Safety Scoring**: Automated risk assessment (0-100%) for every AI recommendation
-- **Doctor Review Gate**: All AI responses require physician approval before patient delivery
-- **Confidence Metrics**: Quality assessment based on patient-specific context
-
-### 2. Intelligent Triage System
-- **Urgency Classification**: Automatic priority assignment (High/Medium/Low)
-- **Patient Profiling**: Personalized responses based on diabetes type, HbA1c, medications
-- **Query Routing**: Critical cases fast-tracked to human review
-
-### 3. Blockchain-Secured Infrastructure
-- **ICP Canister Backend**: Decentralized data storage and processing
-- **Immutable Audit Trail**: All medical interactions recorded on-chain
-- **HTTP Outcalls**: Secure external LLM API integration
-
-### 4. Dual-Portal Interface
-- **Patient Portal**: Submit queries, view approved responses, track care history
-- **Doctor Portal**: Review AI responses, approve/edit recommendations, manage patient cases
-
-## Architecture
-
-### Backend (Motoko Canister)
-- **Patient Management**: Store and retrieve patient profiles
-- **Query Processing**: AI response generation with safety evaluation
-- **Doctor Workflow**: Review and approval system for AI responses
-- **Stable Storage**: Persistent data using ICP stable memory
-
-### Frontend (React SPA)
-- **Role-based Interface**: Separate patient and doctor portals  
-- **Real-time Updates**: Query status and response management
-- **Responsive Design**: Tailwind CSS for modern UI
-- **Mock Backend**: Development mode with local data simulation
-
-## 🚀 Quick Start Demo
-
-### Option 1: Instant Demo (Recommended for First-Time Users)
+### 🎮 Option 1: Instant Demo (Recommended for First-Time Users)
 
 **No installation required** - Run the demo directly in your browser:
 
 1. **Download the project**:
    ```bash
-   git clone https://github.com/musyokapatrickmutuku/trustcareconnect.git
+   git clone https://github.com/your-username/trustcareconnect.git
    cd trustcareconnect
    ```
 
@@ -100,154 +54,132 @@ TrustCareConnect bridges the gap between AI efficiency and medical safety throug
    - Submit queries like: "My blood sugar is 250 mg/dL, what should I do?"
    - Switch to "Doctor Portal" to review AI responses
 
-**✅ What works in demo mode**:
-- Complete UI/UX experience
-- Mock AI responses with safety scoring
-- Patient and doctor portal workflows
-- Urgency classification and triage
-
-**❌ What doesn't work in demo mode**:
-- Real LLM integration (uses predefined responses)
-- Data persistence (resets on page refresh)
-
-### Option 2: Full ICP Deployment (Advanced Users)
-
-**For real LLM integration and blockchain deployment**:
+### ⚙️ Option 2: Full Development Setup (Advanced Users)
 
 #### Prerequisites
-- **Git**: For cloning the repository
-- **Modern web browser**: Chrome, Firefox, Safari, or Edge
-- **For full deployment**: DFX (Internet Computer SDK), Node.js
 
-#### Installation Steps
+- Node.js ≥ 16.0.0
+- npm ≥ 8.0.0
+- [DFX (Internet Computer SDK)](https://internetcomputer.org/docs/current/developer-docs/setup/install/)
 
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/musyokapatrickmutuku/trustcareconnect.git
-   cd trustcareconnect
-   ```
+#### Installation
 
-2. **Install DFX (Internet Computer SDK)**:
-   - **Mac/Linux**: 
-     ```bash
-     sh -ci "$(curl -fsSL https://internetcomputer.org/install.sh)"
-     ```
-   - **Windows**: Use WSL (Windows Subsystem for Linux) and run the above command
+```bash
+# Clone the repository
+git clone https://github.com/your-username/trustcareconnect.git
+cd trustcareconnect
 
-3. **Install Node.js dependencies**:
-   ```bash
-   npm install
-   ```
+# Install dependencies and set up workspaces
+npm run setup
 
-4. **Start local ICP network**:
-   ```bash
-   dfx start --background
-   ```
+# Copy environment configuration
+cp .env.example .env
 
-5. **Deploy canisters with cycles for HTTP outcalls**:
-   ```bash
-   dfx deploy --with-cycles 1000000000000
-   ```
+# Start all services (New Architecture)
+npm run dev
 
-6. **Set up API key** (for real LLM responses):
-   - Edit `src/assist_backend/main.mo` line 97
-   - Replace `YOUR_API_KEY_HERE` with your Novita AI or Specific AI API key
-   - Redeploy: `dfx deploy`
+# OR use legacy setup for backward compatibility
+npm run legacy:dev
+```
 
-7. **Access the application**:
-   - Open the URL shown after deployment
-   - Or open `src/assist_frontend/src/index.html` for development mode
+The application will be available at:
+- **Frontend**: http://localhost:3000
+- **AI Proxy**: http://localhost:3001
+- **ICP Backend**: http://localhost:4943
 
-## 🎯 Primary Use Cases
+## 📁 Project Structure
 
-### Scenario 1: Emergency Blood Sugar Management
-- **Patient Query**: "My blood sugar is 250 mg/dL and I feel dizzy"
-- **System Response**: AI generates immediate guidance → Flagged HIGH priority → Doctor reviews within minutes → Patient receives personalized action plan
+### 🆕 New Organized Structure
 
-### Scenario 2: Medication Adjustment Queries
-- **Patient Query**: "Can I skip my metformin if I'm feeling nauseous?"
-- **System Response**: AI considers patient's medication profile → MEDIUM priority review → Contextualized advice based on diabetes history
+```
+trustcareconnect/
+├── packages/                 # Monorepo packages
+│   ├── backend/             # ICP Motoko smart contracts
+│   │   ├── src/
+│   │   │   ├── controllers/      # Business logic controllers
+│   │   │   ├── services/         # Core services
+│   │   │   ├── types/            # Type definitions
+│   │   │   └── main.mo           # Main canister
+│   │   └── tests/
+│   ├── frontend/            # React application
+│   │   ├── src/
+│   │   │   ├── components/       # UI components
+│   │   │   ├── pages/            # Page components
+│   │   │   ├── services/         # API services
+│   │   │   └── types/            # TypeScript types
+│   │   └── public/
+│   ├── ai-proxy/            # AI integration service
+│   │   ├── src/
+│   │   │   ├── controllers/      # API controllers
+│   │   │   ├── services/         # AI integrations
+│   │   │   └── routes/           # API routes
+│   │   └── tests/
+│   └── shared/              # Shared utilities
+├── config/                  # Environment configurations
+├── docs/                    # Comprehensive documentation
+├── scripts/                 # Build and deployment scripts
+└── .github/                 # CI/CD workflows
+```
 
-### Scenario 3: Lifestyle Management Support
-- **Patient Query**: "What foods can I eat before my workout?"
-- **System Response**: Evidence-based nutrition guidance → LOW priority → Integrated with patient's care plan
+### 📁 Legacy Structure (Maintained for Compatibility)
 
-### Testing the Demo
+```
+src/
+├── backend/main.mo          # Original Motoko backend
+├── frontend/               # Original React frontend
+└── ...
+```
 
-**Demo Patient Profiles Available**:
+## 🎯 Core Functionality
 
-1. **Sarah Johnson (P001)** - Type 2 Diabetes
-   - Age: 47, HbA1c: 6.9% (well-controlled)
-   - Medications: Metformin, Lisinopril, Empagliflozin
-   - Use for: Standard diabetes management queries
+### 1. Human-in-the-Loop AI Architecture
+- **AI Response Generation**: Pre-trained LLM provides initial medical guidance
+- **Safety Scoring**: Automated risk assessment for every AI recommendation
+- **Doctor Review Gate**: All AI responses require physician approval
+- **Confidence Metrics**: Quality assessment based on patient context
 
-2. **Michael Thompson (P002)** - Type 1 Diabetes
-   - Age: 19, HbA1c: 7.8% (college student)
-   - Medications: Insulin Pump
-   - Use for: Young adult lifestyle challenges
+### 2. Intelligent Triage System
+- **Urgency Classification**: Automatic priority assignment (High/Medium/Low)
+- **Patient Profiling**: Personalized responses based on medical history
+- **Query Routing**: Critical cases fast-tracked to human review
 
-3. **Carlos Rodriguez (P003)** - Type 2 with Complications
-   - Age: 64, HbA1c: 6.8% (with comorbidities)
-   - Medications: Metformin, Semaglutide, Lisinopril
-   - Use for: Complex diabetes management
+### 3. Blockchain-Secured Infrastructure
+- **ICP Canister Backend**: Decentralized data storage and processing
+- **Immutable Audit Trail**: All medical interactions recorded on-chain
+- **HTTP Outcalls**: Secure external LLM API integration
 
-**Sample Queries to Try**:
-- "My blood sugar reading is 250 mg/dL this morning, what should I do?"
-- "I'm feeling dizzy and think my blood sugar might be low"
-- "Can I exercise if my blood sugar is 180 mg/dL?"
-- "What foods should I avoid before bedtime?"
-- "I forgot to take my metformin this morning, should I take it now?"
+## 🧪 Testing
 
-### Target Users
-- **Primary**: Type 1 & Type 2 diabetes patients (ages 18-70)
-- **Secondary**: Endocrinologists, family physicians, diabetes educators
-- **Developers**: Healthcare tech teams building AI-assisted medical platforms
+```bash
+# Run all tests (new structure)
+npm test
 
-## 🛠️ Troubleshooting
+# Run specific package tests
+npm run test:frontend
+npm run test:ai-proxy
+npm run test:backend
 
-### Common Issues and Solutions
+# Legacy testing
+npm run legacy:test
+```
 
-**Problem**: Demo.html doesn't open or displays blank page
-- **Solution**: Ensure you're opening the file directly in a web browser, not a text editor
-- **Alternative**: Try a different browser (Chrome, Firefox, Safari, Edge)
+## 🚢 Deployment
 
-**Problem**: "File not found" error when opening demo.html
-- **Solution**: 
-  - Check that you've downloaded the complete project
-  - Verify the file path: `trustcareconnect/demo.html`
-  - Try opening with: File → Open File in your browser
+### Local Development
+```bash
+# New architecture
+npm run deploy:local
 
-**Problem**: Demo looks broken or unstyled
-- **Solution**: Ensure you have internet connection (demo loads CSS from CDN)
-- **Alternative**: Try refreshing the page (Ctrl+F5 or Cmd+Shift+R)
+# Legacy deployment
+npm run legacy:deploy:local
+```
 
-**Problem**: Cannot submit queries or buttons don't work
-- **Solution**: 
-  - Enable JavaScript in your browser
-  - Try a different browser
-  - Check browser console for errors (F12 → Console)
+### Production Deployment
+```bash
+npm run deploy:production
+```
 
-**Problem**: DFX installation fails on Windows
-- **Solution**: 
-  - Install WSL (Windows Subsystem for Linux) first
-  - Run DFX installation commands in WSL environment
-  - Alternative: Use Docker Desktop with dfinity/sdk image
-
-**Problem**: "Insufficient cycles" error during deployment
-- **Solution**: Deploy with more cycles: `dfx deploy --with-cycles 2000000000000`
-
-**Problem**: HTTP outcalls fail in local development
-- **Solution**: 
-  - Ensure internet connection
-  - Check API key is correctly set in main.mo
-  - Verify cycles balance: `dfx canister status assist_backend`
-
-**Need Help?**
-- Check the [LLM_INTEGRATION_SETUP.md](LLM_INTEGRATION_SETUP.md) for detailed API setup
-- Open an issue on GitHub for technical problems
-- Ensure you're using a modern web browser with JavaScript enabled
-
-## Demo Patient Profiles
+## 🎮 Demo Patient Profiles
 
 **P001 - Sarah Johnson (47, Type 2)**
 - HbA1c: 6.9%, well-controlled
@@ -264,77 +196,96 @@ TrustCareConnect bridges the gap between AI efficiency and medical safety throug
 - Medications: Metformin, Semaglutide, Lisinopril  
 - Use case: Older patient with comorbidities
 
-## Advantages of Using the ICP Protocal 
+### Sample Queries to Try:
+- "My blood sugar reading is 250 mg/dL this morning, what should I do?"
+- "I'm feeling dizzy and think my blood sugar might be low"
+- "Can I exercise if my blood sugar is 180 mg/dL?"
+- "What foods should I avoid before bedtime?"
 
-- **Decentralized**: Runs on ICP blockchain vs. centralized FastAPI
-- **Persistent**: Stable memory vs. SQLite database
-- **Scalable**: ICP's automatic scaling vs. Docker containers
-- **Secure**: Blockchain-level security vs. application-level
+## 📚 Documentation
 
-### Simplifications
-- **Mock AI**: Predefined responses vs. LLM integration
-- **3 Patients**: Reduced from 5 demo patients
-- **Basic UI**: Single HTML file vs. multi-file Streamlit app
-- **No Auth**: Simple role selection vs. authentication system
+- 📖 [Getting Started Guide](./docs/development/getting-started.md)
+- 🏗️ [Architecture Overview](./docs/architecture/overview.md)
+- 🔌 [API Reference](./docs/api/backend-api.md)
+- 🚀 [Deployment Guide](./docs/deployment/production.md)
+- 🤝 [Contributing Guidelines](./docs/development/contributing.md)
 
-## Testing
+## 🔧 Configuration
+
+### Environment Variables
+
+Key environment variables:
 
 ```bash
-# Run all tests
-npm run test
+# ICP Configuration
+REACT_APP_BACKEND_CANISTER_ID=your-canister-id
 
-# Backend tests (Motoko unit tests)
-npm run test:backend
+# AI Configuration
+OPENAI_API_KEY=your-openai-key
+CLAUDE_API_KEY=your-claude-key
 
-# Frontend tests (React component tests)  
-npm run test:frontend
+# Development
+NODE_ENV=development
 ```
 
-## Deployment
+See [.env.example](./.env.example) for complete configuration options.
 
-### Local Development
-```bash
-dfx start --background
-dfx deploy
-```
+## 🛠️ Troubleshooting
 
-### IC Mainnet
-```bash
-dfx deploy --network ic
-```
+### Common Issues
 
-## Future Enhancements
+**Demo doesn't open**:
+- Ensure you're opening `demo.html` directly in a web browser
+- Try a different browser (Chrome, Firefox, Safari, Edge)
 
-1. **Real LLM Integration**: Add HTTP outcalls for actual AI API e.g. a finetuned local LLM on diabetis 
+**DFX installation fails on Windows**:
+- Install WSL (Windows Subsystem for Linux) first
+- Run DFX installation commands in WSL environment
+
+**"Insufficient cycles" error**:
+- Deploy with more cycles: `dfx deploy --with-cycles 2000000000000`
+
+For more troubleshooting, see our [documentation](./docs/development/troubleshooting.md).
+
+## 🚀 Future Enhancements
+
+1. **Real LLM Integration**: Fine-tuned models for diabetes care
 2. **Internet Identity**: Implement proper ICP authentication
-3. **Advanced UI**: Migrate to full React/TypeScript project
-4. **Medical Records**: Expand patient data management
-5. **Notifications**: Real-time alerts for all queries with the relevant urgency requirements 
-6. **Analytics**: Usage metrics and outcome tracking
+3. **Advanced Analytics**: Usage metrics and outcome tracking
+4. **Mobile Application**: Native iOS/Android apps
+5. **Multi-language Support**: Internationalization
 
-## File Structure
+## 🤝 Contributing
 
-```
-trustcareconnect/
-├── dfx.json                     # ICP project configuration
-├── mops.toml                    # Motoko package manager
-├── package.json                 # Node.js dependencies
-├── src/
-│   ├── assist_backend/
-│   │   └── main.mo             # Motoko canister (backend logic)
-│   └── assist_frontend/
-│       └── src/
-│           └── index.html      # React SPA (frontend)
-└── README.md                   # This file
-```
+We welcome contributions! Please see our [Contributing Guidelines](./docs/development/contributing.md) for details.
 
-## Contributing
+### Development Workflow
 
-This is a simplified demonstration version. For production use:
-1. Add comprehensive error handling
-2. Implement real LLM integration  
-3. Add proper authentication
-4. Create extensive test coverage
-5. Add monitoring and logging
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests
+5. Submit a pull request
 
+## 📄 License
 
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- [Internet Computer](https://internetcomputer.org/) for blockchain infrastructure
+- [OpenAI](https://openai.com/) and [Anthropic](https://www.anthropic.com/) for AI capabilities
+- The open-source community for excellent tools and libraries
+
+## 📞 Support
+
+- 🐛 Issues: [GitHub Issues](https://github.com/your-username/trustcareconnect/issues)
+- 💬 Discussions: [GitHub Discussions](https://github.com/your-username/trustcareconnect/discussions)
+- 📧 Email: support@trustcareconnect.com
+
+---
+
+<div align="center">
+  <strong>Built with ❤️ for better healthcare communication</strong><br>
+  <em>Combining AI efficiency with human medical expertise</em>
+</div>

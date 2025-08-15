@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "canisters": {
+    "backend": {
+      "type": "motoko",
+      "main": "src/main.mo",
+      "dependencies": []
+    }
+  },
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": ""
+    }
+  },
+  "networks": {
+    "local": {
+      "bind": "127.0.0.1:4943",
+      "type": "ephemeral"
+    },
+    "ic": {
+      "providers": ["https://icp0.io", "https://icp-api.io"],
+      "type": "persistent"
+    }
+  }
+}
