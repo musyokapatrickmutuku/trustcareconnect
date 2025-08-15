@@ -67,14 +67,14 @@ if command -v dfx >/dev/null 2>&1 && dfx ping local >/dev/null 2>&1; then
     cd packages/backend 2>/dev/null || cd backend 2>/dev/null || true
     
     # Test patient registration
-    if dfx canister call backend registerPatient '("Test User", 25, "test@quicktest.com", "test condition")' >/dev/null 2>&1; then
+    if dfx canister call backend registerPatient '("Test User", "test condition", "test@quicktest.com")' >/dev/null 2>&1; then
         print_pass "Patient registration works"
     else
         print_fail "Patient registration failed"
     fi
     
-    # Test getting all patients
-    if dfx canister call backend getAllPatients '()' >/dev/null 2>&1; then
+    # Test getting unassigned patients (since getAllPatients doesn't exist)
+    if dfx canister call backend getUnassignedPatients '()' >/dev/null 2>&1; then
         print_pass "Patient retrieval works"
     else
         print_fail "Patient retrieval failed"
