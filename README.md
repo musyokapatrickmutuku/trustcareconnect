@@ -66,7 +66,7 @@ TrustCareConnect is a secure, decentralized healthcare communication platform th
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/trustcareconnect.git
+git clone https://github.com/musyokapatrickmutuku/trustcareconnect.git
 cd trustcareconnect
 
 # Install dependencies and set up workspaces
@@ -86,6 +86,29 @@ The application will be available at:
 - **Frontend**: http://localhost:3000
 - **AI Proxy**: http://localhost:3001
 - **ICP Backend**: http://localhost:4943
+
+### 🪟 Option 3: WSL Windows Deployment (One-Click Setup)
+
+**Perfect for Windows developers using WSL**:
+
+```bash
+# Clone and navigate to project
+git clone https://github.com/musyokapatrickmutuku/trustcareconnect.git
+cd trustcareconnect
+
+# One-command deployment (installs dependencies, starts all services)
+npm run deploy:wsl
+```
+
+This automated script will:
+- ✅ Check and install all prerequisites (Node.js, DFX, etc.)
+- ✅ Set up the project environment
+- ✅ Deploy backend canister to local IC network
+- ✅ Start AI proxy service on port 3001
+- ✅ Launch frontend application on port 3000
+- ✅ Run health checks and provide testing commands
+
+**📚 For detailed WSL setup guide**: See [docs/deployment/WSL_DEPLOYMENT_GUIDE.md](docs/deployment/WSL_DEPLOYMENT_GUIDE.md)
 
 ## 📁 Project Structure
 

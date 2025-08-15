@@ -37,6 +37,10 @@
     "deploy:prod:ai-proxy": "echo 'Production AI proxy deployment not configured'",
     "deploy:prod:frontend": "echo 'Production frontend deployment not configured'",
     
+    "deploy:wsl": "bash scripts/deploy/wsl-deploy.sh",
+    "test:workflow": "npm run test:backend && npm run test:ai-proxy && npm run test:frontend",
+    "test:quick": "bash scripts/test/quick-test.sh",
+    
     "legacy:build": "npm run legacy:build:frontend",
     "legacy:build:frontend": "cd src/frontend && npm run build && cd ../.. && cp -r src/frontend/build/* dist/frontend/",
     "legacy:start": "dfx start --background",
