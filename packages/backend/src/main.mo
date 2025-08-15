@@ -6,7 +6,6 @@ import Iter "mo:base/Iter";
 import Time "mo:base/Time";
 import Int "mo:base/Int";
 import Result "mo:base/Result";
-import Debug "mo:base/Debug";
 
 actor TrustCareConnect {
 
@@ -197,7 +196,7 @@ actor TrustCareConnect {
     };
 
     // Unassign patient from doctor
-    public func unassignPatient(patientId: PatientId, doctorId: DoctorId): async Result.Result<(), Text> {
+    public func unassignPatient(patientId: PatientId, _doctorId: DoctorId): async Result.Result<(), Text> {
         switch (patients.get(patientId)) {
             case null { #err("Patient not found") };
             case (?patient) {
@@ -332,7 +331,7 @@ actor TrustCareConnect {
     };
 
     // Doctor responds to query
-    public func respondToQuery(queryId: QueryId, doctorId: DoctorId, response: Text): async Result.Result<(), Text> {
+    public func respondToQuery(queryId: QueryId, _doctorId: DoctorId, response: Text): async Result.Result<(), Text> {
         switch (queries.get(queryId)) {
             case null { #err("Query not found") };
             case (?medicalQuery) {

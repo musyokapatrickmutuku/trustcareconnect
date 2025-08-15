@@ -36,11 +36,9 @@
     "deploy:prod:backend": "cd packages/backend && dfx deploy --network ic",
     "deploy:prod:ai-proxy": "echo 'Production AI proxy deployment not configured'",
     "deploy:prod:frontend": "echo 'Production frontend deployment not configured'",
-    
     "deploy:wsl": "bash scripts/deploy/wsl-deploy.sh",
     "test:workflow": "npm run test:backend && npm run test:ai-proxy && npm run test:frontend",
     "test:quick": "bash scripts/test/quick-test.sh",
-    
     "legacy:build": "npm run legacy:build:frontend",
     "legacy:build:frontend": "cd src/frontend && npm run build && cd ../.. && cp -r src/frontend/build/* dist/frontend/",
     "legacy:start": "dfx start --background",
@@ -51,13 +49,13 @@
     "legacy:dev": "npm run legacy:start && npm run legacy:deploy:local"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2",
-    "prettier": "^3.0.0",
-    "husky": "^8.0.3",
-    "lint-staged": "^15.0.0",
     "@rollup/plugin-commonjs": "^25.0.8",
     "@rollup/plugin-node-resolve": "^15.3.1",
     "@types/node": "^24.2.1",
+    "concurrently": "^8.2.2",
+    "husky": "^8.0.3",
+    "lint-staged": "^15.0.0",
+    "prettier": "^3.0.0",
     "rollup": "^3.29.5",
     "tslib": "^2.8.1"
   },
@@ -68,7 +66,7 @@
     "@dfinity/identity": "^3.2.1",
     "@dfinity/principal": "^3.2.1",
     "@rollup/plugin-typescript": "^12.1.4",
-    "azle": "^0.21.0",
+    "azle": "^0.32.0",
     "typescript": "^5.9.2"
   },
   "engines": {
