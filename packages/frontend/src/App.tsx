@@ -1,6 +1,6 @@
 // TrustCareConnect Frontend - Main App Component
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
 import { Patient, Doctor, ViewState } from './types';
 import { UI_MESSAGES } from './constants';
 import MessageDisplay from './components/common/MessageDisplay';
@@ -9,6 +9,48 @@ import PatientPortal from './pages/PatientPortal';
 import DoctorPortal from './pages/DoctorPortal';
 import icpService from './services/icpService';
 import './styles/App.css';
+
+// Navigation component that uses React Router
+const Navigation: React.FC = () => {
+  const location = useLocation();
+  
+  const isActive = (path: string) => location.pathname === path;
+  
+  return (
+    <nav className="flex space-x-4">
+      <Link
+        to="/home"
+        className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+          isActive('/home') 
+            ? 'text-blue-600 bg-blue-50' 
+            : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
+        }`}
+      >
+        Home
+      </Link>
+      <Link
+        to="/patient"
+        className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+          isActive('/patient') 
+            ? 'text-blue-600 bg-blue-50' 
+            : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
+        }`}
+      >
+        Patient Portal
+      </Link>
+      <Link
+        to="/doctor"
+        className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+          isActive('/doctor') 
+            ? 'text-blue-600 bg-blue-50' 
+            : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
+        }`}
+      >
+        Doctor Portal
+      </Link>
+    </nav>
+  );
+};
 
 function App() {
   const [viewState, setViewState] = useState<ViewState>({
@@ -62,26 +104,7 @@ function App() {
                   🏥 TrustCareConnect
                 </h1>
               </div>
-              <nav className="flex space-x-4">
-                <button
-                  onClick={() => setViewState(prev => ({ ...prev, currentView: 'home' }))}
-                  className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100"
-                >
-                  Home
-                </button>
-                <button
-                  onClick={() => setViewState(prev => ({ ...prev, currentView: 'patient' }))}
-                  className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100"
-                >
-                  Patient Portal
-                </button>
-                <button
-                  onClick={() => setViewState(prev => ({ ...prev, currentView: 'doctor' }))}
-                  className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100"
-                >
-                  Doctor Portal
-                </button>
-              </nav>
+              <Navigation />
             </div>
           </div>
         </header>
@@ -129,35 +152,6 @@ function App() {
             />
           </Routes>
         </main>
-
-        {/* Legacy navigation for backward compatibility */}
-        {viewState.currentView === 'home' && (
-          <div className="px-4 sm:px-6 lg:px-8">
-            <HomePage />
-          </div>
-        )}
-        {viewState.currentView === 'patient' && (
-          <div className="px-4 sm:px-6 lg:px-8">
-            <PatientPortal
-              currentUser={viewState.currentUser as Patient}
-              setCurrentUser={setCurrentUser}
-              showMessage={showMessage}
-              loading={viewState.loading.patient || false}
-              setLoading={(loading) => setLoading('patient', loading)}
-            />
-          </div>
-        )}
-        {viewState.currentView === 'doctor' && (
-          <div className="px-4 sm:px-6 lg:px-8">
-            <DoctorPortal
-              currentUser={viewState.currentUser as Doctor}
-              setCurrentUser={setCurrentUser}
-              showMessage={showMessage}
-              loading={viewState.loading.doctor || false}
-              setLoading={(loading) => setLoading('doctor', loading)}
-            />
-          </div>
-        )}
       </div>
     </Router>
   );

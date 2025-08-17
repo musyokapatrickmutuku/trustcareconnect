@@ -51,6 +51,8 @@
   margin: 0 auto;
   padding: 1.5rem;
   width: 100%;
+  position: relative;
+  z-index: 1;
 }
 
 /* Message display */
@@ -135,11 +137,21 @@
   cursor: pointer;
   transition: all 0.2s ease;
   text-decoration: none;
+  position: relative;
+  z-index: 1;
 }
 
 .btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Ensure buttons are clickable */
+button, .btn, a {
+  pointer-events: auto;
+  position: relative;
+  z-index: 10;
 }
 
 .btn-primary {
