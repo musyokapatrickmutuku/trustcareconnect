@@ -19,7 +19,6 @@
     "@dfinity/candid": "^3.2.1",
     "@dfinity/identity": "^3.2.1",
     "@dfinity/principal": "^3.2.1",
-    "azle": "0.32.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.8.0"

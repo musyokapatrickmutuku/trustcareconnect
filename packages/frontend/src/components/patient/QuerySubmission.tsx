@@ -27,7 +27,7 @@ const QuerySubmission: React.FC<QuerySubmissionProps> = ({
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     const maxLength = name === 'title' 
       ? FORM_VALIDATION.MAX_TITLE_LENGTH 

@@ -24,7 +24,7 @@ const PatientRegistration: React.FC<PatientRegistrationProps> = ({
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     const maxLength = FORM_VALIDATION[`MAX_${name.toUpperCase()}_LENGTH` as keyof typeof FORM_VALIDATION] || 100;
     

@@ -1,5 +1,5 @@
 // ICP Service - Refactored with TypeScript and better structure
-import { Actor, HttpAgent } from '@dfinity/agent';
+const { Actor, HttpAgent } = require('@dfinity/agent');
 import { idlFactory } from '../declarations/backend';
 import { Patient, Doctor, MedicalQuery, SystemStats, ApiResponse } from '../types';
 
@@ -8,7 +8,7 @@ const BACKEND_CANISTER_ID = process.env.REACT_APP_BACKEND_CANISTER_ID || 'rrkah-
 
 class ICPService {
   private actor: any = null;
-  private agent: HttpAgent | null = null;
+  private agent: any = null;
 
   constructor() {
     this.init();
