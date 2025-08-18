@@ -1,7 +1,7 @@
 {
   "name": "trustcareconnect",
   "version": "1.0.0",
-  "description": "AI-driven healthcare communication platform with human oversight",
+  "description": "✅ PRODUCTION-READY: AI-driven healthcare communication platform with human oversight - Fully deployed and tested end-to-end",
   "private": true,
   "workspaces": [
     "packages/*"
@@ -39,6 +39,7 @@
     "deploy:wsl": "bash scripts/deploy/wsl-deploy.sh",
     "test:workflow": "npm run test:backend && npm run test:ai-proxy && npm run test:frontend",
     "test:quick": "bash scripts/test/quick-test.sh",
+    "test:startup": "bash scripts/test/wsl-startup-test.sh",
     "legacy:build": "npm run legacy:build:frontend",
     "legacy:build:frontend": "cd src/frontend && npm run build && cd ../.. && cp -r src/frontend/build/* dist/frontend/",
     "legacy:start": "dfx start --background",

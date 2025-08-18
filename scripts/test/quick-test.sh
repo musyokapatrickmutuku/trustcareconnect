@@ -39,8 +39,8 @@ else
 fi
 
 # Test AI Proxy (port 3001)
-if curl -s http://localhost:3001/health >/dev/null 2>&1; then
-    HEALTH_RESPONSE=$(curl -s http://localhost:3001/health)
+if curl -s http://localhost:3001/api/health >/dev/null 2>&1; then
+    HEALTH_RESPONSE=$(curl -s http://localhost:3001/api/health)
     print_pass "AI Proxy is running on port 3001"
     print_info "Health response: $HEALTH_RESPONSE"
 else
@@ -90,11 +90,11 @@ echo
 # Test 3: AI Proxy API
 print_test "Testing AI Proxy API endpoints..."
 
-if curl -s http://localhost:3001/health >/dev/null 2>&1; then
+if curl -s http://localhost:3001/api/health >/dev/null 2>&1; then
     # Test AI query endpoint
     QUERY_RESPONSE=$(curl -s -X POST http://localhost:3001/api/query \
         -H "Content-Type: application/json" \
-        -d '{"query": "Quick test query", "condition": "test", "patientId": "test-123"}' 2>/dev/null)
+        -d '{"queryText": "Quick test query", "condition": "test", "provider": "mock"}' 2>/dev/null)
     
     if [ $? -eq 0 ] && [ -n "$QUERY_RESPONSE" ]; then
         print_pass "AI query endpoint responds"
