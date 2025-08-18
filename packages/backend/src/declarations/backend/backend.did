@@ -1,0 +1,78 @@
+type SystemStats = 
+ record {
+   completedQueries: nat;
+   pendingQueries: nat;
+   totalDoctors: nat;
+   totalPatients: nat;
+   totalQueries: nat;
+ };
+type Result_1 = 
+ variant {
+   err: text;
+   ok: QueryId;
+ };
+type Result = 
+ variant {
+   err: text;
+   ok;
+ };
+type QueryStatus = 
+ variant {
+   completed;
+   doctor_review;
+   pending;
+ };
+type QueryId = text;
+type PatientId = text;
+type Patient = 
+ record {
+   assignedDoctorId: opt DoctorId;
+   condition: text;
+   email: text;
+   id: PatientId;
+   isActive: bool;
+   name: text;
+ };
+type MedicalQuery = 
+ record {
+   aiDraftResponse: opt text;
+   createdAt: int;
+   description: text;
+   doctorId: opt DoctorId;
+   id: QueryId;
+   patientId: PatientId;
+   response: opt text;
+   status: QueryStatus;
+   title: text;
+   updatedAt: int;
+ };
+type DoctorId = text;
+type Doctor = 
+ record {
+   id: DoctorId;
+   name: text;
+   specialization: text;
+ };
+service : {
+  assignPatientToDoctor: (patientId: PatientId, doctorId: DoctorId) ->
+   (Result);
+  getAllDoctors: () -> (vec Doctor) query;
+  getDoctor: (doctorId: DoctorId) -> (opt Doctor) query;
+  getDoctorPatients: (doctorId: DoctorId) -> (vec Patient) query;
+  getDoctorQueries: (doctorId: DoctorId) -> (vec MedicalQuery) query;
+  getPatient: (patientId: PatientId) -> (opt Patient) query;
+  getPatientQueries: (patientId: PatientId) -> (vec MedicalQuery) query;
+  getPendingQueries: () -> (vec MedicalQuery) query;
+  getQuery: (queryId: QueryId) -> (opt MedicalQuery) query;
+  getStats: () -> (SystemStats) query;
+  getUnassignedPatients: () -> (vec Patient) query;
+  healthCheck: () -> (text) query;
+  registerDoctor: (name: text, specialization: text) -> (DoctorId);
+  registerPatient: (name: text, condition: text, email: text) -> (PatientId);
+  respondToQuery: (queryId: QueryId, _doctorId: DoctorId, response: text) ->
+   (Result);
+  submitQuery: (patientId: PatientId, title: text, description: text) ->
+   (Result_1);
+  takeQuery: (queryId: QueryId, doctorId: DoctorId) -> (Result);
+  unassignPatient: (patientId: PatientId, _doctorId: DoctorId) -> (Result);
+}

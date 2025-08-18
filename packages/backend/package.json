@@ -1,7 +1,7 @@
 {
   "name": "@trustcareconnect/backend",
   "version": "1.0.0",
-  "description": "TrustCareConnect ICP Motoko Backend",
+  "description": "✅ DEPLOYED: TrustCareConnect ICP Motoko Backend - Canister ID: uxrrr-q7777-77774-qaaaq-cai, All functions tested",
   "main": "src/main.mo",
   "scripts": {
     "build": "dfx build",

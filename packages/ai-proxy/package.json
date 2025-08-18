@@ -1,7 +1,7 @@
 {
   "name": "@trustcareconnect/ai-proxy",
   "version": "1.0.0",
-  "description": "TrustCareConnect AI Proxy Service",
+  "description": "✅ RUNNING: TrustCareConnect AI Proxy Service - Express.js server on port 3001, Mock AI responses active",
   "main": "src/app.js",
   "scripts": {
     "start": "node src/app.js",
