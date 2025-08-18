@@ -8,8 +8,12 @@ import { formatQueryStatus, formatTimestamp } from '../utils/formatters';
 import { MEDICAL_SPECIALIZATIONS, UI_MESSAGES } from '../constants';
 import icpService from '../services/icpService';
 
-interface DoctorPortalProps extends ComponentProps {
+interface DoctorPortalProps {
   currentUser: Doctor | null;
+  setCurrentUser?: (user: Doctor | null) => void;
+  showMessage?: (message: string, type?: 'success' | 'error' | 'info' | 'warning') => void;
+  loading?: boolean;
+  setLoading?: (loading: boolean) => void;
 }
 
 const DoctorPortal: React.FC<DoctorPortalProps> = ({

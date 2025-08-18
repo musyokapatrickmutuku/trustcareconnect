@@ -2,11 +2,6 @@ export const idlFactory = ({ IDL }) => {
   const PatientId = IDL.Text;
   const DoctorId = IDL.Text;
   const Result = IDL.Variant({ 'ok' : IDL.Null, 'err' : IDL.Text });
-  const Doctor = IDL.Record({
-    'id' : DoctorId,
-    'name' : IDL.Text,
-    'specialization' : IDL.Text,
-  });
   const Patient = IDL.Record({
     'id' : PatientId,
     'name' : IDL.Text,
@@ -14,6 +9,11 @@ export const idlFactory = ({ IDL }) => {
     'email' : IDL.Text,
     'assignedDoctorId' : IDL.Opt(DoctorId),
     'condition' : IDL.Text,
+  });
+  const Doctor = IDL.Record({
+    'id' : DoctorId,
+    'name' : IDL.Text,
+    'specialization' : IDL.Text,
   });
   const QueryId = IDL.Text;
   const QueryStatus = IDL.Variant({
@@ -43,6 +43,7 @@ export const idlFactory = ({ IDL }) => {
   const Result_1 = IDL.Variant({ 'ok' : QueryId, 'err' : IDL.Text });
   return IDL.Service({
     'assignPatientToDoctor' : IDL.Func([PatientId, DoctorId], [Result], []),
+    'findPatientByEmail' : IDL.Func([IDL.Text], [IDL.Opt(Patient)], ['query']),
     'getAllDoctors' : IDL.Func([], [IDL.Vec(Doctor)], ['query']),
     'getDoctor' : IDL.Func([DoctorId], [IDL.Opt(Doctor)], ['query']),
     'getDoctorPatients' : IDL.Func([DoctorId], [IDL.Vec(Patient)], ['query']),

@@ -142,6 +142,11 @@ packages/frontend/.env.production
 packages/backend/.vessel/
 packages/backend/.dfx/
 
-# Legacy files (keep for compatibility)
-src/frontend/build/
-src/frontend/node_modules/
+# Legacy backup archives (prevent accidental recreation)
+archive/
+archive/**
+legacy-backup/
+
+# Application-specific logs
+frontend.log
+ai-proxy.log

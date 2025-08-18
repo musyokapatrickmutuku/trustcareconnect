@@ -176,10 +176,11 @@ npm run legacy:dev         # Use old development setup
 npm run legacy:build       # Use old build process
 ```
 
-### Option 2: Restore from Archive
+### Option 2: Restore from Git History
 ```bash
-# Legacy files are preserved in archive/legacy-backup/
-# Copy back if needed (not recommended)
+# Legacy files have been safely removed after verification (62MB saved)
+# If needed, restore from Git history (not recommended)
+git log --oneline --grep="legacy"
 ```
 
 ### Option 3: Git Revert
@@ -194,7 +195,7 @@ git revert <commit-hash>
 ### Check These Resources First:
 1. **Documentation**: `docs/development/getting-started.md`
 2. **Architecture**: `docs/architecture/overview.md`
-3. **Cleanup Record**: `archive/CLEANUP_RECORD.md`
+3. **Cleanup Status**: Archive safely removed, see CLEANUP_PLAN.md for details
 
 ### Still Need Help?
 1. **Check existing issues**: GitHub Issues

@@ -141,6 +141,12 @@ actor TrustCareConnect {
         patients.get(patientId)
     };
 
+    // Find patient by email
+    public query func findPatientByEmail(email: Text): async ?Patient {
+        let allPatients = Iter.toArray(patients.vals());
+        Array.find<Patient>(allPatients, func(p: Patient): Bool { p.email == email })
+    };
+
     // Get unassigned patients
     public query func getUnassignedPatients(): async [Patient] {
         let unassignedPatients = Array.filter<Patient>(
@@ -196,20 +202,30 @@ actor TrustCareConnect {
     };
 
     // Unassign patient from doctor
-    public func unassignPatient(patientId: PatientId, _doctorId: DoctorId): async Result.Result<(), Text> {
+    public func unassignPatient(patientId: PatientId, doctorId: DoctorId): async Result.Result<(), Text> {
         switch (patients.get(patientId)) {
             case null { #err("Patient not found") };
             case (?patient) {
-                let updatedPatient: Patient = {
-                    id = patient.id;
-                    name = patient.name;
-                    condition = patient.condition;
-                    email = patient.email;
-                    assignedDoctorId = null;
-                    isActive = false;
-                };
-                patients.put(patientId, updatedPatient);
-                #ok()
+                // Validate doctor authorization
+                switch (patient.assignedDoctorId) {
+                    case null { #err("Patient is not assigned to any doctor") };
+                    case (?assignedDoctorId) {
+                        if (assignedDoctorId != doctorId) {
+                            #err("Patient is not assigned to this doctor")
+                        } else {
+                            let updatedPatient: Patient = {
+                                id = patient.id;
+                                name = patient.name;
+                                condition = patient.condition;
+                                email = patient.email;
+                                assignedDoctorId = null;
+                                isActive = false;
+                            };
+                            patients.put(patientId, updatedPatient);
+                            #ok()
+                        }
+                    };
+                }
             };
         }
     };
@@ -331,24 +347,34 @@ actor TrustCareConnect {
     };
 
     // Doctor responds to query
-    public func respondToQuery(queryId: QueryId, _doctorId: DoctorId, response: Text): async Result.Result<(), Text> {
+    public func respondToQuery(queryId: QueryId, doctorId: DoctorId, response: Text): async Result.Result<(), Text> {
         switch (queries.get(queryId)) {
             case null { #err("Query not found") };
             case (?medicalQuery) {
-                let updatedQuery: MedicalQuery = {
-                    id = medicalQuery.id;
-                    patientId = medicalQuery.patientId;
-                    title = medicalQuery.title;
-                    description = medicalQuery.description;
-                    status = #completed;
-                    doctorId = medicalQuery.doctorId;
-                    response = ?response;
-                    aiDraftResponse = medicalQuery.aiDraftResponse;
-                    createdAt = medicalQuery.createdAt;
-                    updatedAt = Time.now();
-                };
-                queries.put(queryId, updatedQuery);
-                #ok()
+                // Validate doctor authorization
+                switch (medicalQuery.doctorId) {
+                    case null { #err("Query is not assigned to any doctor") };
+                    case (?assignedDoctorId) {
+                        if (assignedDoctorId != doctorId) {
+                            #err("This query is not assigned to you")
+                        } else {
+                            let updatedQuery: MedicalQuery = {
+                                id = medicalQuery.id;
+                                patientId = medicalQuery.patientId;
+                                title = medicalQuery.title;
+                                description = medicalQuery.description;
+                                status = #completed;
+                                doctorId = medicalQuery.doctorId;
+                                response = ?response;
+                                aiDraftResponse = medicalQuery.aiDraftResponse;
+                                createdAt = medicalQuery.createdAt;
+                                updatedAt = Time.now();
+                            };
+                            queries.put(queryId, updatedQuery);
+                            #ok()
+                        }
+                    };
+                }
             };
         }
     };

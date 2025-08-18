@@ -15,11 +15,7 @@ export interface Doctor {
   specialization: string;
 }
 
-export interface QueryStatus {
-  pending?: null;
-  doctor_review?: null;
-  completed?: null;
-}
+export type QueryStatus = 'pending' | 'doctor_review' | 'completed';
 
 export interface MedicalQuery {
   id: string;
@@ -65,10 +61,27 @@ export interface ViewState {
 
 export type UserType = 'patient' | 'doctor';
 
-export interface ComponentProps {
-  currentUser?: Patient | Doctor | null;
-  setCurrentUser?: (user: Patient | Doctor | null) => void;
-  showMessage?: (message: string) => void;
+// Base component props interface for consistent prop handling
+export interface BaseComponentProps {
+  showMessage?: (message: string, type?: 'success' | 'error' | 'info' | 'warning') => void;
   loading?: boolean;
   setLoading?: (loading: boolean) => void;
+}
+
+// Extended props for user-aware components
+export interface ComponentProps extends BaseComponentProps {
+  currentUser?: Patient | Doctor | null;
+  setCurrentUser?: (user: Patient | Doctor | null) => void;
+}
+
+// Patient-specific component props
+export interface PatientComponentProps extends BaseComponentProps {
+  patient: Patient;
+  onUpdate?: () => void;
+}
+
+// Doctor-specific component props
+export interface DoctorComponentProps extends BaseComponentProps {
+  doctor: Doctor;
+  onUpdate?: () => void;
 }

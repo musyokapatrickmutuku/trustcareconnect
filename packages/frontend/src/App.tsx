@@ -1,7 +1,7 @@
 // TrustCareConnect Frontend - Main App Component
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
-import { Patient, Doctor, ViewState } from './types';
+import { Patient, Doctor } from './types';
 import { UI_MESSAGES } from './constants';
 import MessageDisplay from './components/common/MessageDisplay';
 import HomePage from './pages/HomePage';
@@ -53,12 +53,10 @@ const Navigation: React.FC = () => {
 };
 
 function App() {
-  const [viewState, setViewState] = useState<ViewState>({
-    currentView: 'home',
-    currentUser: null,
-    loading: {},
-    message: ''
-  });
+  const [currentPatient, setCurrentPatient] = useState<Patient | null>(null);
+  const [currentDoctor, setCurrentDoctor] = useState<Doctor | null>(null);
+  const [loading, setLoading] = useState<{[key: string]: boolean}>({});
+  const [message, setMessage] = useState('');
 
   useEffect(() => {
     // Test backend connection on load
@@ -75,22 +73,15 @@ function App() {
   };
 
   const showMessage = (msg: string, type: 'success' | 'error' | 'info' | 'warning' = 'info') => {
-    setViewState(prev => ({ ...prev, message: msg }));
+    setMessage(msg);
   };
 
-  const setCurrentUser = (user: Patient | Doctor | null) => {
-    setViewState(prev => ({ ...prev, currentUser: user }));
-  };
-
-  const setLoading = (key: string, loading: boolean) => {
-    setViewState(prev => ({
-      ...prev,
-      loading: { ...prev.loading, [key]: loading }
-    }));
+  const setLoadingState = (key: string, isLoading: boolean) => {
+    setLoading(prev => ({ ...prev, [key]: isLoading }));
   };
 
   const clearMessage = () => {
-    setViewState(prev => ({ ...prev, message: '' }));
+    setMessage('');
   };
 
   return (
@@ -109,9 +100,9 @@ function App() {
           </div>
         </header>
 
-        {viewState.message && (
+        {message && (
           <MessageDisplay
-            message={viewState.message}
+            message={message}
             onClose={clearMessage}
             autoHide={true}
           />
@@ -130,11 +121,11 @@ function App() {
               path="/patient" 
               element={
                 <PatientPortal
-                  currentUser={viewState.currentUser as Patient}
-                  setCurrentUser={setCurrentUser}
+                  currentUser={currentPatient}
+                  setCurrentUser={setCurrentPatient}
                   showMessage={showMessage}
-                  loading={viewState.loading.patient || false}
-                  setLoading={(loading) => setLoading('patient', loading)}
+                  loading={loading.patient || false}
+                  setLoading={(isLoading) => setLoadingState('patient', isLoading)}
                 />
               } 
             />
@@ -142,11 +133,11 @@ function App() {
               path="/doctor" 
               element={
                 <DoctorPortal
-                  currentUser={viewState.currentUser as Doctor}
-                  setCurrentUser={setCurrentUser}
+                  currentUser={currentDoctor}
+                  setCurrentUser={setCurrentDoctor}
                   showMessage={showMessage}
-                  loading={viewState.loading.doctor || false}
-                  setLoading={(loading) => setLoading('doctor', loading)}
+                  loading={loading.doctor || false}
+                  setLoading={(isLoading) => setLoadingState('doctor', isLoading)}
                 />
               } 
             />

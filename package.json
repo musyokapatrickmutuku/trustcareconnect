@@ -20,7 +20,7 @@
     "test:ai-proxy": "cd packages/ai-proxy && npm test",
     "test:frontend": "cd packages/frontend && npm test",
     "lint": "npm run lint:backend && npm run lint:ai-proxy && npm run lint:frontend",
-    "lint:backend": "echo 'Backend linting not implemented'",
+    "lint:backend": "echo 'Backend: Motoko linting via dfx check' && cd packages/backend && dfx check",
     "lint:ai-proxy": "cd packages/ai-proxy && npm run lint",
     "lint:frontend": "cd packages/frontend && npm run lint",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\"",
@@ -40,14 +40,6 @@
     "test:workflow": "npm run test:backend && npm run test:ai-proxy && npm run test:frontend",
     "test:quick": "bash scripts/test/quick-test.sh",
     "test:startup": "bash scripts/test/wsl-startup-test.sh",
-    "legacy:build": "npm run legacy:build:frontend",
-    "legacy:build:frontend": "cd src/frontend && npm run build && cd ../.. && cp -r src/frontend/build/* dist/frontend/",
-    "legacy:start": "dfx start --background",
-    "legacy:deploy": "dfx deploy",
-    "legacy:deploy:local": "dfx deploy --network local",
-    "legacy:stop": "dfx stop",
-    "legacy:clean": "dfx canister --network local delete --all && rm -rf dist/",
-    "legacy:dev": "npm run legacy:start && npm run legacy:deploy:local"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.8",

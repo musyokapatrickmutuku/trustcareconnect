@@ -63,8 +63,10 @@ jobs:
 
       - name: Deploy to production server
         run: |
-          echo "AI Proxy deployment to production server would go here"
-          echo "This could be Docker deployment, cloud function, or server deployment"
+          echo "🚀 Deploying AI Proxy to production..."
+          # TODO: Configure actual deployment (Docker, PM2, or cloud service)
+          # Example: docker build -t ai-proxy . && docker push registry/ai-proxy:latest
+          echo "⚠️  Production deployment requires environment-specific configuration"
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           CLAUDE_API_KEY: ${{ secrets.CLAUDE_API_KEY }}
@@ -99,8 +101,10 @@ jobs:
 
       - name: Deploy to hosting service
         run: |
-          echo "Frontend deployment would go here"
-          echo "This could be to Vercel, Netlify, or other hosting service"
+          echo "🚀 Deploying Frontend to hosting service..."
+          # TODO: Configure actual deployment (Vercel, Netlify, or ICP hosting)
+          # Example: npx vercel --prod --token ${{ secrets.VERCEL_TOKEN }}
+          echo "⚠️  Frontend deployment requires hosting service configuration"
 
   notify:
     name: Notify Deployment

@@ -1,10 +1,10 @@
 // ICP Service - Refactored with TypeScript and better structure
-const { Actor, HttpAgent } = require('@dfinity/agent');
+import { Actor, HttpAgent } from '@dfinity/agent';
 import { idlFactory } from '../declarations/backend';
 import { Patient, Doctor, MedicalQuery, SystemStats, ApiResponse } from '../types';
 
 // Backend canister ID (will be set after deployment)
-const BACKEND_CANISTER_ID = process.env.REACT_APP_BACKEND_CANISTER_ID || 'uxrrr-q7777-77774-qaaaq-cai';
+const BACKEND_CANISTER_ID = process.env.REACT_APP_BACKEND_CANISTER_ID || 'lqy7q-dh777-77777-aaaaq-cai';
 
 class ICPService {
   private actor: any = null;
@@ -72,9 +72,21 @@ class ICPService {
     try {
       const actor = await this.ensureActor();
       const result = await actor.getPatient(patientId);
-      return { success: true, data: result[0] || null };
+      // ICP returns Option type as array - check if array has elements
+      return { success: true, data: result.length > 0 ? result[0] : null };
     } catch (error) {
       return this.handleError(error, 'get patient');
+    }
+  }
+
+  async findPatientByEmail(email: string): Promise<ApiResponse<Patient | null>> {
+    try {
+      const actor = await this.ensureActor();
+      const result = await actor.findPatientByEmail(email);
+      // ICP returns Option type as array - check if array has elements
+      return { success: true, data: result.length > 0 ? result[0] : null };
+    } catch (error) {
+      return this.handleError(error, 'find patient by email');
     }
   }
 
@@ -146,7 +158,8 @@ class ICPService {
     try {
       const actor = await this.ensureActor();
       const result = await actor.getDoctor(doctorId);
-      return { success: true, data: result[0] || null };
+      // ICP returns Option type as array - check if array has elements
+      return { success: true, data: result.length > 0 ? result[0] : null };
     } catch (error) {
       return this.handleError(error, 'get doctor');
     }

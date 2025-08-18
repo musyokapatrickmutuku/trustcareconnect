@@ -46,6 +46,7 @@ export interface SystemStats {
 }
 export interface _SERVICE {
   'assignPatientToDoctor' : ActorMethod<[PatientId, DoctorId], Result>,
+  'findPatientByEmail' : ActorMethod<[string], [] | [Patient]>,
   'getAllDoctors' : ActorMethod<[], Array<Doctor>>,
   'getDoctor' : ActorMethod<[DoctorId], [] | [Doctor]>,
   'getDoctorPatients' : ActorMethod<[DoctorId], Array<Patient>>,
