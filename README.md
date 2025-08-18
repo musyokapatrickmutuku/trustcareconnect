@@ -12,7 +12,7 @@ TrustCareConnect is a secure, decentralized healthcare communication platform th
 
 ### 🎯 Key Features
 
-- **🤖 AI-Assisted Consultations**: Smart draft responses using OpenAI GPT and Claude
+- **🤖 AI-Assisted Consultations**: Smart draft responses using Medically focussed LLM
 - **👨‍⚕️ Human Oversight**: Mandatory physician review for all AI responses
 - **🔐 Blockchain Security**: Secure data storage on Internet Computer Protocol
 - **📱 Dual Interface**: Separate portals for patients and healthcare providers
@@ -409,4 +409,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 <div align="center">
   <strong>Built with ❤️ for better healthcare communication</strong><br>
   <em>Combining AI efficiency with human medical expertise</em>
+
 </div>
