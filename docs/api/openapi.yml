@@ -1,0 +1,572 @@
+openapi: 3.0.3
+info:
+  title: TrustCareConnect API
+  description: |
+    TrustCareConnect Healthcare Platform API
+    
+    A comprehensive healthcare platform built on Internet Computer Protocol (ICP) 
+    with AI-powered medical query processing capabilities.
+    
+    ## Features
+    - Patient and doctor management
+    - AI-powered medical consultations
+    - Secure healthcare data storage
+    - Real-time monitoring and logging
+    
+  version: 1.0.0
+  contact:
+    name: TrustCareConnect Support
+    email: support@trustcareconnect.com
+    url: https://trustcareconnect.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.trustcareconnect.com
+    description: Production server
+  - url: https://staging-api.trustcareconnect.com
+    description: Staging server
+  - url: http://localhost:3001
+    description: Development server
+
+security:
+  - ApiKeyAuth: []
+  - PrincipalAuth: []
+
+paths:
+  /api/health:
+    get:
+      summary: Health check
+      description: Returns the health status of the AI Proxy service
+      operationId: getHealth
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '503':
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/query:
+    post:
+      summary: Process medical query
+      description: |
+        Processes a medical query using AI providers (OpenAI or Claude).
+        
+        This endpoint accepts medical questions and returns AI-generated responses
+        to help with healthcare consultations.
+      operationId: processQuery
+      tags:
+        - AI Query
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QueryRequest'
+            examples:
+              diabetes_query:
+                summary: Diabetes symptoms query
+                value:
+                  queryText: "What are the symptoms of type 2 diabetes?"
+                  condition: "diabetes"
+                  provider: "openai"
+              hypertension_query:
+                summary: Hypertension treatment query
+                value:
+                  queryText: "What are the treatment options for high blood pressure?"
+                  condition: "hypertension"
+                  provider: "claude"
+      responses:
+        '200':
+          description: Query processed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryResponse'
+              examples:
+                successful_response:
+                  summary: Successful AI response
+                  value:
+                    success: true
+                    data:
+                      response: "Type 2 diabetes symptoms include increased thirst, frequent urination, increased hunger, unintended weight loss, fatigue, blurred vision, slow-healing sores, and frequent infections."
+                      provider: "openai"
+                      processingTime: 1250
+                      timestamp: "2025-01-19T10:30:00.000Z"
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: AI provider error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/query/fallback:
+    post:
+      summary: Process query with fallback
+      description: |
+        Processes a medical query with automatic fallback between AI providers.
+        If the preferred provider fails, it automatically tries the alternative.
+      operationId: processQueryWithFallback
+      tags:
+        - AI Query
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QueryFallbackRequest'
+      responses:
+        '200':
+          description: Query processed successfully (possibly with fallback)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryResponse'
+
+  /api/logs:
+    post:
+      summary: Submit application logs
+      description: |
+        Collects logs from client applications for centralized monitoring.
+        This is an internal endpoint used by the frontend application.
+      operationId: submitLogs
+      tags:
+        - Logging
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LogSubmissionRequest'
+      responses:
+        '200':
+          description: Logs processed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogSubmissionResponse'
+        '207':
+          description: Partial success (some logs failed validation)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogSubmissionResponse'
+        '400':
+          description: Invalid log format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/logs/health:
+    get:
+      summary: Log collection health check
+      description: Health check specifically for the log collection service
+      operationId: getLogHealth
+      tags:
+        - Logging
+        - Health
+      responses:
+        '200':
+          description: Log service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogHealthResponse'
+
+  /api/metrics:
+    get:
+      summary: Prometheus metrics
+      description: |
+        Returns Prometheus-formatted metrics for monitoring.
+        Available only in production environment.
+      operationId: getMetrics
+      tags:
+        - Monitoring
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: Metrics data
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: |
+                  # HELP http_requests_total Total number of HTTP requests
+                  # TYPE http_requests_total counter
+                  http_requests_total{method="GET",status="200"} 1234
+                  http_requests_total{method="POST",status="200"} 567
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key for service authentication
+    PrincipalAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: ICP Principal ID
+      description: Internet Computer Principal ID for user authentication
+
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded, unhealthy]
+          example: healthy
+        timestamp:
+          type: string
+          format: date-time
+          example: "2025-01-19T10:30:00.000Z"
+        uptime:
+          type: number
+          description: Service uptime in seconds
+          example: 3600
+        version:
+          type: string
+          example: "1.0.0"
+        services:
+          type: object
+          properties:
+            ai_providers:
+              type: object
+              properties:
+                openai:
+                  type: string
+                  enum: [available, unavailable]
+                claude:
+                  type: string
+                  enum: [available, unavailable]
+            database:
+              type: string
+              enum: [connected, disconnected]
+
+    QueryRequest:
+      type: object
+      required:
+        - queryText
+      properties:
+        queryText:
+          type: string
+          description: The medical question to process
+          minLength: 5
+          maxLength: 1000
+          example: "What are the symptoms of type 2 diabetes?"
+        condition:
+          type: string
+          description: Related medical condition (optional)
+          maxLength: 100
+          example: "diabetes"
+        provider:
+          type: string
+          enum: [openai, claude]
+          description: Preferred AI provider
+          default: openai
+          example: "openai"
+        context:
+          type: object
+          description: Additional context for the query
+          properties:
+            patientAge:
+              type: integer
+              minimum: 0
+              maximum: 150
+            patientGender:
+              type: string
+              enum: [male, female, other]
+            urgency:
+              type: string
+              enum: [low, medium, high, critical]
+
+    QueryFallbackRequest:
+      type: object
+      required:
+        - queryText
+      properties:
+        queryText:
+          type: string
+          minLength: 5
+          maxLength: 1000
+        condition:
+          type: string
+          maxLength: 100
+        preferredProvider:
+          type: string
+          enum: [openai, claude]
+          default: openai
+        context:
+          $ref: '#/components/schemas/QueryRequest/properties/context'
+
+    QueryResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            response:
+              type: string
+              description: AI-generated medical response
+              example: "Type 2 diabetes symptoms include increased thirst, frequent urination, increased hunger..."
+            provider:
+              type: string
+              enum: [openai, claude]
+              example: "openai"
+            fallbackUsed:
+              type: boolean
+              description: Whether fallback provider was used
+              example: false
+            processingTime:
+              type: integer
+              description: Processing time in milliseconds
+              example: 1250
+            timestamp:
+              type: string
+              format: date-time
+              example: "2025-01-19T10:30:00.000Z"
+            confidence:
+              type: number
+              format: float
+              minimum: 0
+              maximum: 1
+              description: AI confidence score (if available)
+              example: 0.85
+
+    LogEntry:
+      type: object
+      required:
+        - level
+        - message
+        - timestamp
+      properties:
+        level:
+          type: string
+          enum: [debug, info, warn, error]
+          example: "error"
+        message:
+          type: string
+          maxLength: 1000
+          example: "API request failed"
+        timestamp:
+          type: string
+          format: date-time
+          example: "2025-01-19T10:30:00.000Z"
+        url:
+          type: string
+          maxLength: 500
+          example: "https://trustcareconnect.com/dashboard"
+        userAgent:
+          type: string
+          maxLength: 500
+        userId:
+          type: string
+          description: User identifier (if available)
+        sessionId:
+          type: string
+          description: Session identifier
+        metadata:
+          type: object
+          description: Additional context data
+          example:
+            endpoint: "/api/query"
+            status: 500
+            responseTime: "2500ms"
+
+    LogSubmissionRequest:
+      type: object
+      required:
+        - logs
+      properties:
+        logs:
+          type: array
+          items:
+            $ref: '#/components/schemas/LogEntry'
+          maxItems: 50
+          example:
+            - level: "error"
+              message: "API request failed"
+              timestamp: "2025-01-19T10:30:00.000Z"
+              metadata:
+                endpoint: "/api/query"
+                status: 500
+        source:
+          type: string
+          enum: [frontend, backend, ai-proxy]
+          example: "frontend"
+        application:
+          type: string
+          default: "trustcareconnect"
+          example: "trustcareconnect"
+
+    LogSubmissionResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        processed:
+          type: integer
+          description: Number of logs successfully processed
+          example: 10
+        errors:
+          type: array
+          items:
+            type: string
+          description: Validation errors (if any)
+          example: ["Entry 5: Invalid timestamp format"]
+        timestamp:
+          type: string
+          format: date-time
+          example: "2025-01-19T10:30:00.000Z"
+
+    LogHealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, unhealthy]
+          example: "healthy"
+        service:
+          type: string
+          example: "log-collector"
+        timestamp:
+          type: string
+          format: date-time
+        uptime:
+          type: number
+          description: Service uptime in seconds
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+          description: Error code
+          example: "INVALID_REQUEST"
+        message:
+          type: string
+          description: Human-readable error message
+          example: "Request validation failed"
+        details:
+          type: object
+          description: Additional error details
+          example:
+            field: "queryText"
+            reason: "Field is required"
+        timestamp:
+          type: string
+          format: date-time
+          example: "2025-01-19T10:30:00.000Z"
+
+  responses:
+    RateLimitExceeded:
+      description: Rate limit exceeded
+      headers:
+        X-RateLimit-Limit:
+          schema:
+            type: integer
+          description: Request limit per time window
+        X-RateLimit-Remaining:
+          schema:
+            type: integer
+          description: Remaining requests in current window
+        X-RateLimit-Reset:
+          schema:
+            type: integer
+          description: Unix timestamp when rate limit resets
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Unauthorized:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Forbidden:
+      description: Insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  examples:
+    DiabetesQuery:
+      summary: Diabetes symptoms inquiry
+      description: Example query asking about diabetes symptoms
+      value:
+        queryText: "What are the early warning signs of diabetes?"
+        condition: "diabetes"
+        provider: "openai"
+        context:
+          patientAge: 45
+          patientGender: "male"
+          urgency: "medium"
+
+    HypertensionTreatment:
+      summary: Hypertension treatment options
+      description: Query about treatment options for high blood pressure
+      value:
+        queryText: "What lifestyle changes can help manage high blood pressure?"
+        condition: "hypertension"
+        provider: "claude"
+        context:
+          urgency: "low"
+
+tags:
+  - name: Health
+    description: Health check endpoints
+  - name: AI Query
+    description: AI-powered medical query processing
+  - name: Logging
+    description: Log collection and monitoring
+  - name: Monitoring
+    description: System monitoring and metrics
+
+externalDocs:
+  description: TrustCareConnect Documentation
+  url: https://docs.trustcareconnect.com
