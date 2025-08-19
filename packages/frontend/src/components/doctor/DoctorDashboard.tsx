@@ -24,14 +24,16 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({
   loading,
   setLoading
 }) => {
-  const [activeTab, setActiveTab] = useState<'overview' | 'patients' | 'queries' | 'assignments'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'patients' | 'queries' | 'incoming' | 'assignments'>('overview');
   const [myPatients, setMyPatients] = useState<Patient[]>([]);
   const [unassignedPatients, setUnassignedPatients] = useState<Patient[]>([]);
   const [myQueries, setMyQueries] = useState<MedicalQuery[]>([]);
+  const [patientNameMap, setPatientNameMap] = useState<Record<string, string>>({});
   const [stats, setStats] = useState({
     totalPatients: 0,
     activeQueries: 0,
     completedQueries: 0,
+    pendingQueries: 0,
     unassignedCount: 0
   });
   const [dataLoading, setDataLoading] = useState(false);
@@ -59,6 +61,13 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({
       if (result.success && result.data) {
         setMyPatients(result.data);
         setStats(prev => ({ ...prev, totalPatients: result.data?.length || 0 }));
+        
+        // Build patient name mapping
+        const nameMap: Record<string, string> = {};
+        result.data.forEach(patient => {
+          nameMap[patient.id] = patient.name;
+        });
+        setPatientNameMap(prev => ({ ...prev, ...nameMap }));
       }
     } catch (error) {
       console.error('Failed to load patients:', error);
@@ -82,6 +91,30 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({
       const result = await icpService.getDoctorQueries(currentDoctor.id);
       if (result.success && result.data) {
         setMyQueries(result.data);
+        
+        // Build patient name map from query patient IDs
+        const queryNameMap: Record<string, string> = {};
+        for (const query of result.data) {
+          if (!patientNameMap[query.patientId] && !queryNameMap[query.patientId]) {
+            try {
+              const patientResult = await icpService.getPatient(query.patientId);
+              if (patientResult.success && patientResult.data) {
+                queryNameMap[query.patientId] = patientResult.data.name;
+              }
+            } catch (error) {
+              console.error(`Failed to load patient ${query.patientId}:`, error);
+            }
+          }
+        }
+        
+        // Update patient name map with query patients
+        if (Object.keys(queryNameMap).length > 0) {
+          setPatientNameMap(prev => ({ ...prev, ...queryNameMap }));
+        }
+        
+        const pendingQueries = result.data.filter(q => 
+          formatQueryStatus(q.status) === 'Pending'
+        ).length;
         const activeQueries = result.data.filter(q => 
           formatQueryStatus(q.status) === 'Pending' || formatQueryStatus(q.status) === 'Under Review'
         ).length;
@@ -91,7 +124,8 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({
         setStats(prev => ({ 
           ...prev, 
           activeQueries,
-          completedQueries 
+          completedQueries,
+          pendingQueries 
         }));
       }
     } catch (error) {
@@ -198,7 +232,7 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
                         <p className="font-medium text-gray-900 text-sm">{query.title}</p>
-                        <p className="text-xs text-gray-500 mt-1">Patient: {query.patientId}</p>
+                        <p className="text-xs text-gray-500 mt-1">Patient: {patientNameMap[query.patientId] || query.patientId}</p>
                       </div>
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                         formatQueryStatus(query.status) === 'Completed' 
@@ -270,6 +304,60 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({
                     showMessage={showMessage}
                     loading={loading}
                     setLoading={setLoading}
+                    patientName={patientNameMap[query.patientId]}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        );
+
+      case 'incoming':
+        const pendingQueries = myQueries.filter(q => formatQueryStatus(q.status) === 'Pending');
+        return (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-semibold text-gray-900">
+                🔔 Incoming Queries ({pendingQueries.length})
+              </h3>
+              {pendingQueries.length > 0 && (
+                <div className="flex items-center gap-2 text-sm text-orange-600 bg-orange-50 px-3 py-1 rounded-full">
+                  <span>⚡ Requires Immediate Attention</span>
+                </div>
+              )}
+            </div>
+            
+            {pendingQueries.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="text-4xl mb-4">🎉</div>
+                <p className="text-lg font-medium text-gray-900 mb-2">All caught up!</p>
+                <p className="text-gray-500">No pending queries at the moment.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-4">
+                  <div className="flex items-start">
+                    <span className="text-orange-500 mr-3 mt-0.5">💡</span>
+                    <div>
+                      <p className="text-orange-800 text-sm font-medium">Quick Action Guide:</p>
+                      <p className="text-orange-700 text-sm mt-1">
+                        Click "Start Review" on any query to begin editing the AI-generated response. 
+                        The AI has already analyzed each query and provided a draft response for your review.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
+                {pendingQueries.map((query) => (
+                  <QueryCard
+                    key={query.id}
+                    query={query}
+                    currentDoctor={currentDoctor}
+                    onUpdate={loadMyQueries}
+                    showMessage={showMessage}
+                    loading={loading}
+                    setLoading={setLoading}
+                    patientName={patientNameMap[query.patientId]}
                   />
                 ))}
               </div>
@@ -297,9 +385,16 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({
       <div className="bg-white rounded-lg shadow p-6">
         <div className="flex justify-between items-start">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">
-              👨‍⚕️ Dr. {currentDoctor.name}
-            </h1>
+            <div className="flex items-center gap-3 mb-2">
+              <h1 className="text-2xl font-bold text-gray-900">
+                👨‍⚕️ Dr. {currentDoctor.name}
+              </h1>
+              {stats.pendingQueries > 0 && (
+                <div className="flex items-center gap-2 bg-orange-100 text-orange-800 px-3 py-1 rounded-full">
+                  <span className="text-sm font-medium">🔔 {stats.pendingQueries} Pending</span>
+                </div>
+              )}
+            </div>
             <p className="text-gray-600 mt-1">
               Specialization: <span className="font-medium">{currentDoctor.specialization}</span>
             </p>
@@ -322,8 +417,9 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({
           <nav className="-mb-px flex space-x-8 px-6">
             {[
               { id: 'overview', label: '📊 Overview', count: null },
+              { id: 'incoming', label: '📥 Incoming Queries', count: stats.pendingQueries },
               { id: 'patients', label: '👥 My Patients', count: stats.totalPatients },
-              { id: 'queries', label: '💬 Queries', count: stats.activeQueries },
+              { id: 'queries', label: '💬 All Queries', count: stats.activeQueries },
               { id: 'assignments', label: '📋 Assignments', count: stats.unassignedCount }
             ].map((tab) => (
               <button

@@ -45,8 +45,12 @@ const PatientDashboard: React.FC<PatientDashboardProps> = ({
   const loadPatientQueries = async () => {
     setLoading(true);
     try {
+      console.log(`Loading queries for patient: ${patient.id}`);
       const result = await icpService.getPatientQueries(patient.id);
+      console.log('Query result:', result);
+      
       if (result.success && result.data) {
+        console.log(`Found ${result.data.length} queries for patient`);
         const queriesWithEstimates = result.data.map((query: MedicalQuery) => ({
           ...query,
           estimatedResponseTime: calculateEstimatedResponseTime(query),
@@ -57,10 +61,14 @@ const PatientDashboard: React.FC<PatientDashboardProps> = ({
         checkForStatusUpdates(queriesWithEstimates);
         
         setQueries(queriesWithEstimates);
+      } else {
+        console.log('No queries found or request failed:', result.error);
+        setQueries([]);
       }
     } catch (error) {
       console.error('Error loading queries:', error);
       showMessage('Failed to load your queries', 'error');
+      setQueries([]);
     } finally {
       setLoading(false);
     }
@@ -108,13 +116,20 @@ const PatientDashboard: React.FC<PatientDashboardProps> = ({
     
     newQueries.forEach(query => {
       const existingQuery = queries.find(q => q.id === query.id);
+      
+      // Check for new queries (first time seeing this query)
+      if (!existingQuery && query.status === 'pending') {
+        newNotifications.push(`🤖 Query "${query.title}" has been processed by AI and sent to your doctor for review`);
+      }
+      
+      // Check for status changes
       if (existingQuery && existingQuery.status !== query.status) {
         switch (query.status) {
           case 'doctor_review':
-            newNotifications.push(`Your query "${query.title}" is now being reviewed by a doctor`);
+            newNotifications.push(`👨‍⚕️ Your query "${query.title}" is now being reviewed by your doctor`);
             break;
           case 'completed':
-            newNotifications.push(`Your query "${query.title}" has been answered!`);
+            newNotifications.push(`✅ Your query "${query.title}" has been answered by your doctor!`);
             break;
         }
       }
@@ -147,9 +162,9 @@ const PatientDashboard: React.FC<PatientDashboardProps> = ({
 
   const getStatusText = (status: QueryStatus) => {
     switch (status) {
-      case 'pending': return 'AI Processed - Awaiting Doctor Review';
-      case 'doctor_review': return 'Under Doctor Review';
-      case 'completed': return 'Completed';
+      case 'pending': return '🤖 AI Analyzed - Awaiting Doctor Review';
+      case 'doctor_review': return '👨‍⚕️ Under Doctor Review';
+      case 'completed': return '✅ Doctor Response Received';
       default: return 'Processing';
     }
   };
@@ -304,7 +319,16 @@ const PatientDashboard: React.FC<PatientDashboardProps> = ({
                 </div>
               ) : queries.length === 0 ? (
                 <div className="p-8 text-center text-gray-500">
-                  <p>No queries yet. Submit your first medical query!</p>
+                  <div className="text-4xl mb-4">📋</div>
+                  <p className="text-lg font-medium text-gray-700 mb-2">No queries yet</p>
+                  <p className="text-sm text-gray-500 mb-4">Submit your first medical query to get started!</p>
+                  {!patient.assignedDoctorId && (
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mt-4">
+                      <p className="text-yellow-800 text-sm">
+                        ⚠️ You need to be assigned to a doctor before you can submit queries.
+                      </p>
+                    </div>
+                  )}
                 </div>
               ) : (
                 queries.slice(0, 5).map((query) => (

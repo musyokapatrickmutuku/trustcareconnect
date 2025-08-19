@@ -14,6 +14,7 @@ interface QueryCardProps {
   showMessage: (message: string, type?: 'success' | 'error' | 'info' | 'warning') => void;
   loading: boolean;
   setLoading: (loading: boolean) => void;
+  patientName?: string;
 }
 
 const QueryCard: React.FC<QueryCardProps> = ({
@@ -22,7 +23,8 @@ const QueryCard: React.FC<QueryCardProps> = ({
   onUpdate,
   showMessage,
   loading,
-  setLoading
+  setLoading,
+  patientName
 }) => {
   const [responseForm, setResponseForm] = useState({ response: '' });
   const [showResponse, setShowResponse] = useState(false);
@@ -100,7 +102,7 @@ const QueryCard: React.FC<QueryCardProps> = ({
         <div className="flex-1">
           <h4 className="font-semibold text-gray-900 mb-1">{query.title}</h4>
           <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
-            <span>Patient ID: <span className="font-mono">{query.patientId}</span></span>
+            <span>Patient: <span className="font-medium text-gray-900">{patientName || query.patientId}</span></span>
             <span>Created: {formatTimestamp(query.createdAt)}</span>
           </div>
         </div>
@@ -120,89 +122,132 @@ const QueryCard: React.FC<QueryCardProps> = ({
         </div>
       </div>
 
-      {/* Query Description */}
+      {/* Patient Input & AI Response Side-by-Side */}
       <div className="mb-4">
-        <p className="text-gray-700 bg-white/50 p-3 rounded border">
-          {query.description}
-        </p>
-      </div>
-
-      {/* AI Draft Response */}
-      {query.aiDraftResponse && status === 'Under Review' && (
-        <div className="mb-4 bg-white/70 border rounded p-3">
-          <div className="flex justify-between items-center mb-2">
-            <h5 className="font-medium text-blue-800">🤖 AI-Generated Draft Response:</h5>
-            <Button
-              size="small"
-              variant="secondary"
-              onClick={useAIDraft}
-            >
-              Use Draft
-            </Button>
+        <div className="grid md:grid-cols-2 gap-4">
+          {/* Patient Query Section */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <span className="text-lg">👤</span>
+              <h5 className="font-medium text-gray-900">Patient Query</h5>
+            </div>
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+              <p className="text-gray-800 text-sm leading-relaxed">{query.description}</p>
+            </div>
           </div>
-          <div className="bg-white p-3 rounded border text-gray-700 text-sm">
-            {query.aiDraftResponse}
-          </div>
+          
+          {/* AI Draft Response Section */}
+          {query.aiDraftResponse && (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">🤖</span>
+                <h5 className="font-medium text-blue-800">AI Draft Response</h5>
+                {status === 'Under Review' && (
+                  <Button
+                    size="small"
+                    variant="secondary"
+                    onClick={useAIDraft}
+                    className="ml-auto"
+                  >
+                    Use Draft
+                  </Button>
+                )}
+              </div>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <p className="text-blue-800 text-sm leading-relaxed">{query.aiDraftResponse}</p>
+              </div>
+              {status === 'Pending' && (
+                <div className="text-xs text-blue-600 italic bg-blue-50 p-2 rounded border">
+                  💡 Click "Start Review" above to begin editing this AI draft response
+                </div>
+              )}
+            </div>
+          )}
         </div>
-      )}
+      </div>
 
       {/* Response Section for Under Review Queries */}
       {status === 'Under Review' && (
-        <div className="mt-4">
+        <div className="mt-6 border-t border-gray-200 pt-6">
+          <div className="flex items-center gap-2 mb-4">
+            <span className="text-lg">✏️</span>
+            <h5 className="font-medium text-green-800">Doctor's Response Editor</h5>
+          </div>
+          
           {!showResponse && (
-            <div className="flex gap-2">
-              <Button
-                size="small"
-                onClick={() => setShowResponse(true)}
-              >
-                Write Response
-              </Button>
-              {query.aiDraftResponse && (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-green-800 text-sm font-medium">Ready to respond to this patient query?</p>
+              </div>
+              <div className="flex gap-2">
                 <Button
-                  size="small"
-                  variant="secondary"
-                  onClick={useAIDraft}
+                  onClick={() => setShowResponse(true)}
+                  className="bg-green-600 hover:bg-green-700"
                 >
-                  Edit AI Draft
+                  ✏️ Write Response
                 </Button>
-              )}
+                {query.aiDraftResponse && (
+                  <Button
+                    variant="secondary"
+                    onClick={useAIDraft}
+                    className="border-green-300 text-green-700 hover:bg-green-100"
+                  >
+                    📝 Edit AI Draft
+                  </Button>
+                )}
+              </div>
             </div>
           )}
 
           {showResponse && (
-            <form onSubmit={handleRespondToQuery} className="space-y-3">
-              <FormField
-                label="Your Medical Response"
-                type="textarea"
-                name="response"
-                value={responseForm.response}
-                onChange={(e) => setResponseForm({ response: e.target.value })}
-                placeholder="Provide your professional medical response to this patient query..."
-                rows={4}
-                required
-              />
-              <div className="flex gap-2">
-                <Button
-                  type="submit"
-                  loading={loading}
-                  disabled={loading || !responseForm.response.trim()}
-                  size="small"
-                >
-                  {loading ? 'Submitting...' : 'Submit Response'}
-                </Button>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="small"
-                  onClick={() => {
-                    setShowResponse(false);
-                    setResponseForm({ response: '' });
-                  }}
-                >
-                  Cancel
-                </Button>
-              </div>
-            </form>
+            <div className="bg-white border-2 border-green-200 rounded-lg p-4">
+              <form onSubmit={handleRespondToQuery} className="space-y-4">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-sm text-green-700 font-medium">
+                    {responseForm.response ? '✨ Editing your response...' : '📝 Compose your medical response'}
+                  </p>
+                  <span className="text-xs text-gray-500">
+                    {responseForm.response.length}/2000 characters
+                  </span>
+                </div>
+                <FormField
+                  label="Your Professional Medical Response"
+                  type="textarea"
+                  name="response"
+                  value={responseForm.response}
+                  onChange={(e) => setResponseForm({ response: e.target.value })}
+                  placeholder="Provide your professional medical response to this patient query. Review and modify the AI draft as needed to ensure accuracy and personalization..."
+                  rows={6}
+                  maxLength={2000}
+                  required
+                />
+                <div className="flex gap-2">
+                  <Button
+                    type="submit"
+                    loading={loading}
+                    disabled={loading || !responseForm.response.trim()}
+                    className="bg-green-600 hover:bg-green-700"
+                  >
+                    {loading ? '📤 Submitting...' : '📤 Submit Response to Patient'}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => {
+                      setShowResponse(false);
+                      setResponseForm({ response: '' });
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+                {query.aiDraftResponse && !responseForm.response && (
+                  <div className="text-xs text-blue-600 bg-blue-50 p-3 rounded border">
+                    💡 <strong>Tip:</strong> Click "Edit AI Draft" above to start with the AI-generated response, then modify it as needed.
+                  </div>
+                )}
+              </form>
+            </div>
           )}
         </div>
       )}

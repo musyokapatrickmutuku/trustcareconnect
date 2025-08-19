@@ -12,6 +12,7 @@ interface FormFieldProps {
   options?: string[];
   rows?: number;
   maxLength?: number;
+  autoComplete?: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   error?: string;
   className?: string;
@@ -28,6 +29,7 @@ const FormField: React.FC<FormFieldProps> = ({
   options = [],
   rows = 4,
   maxLength,
+  autoComplete,
   onChange,
   error,
   className = ''
@@ -82,6 +84,7 @@ const FormField: React.FC<FormFieldProps> = ({
             required={required}
             disabled={disabled}
             maxLength={maxLength}
+            autoComplete={autoComplete}
             onChange={onChange}
             className={baseInputClasses}
           />
