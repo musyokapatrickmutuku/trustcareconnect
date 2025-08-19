@@ -150,3 +150,12 @@ legacy-backup/
 # Application-specific logs
 frontend.log
 ai-proxy.log
+
+# SSH keys (prevent accidental commits)
+*.pem
+id_rsa*
+id_ed25519*
+GitHub
+GitHub.pub
+github*
+*.key
