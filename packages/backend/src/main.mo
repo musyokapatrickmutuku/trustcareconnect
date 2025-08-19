@@ -110,10 +110,76 @@ actor TrustCareConnect {
         id
     };
 
-    // Mock AI response function (for testing without HTTP outcalls)
-    private func getMockAIDraftResponse(queryText: Text, condition: Text): ?Text {
-        let response = "Based on your " # condition # " condition and query '" # queryText # "', I recommend consulting with your healthcare provider. This is a mock AI response for testing.";
-        ?response
+    // Real AI response function using Novita AI service via HTTP outcalls
+    private func getAIDraftResponse(queryText: Text, condition: Text): async ?Text {
+        try {
+            let ic : actor {
+                http_request : {
+                    url : Text;
+                    max_response_bytes : ?Nat;
+                    headers : [{name : Text; value : Text}];
+                    body : ?Blob;
+                    method : {#get; #head; #post; #put; #delete};
+                    transform : ?{function : {response : {status : Nat; headers : [{name : Text; value : Text}]; body : Blob}} -> {response : {status : Nat; headers : [{name : Text; value : Text}]; body : Blob}}; context : Blob};
+                } -> async {status : Nat; headers : [{name : Text; value : Text}]; body : Blob};
+            } = actor "aaaaa-aa";
+
+            let host = "localhost:3001";
+            let url = "http://" # host # "/api/query";
+            
+            // JSON payload for AI proxy with Novita provider
+            let jsonPayload = "{\"queryText\":\"" # queryText # "\",\"condition\":\"" # condition # "\",\"provider\":\"novita\"}";
+            let requestBodyAsBlob = Text.encodeUtf8(jsonPayload);
+
+            let requestArgs = {
+                url = url;
+                max_response_bytes = ?2048;
+                headers = [
+                    {name = "Content-Type"; value = "application/json"},
+                    {name = "Host"; value = host}
+                ];
+                body = ?requestBodyAsBlob;
+                method = #post;
+                transform = null;
+            };
+
+            let httpResponse = await ic.http_request(requestArgs);
+
+            if (httpResponse.status == 200) {
+                let responseText = switch (Text.decodeUtf8(httpResponse.body)) {
+                    case null { "" };
+                    case (?text) { text };
+                };
+                // Simple JSON parsing to extract response
+                if (Text.contains(responseText, #text "\"success\":true")) {
+                    // Extract response from JSON - simplified approach
+                    let parts = Text.split(responseText, #text "\"response\":\"");
+                    switch(parts.next()) {
+                        case null { null };
+                        case (?_first) {
+                            switch(parts.next()) {
+                                case null { null };
+                                case (?second) {
+                                    let responseParts = Text.split(second, #text "\",\"metadata\"");
+                                    switch(responseParts.next()) {
+                                        case null { null };
+                                        case (?response) { ?response };
+                                    };
+                                };
+                            };
+                        };
+                    };
+                } else {
+                    null
+                };
+            } else {
+                null
+            };
+        } catch (error) {
+            // Fallback to mock response if AI service fails
+            let fallbackResponse = "Based on your " # condition # " condition and query '" # queryText # "', I recommend consulting with your healthcare provider. (AI service temporarily unavailable)";
+            ?fallbackResponse
+        };
     };
 
     // =======================
@@ -272,8 +338,8 @@ actor TrustCareConnect {
                         let queryId = generateQueryId();
                         let now = Time.now();
                         
-                        // Get mock AI draft response
-                        let aiDraft = getMockAIDraftResponse(title # " " # description, patient.condition);
+                        // Get AI draft response from AI proxy service
+                        let aiDraft = await getAIDraftResponse(title # " " # description, patient.condition);
                         
                         let medicalQuery: MedicalQuery = {
                             id = queryId;

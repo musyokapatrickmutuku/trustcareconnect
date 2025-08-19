@@ -1,6 +1,7 @@
 // Query Controller for AI Proxy
 const OpenAIService = require('../services/OpenAIService');
 const ClaudeService = require('../services/ClaudeService');
+const NovitaService = require('../services/NovitaService');
 const MockService = require('../services/MockService');
 
 class QueryController {
@@ -11,6 +12,9 @@ class QueryController {
     );
     this.claudeService = new ClaudeService(
       process.env.CLAUDE_API_KEY || 'mock-claude-key'
+    );
+    this.novitaService = new NovitaService(
+      process.env.NOVITA_API_KEY || 'sk_F_8dAOPzGPmh98MZPYGOQyYFrPdy2l6d29HQjmj6PA8'
     );
     this.mockService = new MockService();
   }
@@ -62,6 +66,17 @@ class QueryController {
               console.log('Using mock Claude response (no real API key provided)');
               aiResponse = await this.mockService.generateResponse(sanitizedQuery, sanitizedCondition);
               responseProvider = 'mock-claude';
+            }
+            break;
+
+          case 'novita':
+            if (this.novitaService.isAvailable()) {
+              aiResponse = await this.novitaService.generateResponse(sanitizedQuery, sanitizedCondition);
+              responseProvider = 'novita';
+            } else {
+              console.log('Using mock Novita response (no real API key provided)');
+              aiResponse = await this.mockService.generateResponse(sanitizedQuery, sanitizedCondition);
+              responseProvider = 'mock-novita';
             }
             break;
 
@@ -129,6 +144,12 @@ class QueryController {
             description: 'Anthropic Claude 3 Haiku',
             available: this.claudeService.isAvailable(),
             model: 'claude-3-haiku-20240307'
+          },
+          {
+            name: 'novita',
+            description: 'Novita AI Baichuan M2-32B',
+            available: this.novitaService.isAvailable(),
+            model: 'baichuan/baichuan-m2-32b'
           }
         ],
         timestamp: new Date().toISOString()
