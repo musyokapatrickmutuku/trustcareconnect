@@ -16,7 +16,6 @@
     "build:ai-proxy": "cd packages/ai-proxy && npm run build",
     "build:frontend": "cd packages/frontend && npm run build",
     "test": "npm run test:backend && npm run test:ai-proxy && npm run test:frontend",
-    "test:all": "bash scripts/test/run-all-tests.sh",
     "test:backend": "cd packages/backend && ./tests/integration/canister.test.sh",
     "test:ai-proxy": "cd packages/ai-proxy && npm test",
     "test:frontend": "cd packages/frontend && npm run test:ci",
@@ -39,10 +38,7 @@
     "deploy:prod:backend": "cd packages/backend && dfx deploy --network ic",
     "deploy:prod:ai-proxy": "echo 'Production AI proxy deployment not configured'",
     "deploy:prod:frontend": "echo 'Production frontend deployment not configured'",
-    "deploy:wsl": "bash scripts/deploy/wsl-deploy.sh",
     "test:workflow": "npm run test:backend && npm run test:ai-proxy && npm run test:frontend",
-    "test:quick": "bash scripts/test/quick-test.sh",
-    "test:startup": "bash scripts/test/wsl-startup-test.sh",
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.8",

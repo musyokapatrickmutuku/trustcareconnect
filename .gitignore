@@ -159,3 +159,11 @@ GitHub
 GitHub.pub
 github*
 *.key
+
+# Demo and debug files
+demo.html
+debug-*.sh
+test-startup.sh
+
+# Cleanup analysis files
+REPOSITORY_CLEANUP_ANALYSIS.md
