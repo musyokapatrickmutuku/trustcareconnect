@@ -1,0 +1,119 @@
+# Prometheus configuration for TrustCareConnect monitoring
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  - "alert-rules.yml"
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - alertmanager:9093
+
+scrape_configs:
+  # ICP Backend Canister monitoring
+  - job_name: 'icp-backend'
+    static_configs:
+      - targets:
+        - 'your-backend-canister-id.icp0.io:443'
+    scheme: https
+    metrics_path: /metrics
+    scrape_interval: 30s
+    scrape_timeout: 10s
+    params:
+      canister_id: ['your-backend-canister-id']
+    
+  # AI Proxy service monitoring
+  - job_name: 'ai-proxy'
+    static_configs:
+      - targets:
+        - 'api.trustcareconnect.com:443'
+    scheme: https
+    metrics_path: /api/metrics
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    basic_auth:
+      username: prometheus
+      password_file: /etc/prometheus/ai-proxy-password
+    
+  # Frontend application monitoring
+  - job_name: 'frontend'
+    static_configs:
+      - targets:
+        - 'trustcareconnect.com:443'
+    scheme: https
+    scrape_interval: 30s
+    scrape_timeout: 10s
+    
+  # Health check endpoint monitoring
+  - job_name: 'health-checks'
+    static_configs:
+      - targets:
+        - 'api.trustcareconnect.com:443'
+    scheme: https
+    metrics_path: /api/health
+    scrape_interval: 10s
+    scrape_timeout: 5s
+    
+  # Node exporter for system metrics (if running on VPS)
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets:
+        - 'localhost:9100'
+    scrape_interval: 15s
+    
+  # Docker container metrics (if using Docker deployment)
+  - job_name: 'docker'
+    static_configs:
+      - targets:
+        - 'localhost:9323'
+    scrape_interval: 15s
+    
+  # Custom application metrics
+  - job_name: 'trustcareconnect-app'
+    static_configs:
+      - targets:
+        - 'api.trustcareconnect.com:443'
+    scheme: https
+    metrics_path: /api/metrics/app
+    scrape_interval: 30s
+    honor_labels: true
+    params:
+      format: ['prometheus']
+      
+  # Blackbox exporter for endpoint monitoring
+  - job_name: 'blackbox'
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    static_configs:
+      - targets:
+        - https://trustcareconnect.com
+        - https://api.trustcareconnect.com/api/health
+        - https://your-backend-canister-id.icp0.io
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115
+
+  # SSL certificate expiry monitoring
+  - job_name: 'ssl-expiry'
+    metrics_path: /probe
+    params:
+      module: [tls_connect]
+    static_configs:
+      - targets:
+        - trustcareconnect.com:443
+        - api.trustcareconnect.com:443
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115

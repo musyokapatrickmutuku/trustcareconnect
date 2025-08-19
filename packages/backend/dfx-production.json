@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "dfx": "0.22.0",
+  "canisters": {
+    "backend": {
+      "type": "motoko",
+      "main": "src/main.mo"
+    }
+  },
+  "networks": {
+    "local": {
+      "bind": "127.0.0.1:4943",
+      "type": "ephemeral",
+      "replica": {
+        "subnet_type": "system"
+      }
+    },
+    "ic": {
+      "providers": [
+        "https://icp-api.io",
+        "https://ic0.app"
+      ],
+      "type": "persistent"
+    },
+    "playground": {
+      "providers": [
+        "https://playground.motoko.org"
+      ],
+      "type": "playground"
+    }
+  },
+  "output_env_file": ".env",
+  "build": {
+    "packtool": ""
+  },
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": ""
+    }
+  }
+}
