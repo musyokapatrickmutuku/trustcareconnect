@@ -1,5 +1,6 @@
 // ICP Service - Refactored with TypeScript and better structure
-import { Actor, HttpAgent } from '@dfinity/agent';
+// @ts-ignore
+import { HttpAgent, Actor } from '@dfinity/agent';
 import { idlFactory } from '../declarations/backend';
 import { Patient, Doctor, MedicalQuery, SystemStats, ApiResponse } from '../types';
 

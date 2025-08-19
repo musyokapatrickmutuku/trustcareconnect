@@ -1,5 +1,6 @@
 // ICP Service Tests
 import icpService from '../services/icpService';
+// @ts-ignore
 import { Actor, HttpAgent } from '@dfinity/agent';
 import { Patient, Doctor, MedicalQuery } from '../types';
 

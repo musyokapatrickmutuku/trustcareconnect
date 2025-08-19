@@ -1,3 +1,4 @@
+// @ts-ignore
 import { Actor, HttpAgent } from "@dfinity/agent";
 
 // Imports and re-exports candid interface

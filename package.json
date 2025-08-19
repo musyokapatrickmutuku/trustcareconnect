@@ -38,7 +38,7 @@
     "deploy:prod:backend": "cd packages/backend && dfx deploy --network ic",
     "deploy:prod:ai-proxy": "echo 'Production AI proxy deployment not configured'",
     "deploy:prod:frontend": "echo 'Production frontend deployment not configured'",
-    "test:workflow": "npm run test:backend && npm run test:ai-proxy && npm run test:frontend",
+    "test:workflow": "npm run test:backend && npm run test:ai-proxy && npm run test:frontend"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.8",
