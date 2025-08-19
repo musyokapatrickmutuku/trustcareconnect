@@ -127,7 +127,7 @@ actor TrustCareConnect {
             let host = "localhost:3001";
             let url = "http://" # host # "/api/query";
             
-            // JSON payload for AI proxy with Novita provider
+            // JSON payload for AI proxy with Novita provider (Clinical Decision Support)
             let jsonPayload = "{\"queryText\":\"" # queryText # "\",\"condition\":\"" # condition # "\",\"provider\":\"novita\"}";
             let requestBodyAsBlob = Text.encodeUtf8(jsonPayload);
 

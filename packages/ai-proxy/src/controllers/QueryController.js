@@ -147,9 +147,10 @@ class QueryController {
           },
           {
             name: 'novita',
-            description: 'Novita AI Baichuan M2-32B',
+            description: 'Novita AI Clinical Decision Support (Baichuan M2-32B)',
             available: this.novitaService.isAvailable(),
-            model: 'baichuan/baichuan-m2-32b'
+            model: 'baichuan/baichuan-m2-32b',
+            purpose: 'Clinical decision support for healthcare providers'
           }
         ],
         timestamp: new Date().toISOString()
