@@ -58,7 +58,7 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({
       const result = await icpService.getDoctorPatients(currentDoctor.id);
       if (result.success && result.data) {
         setMyPatients(result.data);
-        setStats(prev => ({ ...prev, totalPatients: result.data.length }));
+        setStats(prev => ({ ...prev, totalPatients: result.data?.length || 0 }));
       }
     } catch (error) {
       console.error('Failed to load patients:', error);
@@ -70,7 +70,7 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({
       const result = await icpService.getUnassignedPatients();
       if (result.success && result.data) {
         setUnassignedPatients(result.data);
-        setStats(prev => ({ ...prev, unassignedCount: result.data.length }));
+        setStats(prev => ({ ...prev, unassignedCount: result.data?.length || 0 }));
       }
     } catch (error) {
       console.error('Failed to load unassigned patients:', error);

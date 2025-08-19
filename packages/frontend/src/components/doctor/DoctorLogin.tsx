@@ -121,7 +121,6 @@ const DoctorLogin: React.FC<DoctorLoginProps> = ({
               name="doctorId"
               placeholder="Enter your doctor ID (e.g., doc_123456)"
               required
-              autoComplete="username"
             />
             <div className="text-xs text-gray-500 mt-2">
               💡 Don't have a Doctor ID? Switch to "New Registration" to create an account.
@@ -143,7 +142,6 @@ const DoctorLogin: React.FC<DoctorLoginProps> = ({
               name="name"
               placeholder="Enter your full name"
               required
-              autoComplete="name"
             />
             <FormField
               label="Medical Specialization"
