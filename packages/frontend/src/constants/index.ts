@@ -45,7 +45,8 @@ export const UI_MESSAGES = {
   LOADING: {
     REGISTERING: 'Registering...',
     SUBMITTING: 'Submitting...',
-    LOADING: 'Loading...'
+    LOADING: 'Loading...',
+    SIGNING_IN: 'Signing in...'
   },
   SUCCESS: {
     PATIENT_REGISTERED: 'Patient registered successfully!',
