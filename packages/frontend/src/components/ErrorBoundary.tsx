@@ -2,7 +2,7 @@
 // Catches JavaScript errors in component tree and logs them
 
 import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { logErrorBoundary } from '../utils/logger';
+import Button from './common/Button';
 import './ErrorBoundary.css';
 
 interface Props {
@@ -29,8 +29,18 @@ class ErrorBoundary extends Component<Props, State> {
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('Error caught by boundary:', error, errorInfo);
     
-    // Log error to our logging system
-    logErrorBoundary(error, { componentStack: errorInfo.componentStack || '' });
+    // Log error details for debugging
+    if (process.env.NODE_ENV === 'production') {
+      // In production, you would send this to your error tracking service
+      console.error('Production error logged:', {
+        message: error.message,
+        stack: error.stack,
+        componentStack: errorInfo.componentStack,
+        timestamp: new Date().toISOString(),
+        userAgent: navigator.userAgent,
+        url: window.location.href
+      });
+    }
     
     this.setState({
       error,
@@ -70,18 +80,19 @@ class ErrorBoundary extends Component<Props, State> {
             )}
             
             <div className="error-actions">
-              <button 
+              <Button 
                 onClick={() => window.location.reload()}
-                className="error-button primary"
+                variant="primary"
+                className="mr-3"
               >
                 Reload Page
-              </button>
-              <button 
+              </Button>
+              <Button 
                 onClick={() => window.history.back()}
-                className="error-button secondary"
+                variant="secondary"
               >
                 Go Back
-              </button>
+              </Button>
             </div>
           </div>
           
