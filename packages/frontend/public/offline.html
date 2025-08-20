@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrustCare Connect - Offline</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+        }
+        
+        .offline-container {
+            background: white;
+            border-radius: 16px;
+            padding: 3rem 2rem;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        .offline-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            color: #667eea;
+        }
+        
+        .offline-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #1f2937;
+        }
+        
+        .offline-message {
+            color: #6b7280;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+        
+        .offline-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .offline-button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .offline-button:hover {
+            background: #5a6fd8;
+        }
+        
+        .offline-button.secondary {
+            background: #f3f4f6;
+            color: #374151;
+        }
+        
+        .offline-button.secondary:hover {
+            background: #e5e7eb;
+        }
+        
+        .offline-features {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .offline-features h3 {
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            color: #374151;
+        }
+        
+        .offline-features ul {
+            list-style: none;
+            text-align: left;
+        }
+        
+        .offline-features li {
+            padding: 0.25rem 0;
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+        
+        .offline-features li:before {
+            content: "✓ ";
+            color: #10b981;
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-container">
+        <div class="offline-icon">🏥</div>
+        <h1 class="offline-title">TrustCare Connect</h1>
+        <p class="offline-message">
+            You're currently offline. Please check your internet connection to access your medical queries and communicate with healthcare providers.
+        </p>
+        
+        <div class="offline-actions">
+            <button class="offline-button" onclick="window.location.reload()">
+                Try Again
+            </button>
+            <button class="offline-button secondary" onclick="goHome()">
+                Go to Home
+            </button>
+        </div>
+        
+        <div class="offline-features">
+            <h3>Available when you're back online:</h3>
+            <ul>
+                <li>Submit new medical queries</li>
+                <li>View doctor responses</li>
+                <li>Access patient dashboard</li>
+                <li>Receive real-time notifications</li>
+                <li>Secure medical communication</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        function goHome() {
+            window.location.href = '/';
+        }
+        
+        // Check for connection periodically
+        function checkConnection() {
+            if (navigator.onLine) {
+                window.location.reload();
+            }
+        }
+        
+        // Listen for online events
+        window.addEventListener('online', function() {
+            setTimeout(function() {
+                window.location.reload();
+            }, 1000);
+        });
+        
+        // Check connection every 5 seconds
+        setInterval(checkConnection, 5000);
+        
+        // Show connection status
+        function updateConnectionStatus() {
+            if (navigator.onLine) {
+                document.querySelector('.offline-message').innerHTML = 
+                    'Connection restored! Refreshing page...';
+                setTimeout(function() {
+                    window.location.reload();
+                }, 1500);
+            }
+        }
+        
+        window.addEventListener('online', updateConnectionStatus);
+        window.addEventListener('offline', function() {
+            document.querySelector('.offline-message').innerHTML = 
+                'You\'re currently offline. Please check your internet connection to access your medical queries and communicate with healthcare providers.';
+        });
+    </script>
+</body>
+</html>
