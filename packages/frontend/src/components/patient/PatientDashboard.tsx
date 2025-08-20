@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Patient, MedicalQuery, QueryStatus } from '../../types';
 import Button from '../common/Button';
 import LoadingSpinner from '../common/LoadingSpinner';
 import QuerySubmission from './QuerySubmission';
 import trustCareAPI from '../../api/trustcare';
 import { formatters } from '../../utils/formatters';
+import { useWebSocket } from '../../services/websocket';
+import { useSmartPolling } from '../../hooks/usePolling';
 
 interface PatientDashboardProps {
   patient: Patient;
@@ -32,17 +34,138 @@ const PatientDashboard: React.FC<PatientDashboardProps> = ({
   const [notifications, setNotifications] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
+  const [realtimeUpdates, setRealtimeUpdates] = useState(0);
+  
+  // WebSocket integration for real-time updates
+  const {
+    isConnected: wsConnected,
+    connectionStatus,
+    subscribe,
+    setUserStatus
+  } = useWebSocket(patient.id, 'patient');
+  
+  // Smart polling as fallback when WebSocket is not available
+  const [pollingState, pollingControls] = useSmartPolling(
+    useCallback(async () => {
+      const result = await trustCareAPI.getPatientPortalData(patient.id);
+      if (result.success && result.data?.queries?.success) {
+        return result.data.queries.data || [];
+      }
+      throw new Error(result.error || 'Failed to load queries');
+    }, [patient.id]),
+    wsConnected,
+    {
+      interval: 30000, // Poll every 30 seconds when WebSocket is not connected
+      onSuccess: (queryData) => {
+        const queriesWithEstimates = queryData.map((query: MedicalQuery) => ({
+          ...query,
+          estimatedResponseTime: calculateEstimatedResponseTime(query),
+          timeRemaining: calculateTimeRemaining(query)
+        }));
+        
+        checkForStatusUpdates(queriesWithEstimates);
+        setQueries(queriesWithEstimates);
+        setLastRefresh(new Date());
+        setError(null);
+        setRealtimeUpdates(prev => prev + 1);
+      },
+      onError: (error) => {
+        setError(error.message);
+        showMessage('Failed to refresh query data', 'error');
+      }
+    }
+  );
+
+  // WebSocket event listeners
+  useEffect(() => {
+    if (!wsConnected) return;
+
+    // Set user status as online
+    setUserStatus('online');
+
+    // Subscribe to relevant events
+    const unsubscribeFunctions = [
+      subscribe('query_created', handleQueryCreated),
+      subscribe('query_updated', handleQueryUpdated),
+      subscribe('response_received', handleResponseReceived),
+      subscribe('notification', handleNotification)
+    ];
+
+    return () => {
+      unsubscribeFunctions.forEach(unsub => unsub());
+    };
+  }, [wsConnected, subscribe, setUserStatus]);
 
   useEffect(() => {
     loadPatientQueries();
-    // Set up periodic refresh for real-time updates
-    const interval = setInterval(() => {
-      loadPatientQueries();
-      updateTimeEstimates();
-    }, 30000); // Refresh every 30 seconds
-
-    return () => clearInterval(interval);
+    
+    // Set up time estimate updates
+    const timeUpdateInterval = setInterval(updateTimeEstimates, 60000); // Update every minute
+    return () => clearInterval(timeUpdateInterval);
   }, [patient.id]);
+
+  // WebSocket event handlers
+  const handleQueryCreated = useCallback((data: any) => {
+    if (data.query && data.query.patientId === patient.id) {
+      const queryWithEstimate = {
+        ...data.query,
+        estimatedResponseTime: calculateEstimatedResponseTime(data.query),
+        timeRemaining: calculateTimeRemaining(data.query)
+      };
+      setQueries(prev => [queryWithEstimate, ...prev]);
+      showMessage('Your query has been submitted and is being processed', 'success');
+      setRealtimeUpdates(prev => prev + 1);
+    }
+  }, [patient.id, showMessage]);
+
+  const handleQueryUpdated = useCallback((data: any) => {
+    if (data.query && data.query.patientId === patient.id) {
+      setQueries(prev => prev.map(query => 
+        query.id === data.query.id ? {
+          ...data.query,
+          estimatedResponseTime: calculateEstimatedResponseTime(data.query),
+          timeRemaining: calculateTimeRemaining(data.query)
+        } : query
+      ));
+      setRealtimeUpdates(prev => prev + 1);
+      
+      // Show notification for status changes
+      if (data.previousStatus !== data.newStatus) {
+        const statusMessage = 
+          data.newStatus === 'doctor_review' ? 'Your query is now being reviewed by your doctor' :
+          data.newStatus === 'completed' ? 'Your doctor has responded to your query!' :
+          `Query status updated to ${data.newStatus}`;
+        
+        showMessage(statusMessage, data.newStatus === 'completed' ? 'success' : 'info');
+        
+        // Add to notifications
+        setNotifications(prev => [statusMessage, ...prev].slice(0, 10));
+      }
+    }
+  }, [patient.id, showMessage]);
+
+  const handleResponseReceived = useCallback((data: any) => {
+    if (data.query && data.query.patientId === patient.id) {
+      setQueries(prev => prev.map(query => 
+        query.id === data.query.id ? {
+          ...data.query,
+          estimatedResponseTime: 'Completed',
+          timeRemaining: 'Completed'
+        } : query
+      ));
+      
+      showMessage(`You have received a response for "${data.query.title}"!`, 'success');
+      setNotifications(prev => [`✅ New response received for "${data.query.title}"`, ...prev].slice(0, 10));
+      setRealtimeUpdates(prev => prev + 1);
+    }
+  }, [patient.id, showMessage]);
+
+  const handleNotification = useCallback((data: any) => {
+    if (data.targetUser === patient.id || data.targetUserType === 'patient') {
+      showMessage(data.message, data.type || 'info');
+      setNotifications(prev => [data.message, ...prev].slice(0, 10));
+    }
+  }, [patient.id, showMessage]);
 
   const loadPatientQueries = async () => {
     setLoading(true);
@@ -224,6 +347,28 @@ const PatientDashboard: React.FC<PatientDashboardProps> = ({
                   Last updated: {lastRefresh.toLocaleTimeString()}
                 </p>
               )}
+              {/* Connection Status */}
+              <div className="flex items-center space-x-2 text-xs">
+                <div className={`w-2 h-2 rounded-full ${
+                  wsConnected ? 'bg-green-500 animate-pulse' : 
+                  connectionStatus.reconnecting ? 'bg-yellow-500 animate-ping' : 
+                  'bg-red-500'
+                }`} />
+                <span className={
+                  wsConnected ? 'text-green-600' : 
+                  connectionStatus.reconnecting ? 'text-yellow-600' : 
+                  'text-red-600'
+                }>
+                  {wsConnected ? 'Live updates' : 
+                   connectionStatus.reconnecting ? 'Reconnecting...' : 
+                   'Offline mode'}
+                </span>
+                {realtimeUpdates > 0 && (
+                  <span className="text-blue-600">
+                    ({realtimeUpdates} updates)
+                  </span>
+                )}
+              </div>
             </div>
           </div>
           <div className="flex space-x-2">

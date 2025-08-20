@@ -1,5 +1,5 @@
-// Doctor Dashboard Component - Enhanced with Real Backend Integration
-import React, { useState, useEffect } from 'react';
+// Doctor Dashboard Component - Enhanced with Real-Time Updates
+import React, { useState, useEffect, useCallback } from 'react';
 import { Doctor, Patient, MedicalQuery } from '../../types';
 import Button from '../common/Button';
 import LoadingSpinner from '../common/LoadingSpinner';
@@ -8,6 +8,8 @@ import QueryCard from './QueryCard';
 import UnassignedPatients from './UnassignedPatients';
 import { formatQueryStatus } from '../../utils/formatters';
 import trustCareAPI from '../../api/trustcare';
+import webSocketService, { useWebSocket } from '../../services/websocket';
+import { useSmartPolling } from '../../hooks/usePolling';
 
 interface DoctorDashboardProps {
   currentDoctor: Doctor;
@@ -40,13 +42,175 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({
   const [dataLoading, setDataLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
+  const [realtimeUpdates, setRealtimeUpdates] = useState(0); // Counter for real-time updates
+  
+  // WebSocket integration for real-time updates
+  const {
+    isConnected: wsConnected,
+    connectionStatus,
+    subscribe,
+    subscribeToSystemStats,
+    setUserStatus
+  } = useWebSocket(currentDoctor.id, 'doctor');
+
+  // Smart polling as fallback when WebSocket is not available
+  const [pollingState, pollingControls] = useSmartPolling(
+    useCallback(async () => {
+      const result = await trustCareAPI.getDoctorDashboardData(currentDoctor.id);
+      if (result.success && result.data) {
+        return result.data;
+      }
+      throw new Error(result.error || 'Failed to load dashboard data');
+    }, [currentDoctor.id]),
+    wsConnected,
+    {
+      interval: 30000, // Poll every 30 seconds when WebSocket is not connected
+      onSuccess: (data) => {
+        updateDashboardFromData(data);
+        setRealtimeUpdates(prev => prev + 1);
+      },
+      onError: (error) => {
+        setError(error.message);
+        showMessage('Failed to refresh dashboard data', 'error');
+      }
+    }
+  );
+
+  // WebSocket event listeners
+  useEffect(() => {
+    if (!wsConnected) return;
+
+    // Set user status as online
+    setUserStatus('online');
+    
+    // Subscribe to system statistics updates
+    subscribeToSystemStats();
+
+    // Subscribe to relevant events
+    const unsubscribeFunctions = [
+      subscribe('query_created', handleQueryCreated),
+      subscribe('query_updated', handleQueryUpdated),
+      subscribe('query_assigned', handleQueryAssigned),
+      subscribe('response_received', handleResponseReceived),
+      subscribe('system_stats_updated', handleSystemStatsUpdated),
+      subscribe('notification', handleNotification)
+    ];
+
+    return () => {
+      unsubscribeFunctions.forEach(unsub => unsub());
+    };
+  }, [wsConnected, subscribe, subscribeToSystemStats, setUserStatus]);
 
   useEffect(() => {
     loadDashboardData();
-    // Set up periodic refresh for real-time updates
-    const interval = setInterval(loadDashboardData, 45000); // Refresh every 45 seconds
-    return () => clearInterval(interval);
   }, [currentDoctor]);
+
+  // WebSocket event handlers
+  const handleQueryCreated = useCallback((data: any) => {
+    // Add new query to the appropriate list
+    if (data.query && data.query.doctorId === currentDoctor.id) {
+      setMyQueries(prev => [data.query, ...prev]);
+      setStats(prev => ({ ...prev, activeQueries: prev.activeQueries + 1 }));
+      showMessage(`New query received: ${data.query.title}`, 'info');
+      setRealtimeUpdates(prev => prev + 1);
+    }
+  }, [currentDoctor.id, showMessage]);
+
+  const handleQueryUpdated = useCallback((data: any) => {
+    if (data.query) {
+      setMyQueries(prev => prev.map(query => 
+        query.id === data.query.id ? { ...query, ...data.query } : query
+      ));
+      setRealtimeUpdates(prev => prev + 1);
+      
+      // Show notification for status changes
+      if (data.previousStatus !== data.newStatus) {
+        showMessage(`Query "${data.query.title}" status updated to ${data.newStatus}`, 'info');
+      }
+    }
+  }, [showMessage]);
+
+  const handleQueryAssigned = useCallback((data: any) => {
+    if (data.doctorId === currentDoctor.id && data.query) {
+      setMyQueries(prev => [data.query, ...prev]);
+      setStats(prev => ({ 
+        ...prev, 
+        activeQueries: prev.activeQueries + 1,
+        pendingQueries: prev.pendingQueries + 1 
+      }));
+      showMessage(`New query assigned: ${data.query.title}`, 'success');
+      setRealtimeUpdates(prev => prev + 1);
+    }
+  }, [currentDoctor.id, showMessage]);
+
+  const handleResponseReceived = useCallback((data: any) => {
+    if (data.query && data.query.doctorId === currentDoctor.id) {
+      setMyQueries(prev => prev.map(query => 
+        query.id === data.query.id ? { ...query, ...data.query } : query
+      ));
+      setStats(prev => ({ 
+        ...prev, 
+        completedQueries: prev.completedQueries + 1,
+        activeQueries: Math.max(0, prev.activeQueries - 1)
+      }));
+      setRealtimeUpdates(prev => prev + 1);
+    }
+  }, [currentDoctor.id]);
+
+  const handleSystemStatsUpdated = useCallback((data: any) => {
+    if (data.stats) {
+      // Update relevant stats
+      setStats(prev => ({
+        ...prev,
+        unassignedCount: data.stats.unassignedPatients || prev.unassignedCount,
+        // Update other system-wide stats as needed
+      }));
+      setRealtimeUpdates(prev => prev + 1);
+    }
+  }, []);
+
+  const handleNotification = useCallback((data: any) => {
+    if (data.targetUser === currentDoctor.id || data.targetUserType === 'doctor') {
+      showMessage(data.message, data.type || 'info');
+    }
+  }, [currentDoctor.id, showMessage]);
+
+  // Helper function to update dashboard state from API data
+  const updateDashboardFromData = useCallback((data: any) => {
+    if (data.patients?.success && data.patients.data) {
+      setMyPatients(data.patients.data);
+      setStats(prev => ({ ...prev, totalPatients: data.patients.data.length }));
+      
+      // Build patient name mapping
+      const nameMap: Record<string, string> = {};
+      data.patients.data.forEach((patient: Patient) => {
+        nameMap[patient.id] = patient.name;
+      });
+      setPatientNameMap(prev => ({ ...prev, ...nameMap }));
+    }
+    
+    if (data.queries?.success && data.queries.data) {
+      setMyQueries(data.queries.data);
+      
+      // Calculate query statistics
+      const activeQueries = data.queries.data.filter((q: MedicalQuery) => q.status === 'doctor_review').length;
+      const completedQueries = data.queries.data.filter((q: MedicalQuery) => q.status === 'completed').length;
+      
+      setStats(prev => ({ 
+        ...prev, 
+        activeQueries,
+        completedQueries
+      }));
+    }
+    
+    if (data.pendingQueries?.success && data.pendingQueries.data) {
+      setPendingQueries(data.pendingQueries.data);
+      setStats(prev => ({ ...prev, pendingQueries: data.pendingQueries.data.length }));
+    }
+    
+    setLastRefresh(new Date());
+    setError(null);
+  }, []);
 
   const loadDashboardData = async () => {
     setDataLoading(true);
@@ -60,46 +224,12 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({
       console.log('Doctor dashboard data result:', result);
       
       if (result.success && result.data) {
-        const { doctor, patients, queries, pendingQueries, stats } = result.data;
-        
-        // Update assigned patients
-        if (patients?.success && patients.data) {
-          setMyPatients(patients.data);
-          setStats(prev => ({ ...prev, totalPatients: patients.data.length }));
-          
-          // Build patient name mapping
-          const nameMap: Record<string, string> = {};
-          patients.data.forEach((patient: Patient) => {
-            nameMap[patient.id] = patient.name;
-          });
-          setPatientNameMap(prev => ({ ...prev, ...nameMap }));
-        }
-        
-        // Update doctor's queries
-        if (queries?.success && queries.data) {
-          setMyQueries(queries.data);
-          
-          // Calculate query statistics
-          const activeQueries = queries.data.filter((q: MedicalQuery) => q.status === 'doctor_review').length;
-          const completedQueries = queries.data.filter((q: MedicalQuery) => q.status === 'completed').length;
-          
-          setStats(prev => ({ 
-            ...prev, 
-            activeQueries,
-            completedQueries
-          }));
-        }
-        
-        // Update pending queries
-        if (pendingQueries?.success && pendingQueries.data) {
-          setPendingQueries(pendingQueries.data);
-          setStats(prev => ({ ...prev, pendingQueries: pendingQueries.data.length }));
-        }
+        // Use the centralized update function
+        updateDashboardFromData(result.data);
         
         // Load unassigned patients separately (not included in batch operation)
         await loadUnassignedPatients();
         
-        setLastRefresh(new Date());
         console.log('Dashboard data loaded successfully');
         
         // Log any partial errors from batch operation
@@ -440,6 +570,28 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({
               <span>Doctor ID: <span className="font-mono">{currentDoctor.id}</span></span>
               {lastRefresh && (
                 <span>Last updated: {lastRefresh.toLocaleTimeString()}</span>
+              )}
+              {/* Connection Status Indicator */}
+              <div className="flex items-center space-x-1">
+                <div className={`w-2 h-2 rounded-full ${
+                  wsConnected ? 'bg-green-500 animate-pulse' : 
+                  connectionStatus.reconnecting ? 'bg-yellow-500 animate-ping' : 
+                  'bg-red-500'
+                }`} />
+                <span className={`text-xs ${
+                  wsConnected ? 'text-green-600' : 
+                  connectionStatus.reconnecting ? 'text-yellow-600' : 
+                  'text-red-600'
+                }`}>
+                  {wsConnected ? 'Live' : 
+                   connectionStatus.reconnecting ? 'Reconnecting...' : 
+                   'Offline'}
+                </span>
+              </div>
+              {realtimeUpdates > 0 && (
+                <span className="text-xs text-blue-600">
+                  {realtimeUpdates} real-time updates
+                </span>
               )}
             </div>
           </div>
