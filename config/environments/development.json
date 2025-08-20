@@ -23,13 +23,16 @@
       "novita": {
         "enabled": true,
         "model": "baichuan/baichuan-m2-32b",
-        "maxTokens": 500,
+        "maxTokens": 1500,
         "baseUrl": "https://api.novita.ai/openai",
-        "endpoint": "/v1/chat/completions"
+        "endpoint": "/v1/chat/completions",
+        "default": true,
+        "purpose": "Clinical decision support for healthcare providers"
       },
       "mock": {
         "enabled": true,
-        "delay": 1000
+        "delay": 1000,
+        "default": false
       }
     }
   },

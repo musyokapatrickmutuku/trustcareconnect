@@ -338,8 +338,10 @@ actor TrustCareConnect {
                         let queryId = generateQueryId();
                         let now = Time.now();
                         
-                        // Get AI draft response from AI proxy service
-                        let aiDraft = await getAIDraftResponse(title # " " # description, patient.condition);
+                        // Get AI clinical decision support response from AI proxy service
+                        // Create comprehensive patient profile for clinical decision support
+                        let patientProfile = "Patient ID: " # patient.id # ", Name: " # patient.name # ", Primary Condition: " # patient.condition # ", Email: " # patient.email # ", Active Status: " # (if (patient.isActive) {"Active"} else {"Inactive"}) # ", Assigned Doctor: " # (switch (patient.assignedDoctorId) { case null {"Unassigned"}; case (?docId) {docId} });
+                        let aiDraft = await getAIDraftResponse(title # " " # description, patientProfile);
                         
                         let medicalQuery: MedicalQuery = {
                             id = queryId;

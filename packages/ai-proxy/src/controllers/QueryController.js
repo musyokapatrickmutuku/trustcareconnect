@@ -26,7 +26,7 @@ class QueryController {
    */
   async processQuery(req, res) {
     try {
-      const { queryText, condition, provider = 'mock' } = req.body;
+      const { queryText, condition, provider = 'novita' } = req.body;
 
       // Validation
       const validation = this.validateQueryRequest(queryText, condition);
@@ -71,8 +71,9 @@ class QueryController {
 
           case 'novita':
             if (this.novitaService.isAvailable()) {
+              // Always use clinical decision support format for Novita
               aiResponse = await this.novitaService.generateResponse(sanitizedQuery, sanitizedCondition);
-              responseProvider = 'novita';
+              responseProvider = 'novita-clinical';
             } else {
               console.log('Using mock Novita response (no real API key provided)');
               aiResponse = await this.mockService.generateResponse(sanitizedQuery, sanitizedCondition);
@@ -128,29 +129,30 @@ class QueryController {
       res.json({
         providers: [
           {
-            name: 'mock',
-            description: 'Mock AI responses for testing',
-            available: true,
+            name: 'novita',
+            description: 'Novita AI Clinical Decision Support (Baichuan M2-32B)',
+            available: this.novitaService.isAvailable(),
+            model: 'baichuan/baichuan-m2-32b',
+            purpose: 'Clinical decision support for healthcare providers',
             default: true
           },
           {
             name: 'openai',
-            description: 'OpenAI GPT-3.5 Turbo',
+            description: 'OpenAI GPT-3.5 Turbo (General Medical Guidance)',
             available: this.openaiService.isAvailable(),
             model: 'gpt-3.5-turbo'
           },
           {
             name: 'claude',
-            description: 'Anthropic Claude 3 Haiku',
+            description: 'Anthropic Claude 3 Haiku (General Medical Guidance)',
             available: this.claudeService.isAvailable(),
             model: 'claude-3-haiku-20240307'
           },
           {
-            name: 'novita',
-            description: 'Novita AI Clinical Decision Support (Baichuan M2-32B)',
-            available: this.novitaService.isAvailable(),
-            model: 'baichuan/baichuan-m2-32b',
-            purpose: 'Clinical decision support for healthcare providers'
+            name: 'mock',
+            description: 'Mock AI responses for testing only',
+            available: true,
+            default: false
           }
         ],
         timestamp: new Date().toISOString()
