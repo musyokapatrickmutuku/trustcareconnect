@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { MedicalQuery, Doctor } from '../../types';
 import Button from '../common/Button';
 import FormField from '../common/FormField';
+import ClinicalResponseDisplay from './ClinicalResponseDisplay';
 import { formatQueryStatus, formatTimestamp } from '../../utils/formatters';
 import { UI_MESSAGES } from '../../constants';
 import icpService from '../../services/icpService';
@@ -136,29 +137,31 @@ const QueryCard: React.FC<QueryCardProps> = ({
             </div>
           </div>
           
-          {/* AI Draft Response Section */}
+          {/* Clinical Decision Support Response */}
           {query.aiDraftResponse && (
             <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <span className="text-lg">🤖</span>
-                <h5 className="font-medium text-blue-800">AI Draft Response</h5>
-                {status === 'Under Review' && (
-                  <Button
-                    size="small"
-                    variant="secondary"
-                    onClick={useAIDraft}
-                    className="ml-auto"
-                  >
-                    Use Draft
-                  </Button>
-                )}
-              </div>
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <p className="text-blue-800 text-sm leading-relaxed">{query.aiDraftResponse}</p>
-              </div>
+              <ClinicalResponseDisplay
+                rawResponse={query.aiDraftResponse}
+                patientId={query.patientId}
+                queryId={query.id}
+                onEditResponse={(editedResponse) => {
+                  setResponseForm({ response: editedResponse });
+                  setShowResponse(true);
+                }}
+                onApproveResponse={() => {
+                  if (query.aiDraftResponse) {
+                    setResponseForm({ response: query.aiDraftResponse });
+                    setShowResponse(true);
+                  }
+                }}
+                onOrderAction={(action) => {
+                  console.log(`Clinical action ordered: ${action} for patient ${query.patientId}`);
+                  showMessage(`Action "${action}" has been noted in the clinical workflow`, 'info');
+                }}
+              />
               {status === 'Pending' && (
                 <div className="text-xs text-blue-600 italic bg-blue-50 p-2 rounded border">
-                  💡 Click "Start Review" above to begin editing this AI draft response
+                  💡 Click "Start Review" above to begin working with this clinical decision support
                 </div>
               )}
             </div>
@@ -192,7 +195,7 @@ const QueryCard: React.FC<QueryCardProps> = ({
                     onClick={useAIDraft}
                     className="border-green-300 text-green-700 hover:bg-green-100"
                   >
-                    📝 Edit AI Draft
+                    📝 Use Clinical Draft
                   </Button>
                 )}
               </div>
