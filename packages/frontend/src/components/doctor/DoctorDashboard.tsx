@@ -1,4 +1,4 @@
-// Doctor Dashboard Component
+// Doctor Dashboard Component - Enhanced with Real Backend Integration
 import React, { useState, useEffect } from 'react';
 import { Doctor, Patient, MedicalQuery } from '../../types';
 import Button from '../common/Button';
@@ -7,7 +7,7 @@ import PatientCard from './PatientCard';
 import QueryCard from './QueryCard';
 import UnassignedPatients from './UnassignedPatients';
 import { formatQueryStatus } from '../../utils/formatters';
-import icpService from '../../services/icpService';
+import trustCareAPI from '../../api/trustcare';
 
 interface DoctorDashboardProps {
   currentDoctor: Doctor;
@@ -28,6 +28,7 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({
   const [myPatients, setMyPatients] = useState<Patient[]>([]);
   const [unassignedPatients, setUnassignedPatients] = useState<Patient[]>([]);
   const [myQueries, setMyQueries] = useState<MedicalQuery[]>([]);
+  const [pendingQueries, setPendingQueries] = useState<MedicalQuery[]>([]);
   const [patientNameMap, setPatientNameMap] = useState<Record<string, string>>({});
   const [stats, setStats] = useState({
     totalPatients: 0,
@@ -37,46 +38,91 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({
     unassignedCount: 0
   });
   const [dataLoading, setDataLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
 
   useEffect(() => {
     loadDashboardData();
+    // Set up periodic refresh for real-time updates
+    const interval = setInterval(loadDashboardData, 45000); // Refresh every 45 seconds
+    return () => clearInterval(interval);
   }, [currentDoctor]);
 
   const loadDashboardData = async () => {
     setDataLoading(true);
+    setError(null);
+    
     try {
-      await Promise.all([
-        loadMyPatients(),
-        loadUnassignedPatients(),
-        loadMyQueries()
-      ]);
+      console.log(`Loading dashboard data for doctor: ${currentDoctor.id}`);
+      
+      // Use the enhanced batch API to load all doctor dashboard data efficiently
+      const result = await trustCareAPI.getDoctorDashboardData(currentDoctor.id);
+      console.log('Doctor dashboard data result:', result);
+      
+      if (result.success && result.data) {
+        const { doctor, patients, queries, pendingQueries, stats } = result.data;
+        
+        // Update assigned patients
+        if (patients?.success && patients.data) {
+          setMyPatients(patients.data);
+          setStats(prev => ({ ...prev, totalPatients: patients.data.length }));
+          
+          // Build patient name mapping
+          const nameMap: Record<string, string> = {};
+          patients.data.forEach((patient: Patient) => {
+            nameMap[patient.id] = patient.name;
+          });
+          setPatientNameMap(prev => ({ ...prev, ...nameMap }));
+        }
+        
+        // Update doctor's queries
+        if (queries?.success && queries.data) {
+          setMyQueries(queries.data);
+          
+          // Calculate query statistics
+          const activeQueries = queries.data.filter((q: MedicalQuery) => q.status === 'doctor_review').length;
+          const completedQueries = queries.data.filter((q: MedicalQuery) => q.status === 'completed').length;
+          
+          setStats(prev => ({ 
+            ...prev, 
+            activeQueries,
+            completedQueries
+          }));
+        }
+        
+        // Update pending queries
+        if (pendingQueries?.success && pendingQueries.data) {
+          setPendingQueries(pendingQueries.data);
+          setStats(prev => ({ ...prev, pendingQueries: pendingQueries.data.length }));
+        }
+        
+        // Load unassigned patients separately (not included in batch operation)
+        await loadUnassignedPatients();
+        
+        setLastRefresh(new Date());
+        console.log('Dashboard data loaded successfully');
+        
+        // Log any partial errors from batch operation
+        if (result.errors && result.errors.length > 0) {
+          console.warn('Some dashboard data failed to load:', result.errors);
+          showMessage('Some dashboard data may be incomplete. Please try refreshing.', 'warning');
+        }
+      } else {
+        throw new Error(result.error || 'Failed to load dashboard data');
+      }
+    } catch (error) {
+      console.error('Error loading doctor dashboard:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      setError(errorMessage);
+      showMessage('Failed to load dashboard data. Please try refreshing.', 'error');
     } finally {
       setDataLoading(false);
     }
   };
 
-  const loadMyPatients = async () => {
-    try {
-      const result = await icpService.getDoctorPatients(currentDoctor.id);
-      if (result.success && result.data) {
-        setMyPatients(result.data);
-        setStats(prev => ({ ...prev, totalPatients: result.data?.length || 0 }));
-        
-        // Build patient name mapping
-        const nameMap: Record<string, string> = {};
-        result.data.forEach(patient => {
-          nameMap[patient.id] = patient.name;
-        });
-        setPatientNameMap(prev => ({ ...prev, ...nameMap }));
-      }
-    } catch (error) {
-      console.error('Failed to load patients:', error);
-    }
-  };
-
   const loadUnassignedPatients = async () => {
     try {
-      const result = await icpService.getUnassignedPatients();
+      const result = await trustCareAPI.getUnassignedPatients();
       if (result.success && result.data) {
         setUnassignedPatients(result.data);
         setStats(prev => ({ ...prev, unassignedCount: result.data?.length || 0 }));
@@ -86,50 +132,42 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({
     }
   };
 
-  const loadMyQueries = async () => {
+  // Individual refresh functions for specific data (used by child components)
+  const refreshPatients = async () => {
     try {
-      const result = await icpService.getDoctorQueries(currentDoctor.id);
+      const result = await trustCareAPI.getDoctorPatients(currentDoctor.id);
+      if (result.success && result.data) {
+        setMyPatients(result.data);
+        setStats(prev => ({ ...prev, totalPatients: result.data.length }));
+        
+        const nameMap: Record<string, string> = {};
+        result.data.forEach((patient: Patient) => {
+          nameMap[patient.id] = patient.name;
+        });
+        setPatientNameMap(prev => ({ ...prev, ...nameMap }));
+      }
+    } catch (error) {
+      console.error('Failed to refresh patients:', error);
+    }
+  };
+
+  const refreshQueries = async () => {
+    try {
+      const result = await trustCareAPI.getDoctorQueries(currentDoctor.id);
       if (result.success && result.data) {
         setMyQueries(result.data);
         
-        // Build patient name map from query patient IDs
-        const queryNameMap: Record<string, string> = {};
-        for (const query of result.data) {
-          if (!patientNameMap[query.patientId] && !queryNameMap[query.patientId]) {
-            try {
-              const patientResult = await icpService.getPatient(query.patientId);
-              if (patientResult.success && patientResult.data) {
-                queryNameMap[query.patientId] = patientResult.data.name;
-              }
-            } catch (error) {
-              console.error(`Failed to load patient ${query.patientId}:`, error);
-            }
-          }
-        }
+        const activeQueries = result.data.filter((q: MedicalQuery) => q.status === 'doctor_review').length;
+        const completedQueries = result.data.filter((q: MedicalQuery) => q.status === 'completed').length;
         
-        // Update patient name map with query patients
-        if (Object.keys(queryNameMap).length > 0) {
-          setPatientNameMap(prev => ({ ...prev, ...queryNameMap }));
-        }
-        
-        const pendingQueries = result.data.filter(q => 
-          formatQueryStatus(q.status) === 'Pending'
-        ).length;
-        const activeQueries = result.data.filter(q => 
-          formatQueryStatus(q.status) === 'Pending' || formatQueryStatus(q.status) === 'Under Review'
-        ).length;
-        const completedQueries = result.data.filter(q => 
-          formatQueryStatus(q.status) === 'Completed'
-        ).length;
         setStats(prev => ({ 
           ...prev, 
           activeQueries,
-          completedQueries,
-          pendingQueries 
+          completedQueries
         }));
       }
     } catch (error) {
-      console.error('Failed to load queries:', error);
+      console.error('Failed to refresh queries:', error);
     }
   };
 
@@ -398,18 +436,57 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({
             <p className="text-gray-600 mt-1">
               Specialization: <span className="font-medium">{currentDoctor.specialization}</span>
             </p>
-            <p className="text-sm text-gray-500 mt-1">
-              Doctor ID: <span className="font-mono">{currentDoctor.id}</span>
-            </p>
+            <div className="flex items-center space-x-4 text-sm text-gray-500 mt-1">
+              <span>Doctor ID: <span className="font-mono">{currentDoctor.id}</span></span>
+              {lastRefresh && (
+                <span>Last updated: {lastRefresh.toLocaleTimeString()}</span>
+              )}
+            </div>
           </div>
-          <Button
-            variant="secondary"
-            onClick={onLogout}
-          >
-            Switch Account
-          </Button>
+          <div className="flex space-x-2">
+            <Button
+              onClick={loadDashboardData}
+              variant="secondary"
+              size="small"
+              disabled={dataLoading}
+            >
+              {dataLoading ? 'Refreshing...' : 'Refresh'}
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={onLogout}
+            >
+              Switch Account
+            </Button>
+          </div>
         </div>
       </div>
+
+      {/* Error Display */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex items-center">
+            <div className="flex-shrink-0">
+              <span className="text-red-500 text-lg">⚠️</span>
+            </div>
+            <div className="ml-3 flex-1">
+              <h3 className="text-sm font-medium text-red-800">Dashboard Error</h3>
+              <p className="text-sm text-red-700 mt-1">{error}</p>
+              <p className="text-xs text-red-600 mt-1">
+                Some features may not work properly. Please try refreshing the dashboard.
+              </p>
+            </div>
+            <Button
+              onClick={loadDashboardData}
+              size="small"
+              variant="secondary"
+              className="ml-3 text-red-700 border-red-300 hover:bg-red-100"
+            >
+              Retry
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="bg-white rounded-lg shadow">

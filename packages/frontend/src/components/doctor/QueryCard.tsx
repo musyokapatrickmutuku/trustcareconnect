@@ -6,7 +6,7 @@ import FormField from '../common/FormField';
 import ClinicalResponseDisplay from './ClinicalResponseDisplay';
 import { formatQueryStatus, formatTimestamp } from '../../utils/formatters';
 import { UI_MESSAGES } from '../../constants';
-import icpService from '../../services/icpService';
+import trustCareAPI from '../../api/trustcare';
 
 interface QueryCardProps {
   query: MedicalQuery;
@@ -35,7 +35,7 @@ const QueryCard: React.FC<QueryCardProps> = ({
   const handleTakeQuery = async () => {
     setLoading(true);
     try {
-      const result = await icpService.takeQuery(query.id, currentDoctor.id);
+      const result = await trustCareAPI.takeQuery(query.id, currentDoctor.id);
       if (result.success) {
         showMessage(UI_MESSAGES.SUCCESS.QUERY_TAKEN, 'success');
         onUpdate();
@@ -55,7 +55,7 @@ const QueryCard: React.FC<QueryCardProps> = ({
     
     setLoading(true);
     try {
-      const result = await icpService.respondToQuery(
+      const result = await trustCareAPI.respondToQuery(
         query.id,
         currentDoctor.id,
         responseForm.response

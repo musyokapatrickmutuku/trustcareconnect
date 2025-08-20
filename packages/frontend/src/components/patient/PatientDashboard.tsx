@@ -3,7 +3,7 @@ import { Patient, MedicalQuery, QueryStatus } from '../../types';
 import Button from '../common/Button';
 import LoadingSpinner from '../common/LoadingSpinner';
 import QuerySubmission from './QuerySubmission';
-import icpService from '../../services/icpService';
+import trustCareAPI from '../../api/trustcare';
 import { formatters } from '../../utils/formatters';
 
 interface PatientDashboardProps {
@@ -30,6 +30,8 @@ const PatientDashboard: React.FC<PatientDashboardProps> = ({
   const [queries, setQueries] = useState<QueryWithEstimate[]>([]);
   const [loading, setLoading] = useState(false);
   const [notifications, setNotifications] = useState<string[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
 
   useEffect(() => {
     loadPatientQueries();
@@ -44,14 +46,20 @@ const PatientDashboard: React.FC<PatientDashboardProps> = ({
 
   const loadPatientQueries = async () => {
     setLoading(true);
+    setError(null);
+    
     try {
       console.log(`Loading queries for patient: ${patient.id}`);
-      const result = await icpService.getPatientQueries(patient.id);
-      console.log('Query result:', result);
       
-      if (result.success && result.data) {
-        console.log(`Found ${result.data.length} queries for patient`);
-        const queriesWithEstimates = result.data.map((query: MedicalQuery) => ({
+      // Use the enhanced API to load patient portal data (includes patient info and queries)
+      const result = await trustCareAPI.getPatientPortalData(patient.id);
+      console.log('Patient portal data result:', result);
+      
+      if (result.success && result.data?.queries?.success && result.data.queries.data) {
+        const queryData = result.data.queries.data;
+        console.log(`Found ${queryData.length} queries for patient`);
+        
+        const queriesWithEstimates = queryData.map((query: MedicalQuery) => ({
           ...query,
           estimatedResponseTime: calculateEstimatedResponseTime(query),
           timeRemaining: calculateTimeRemaining(query)
@@ -61,13 +69,27 @@ const PatientDashboard: React.FC<PatientDashboardProps> = ({
         checkForStatusUpdates(queriesWithEstimates);
         
         setQueries(queriesWithEstimates);
-      } else {
-        console.log('No queries found or request failed:', result.error);
+        setLastRefresh(new Date());
+        
+        // Log any partial errors from batch operation
+        if (result.errors && result.errors.length > 0) {
+          console.warn('Some patient data failed to load:', result.errors);
+        }
+      } else if (result.success && result.data?.queries?.success && !result.data.queries.data) {
+        // No queries found (empty array)
+        console.log('No queries found for patient');
         setQueries([]);
+        setLastRefresh(new Date());
+      } else {
+        // API error
+        const errorMessage = result.data?.queries?.error || result.error || 'Failed to load queries';
+        throw new Error(errorMessage);
       }
     } catch (error) {
-      console.error('Error loading queries:', error);
-      showMessage('Failed to load your queries', 'error');
+      console.error('Error loading patient queries:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      setError(errorMessage);
+      showMessage('Failed to load your queries. Please try refreshing the page.', 'error');
       setQueries([]);
     } finally {
       setLoading(false);
@@ -197,17 +219,56 @@ const PatientDashboard: React.FC<PatientDashboardProps> = ({
               {patient.assignedDoctorId && (
                 <p>Assigned Doctor: {patient.assignedDoctorId}</p>
               )}
+              {lastRefresh && (
+                <p className="text-xs text-gray-400">
+                  Last updated: {lastRefresh.toLocaleTimeString()}
+                </p>
+              )}
             </div>
           </div>
-          <Button
-            onClick={onLogout}
-            variant="secondary"
-            className="text-sm"
-          >
-            Logout
-          </Button>
+          <div className="flex space-x-2">
+            <Button
+              onClick={loadPatientQueries}
+              variant="secondary"
+              size="small"
+              disabled={loading}
+              className="text-sm"
+            >
+              {loading ? 'Refreshing...' : 'Refresh'}
+            </Button>
+            <Button
+              onClick={onLogout}
+              variant="secondary"
+              className="text-sm"
+            >
+              Logout
+            </Button>
+          </div>
         </div>
       </div>
+
+      {/* Error Display */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+          <div className="flex items-center">
+            <div className="flex-shrink-0">
+              <span className="text-red-500 text-lg">⚠️</span>
+            </div>
+            <div className="ml-3 flex-1">
+              <h3 className="text-sm font-medium text-red-800">Unable to Load Data</h3>
+              <p className="text-sm text-red-700 mt-1">{error}</p>
+            </div>
+            <Button
+              onClick={loadPatientQueries}
+              size="small"
+              variant="secondary"
+              className="ml-3 text-red-700 border-red-300 hover:bg-red-100"
+            >
+              Try Again
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Notifications */}
       {notifications.length > 0 && (

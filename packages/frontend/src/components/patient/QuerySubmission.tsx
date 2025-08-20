@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import FormField from '../common/FormField';
 import Button from '../common/Button';
 import { Patient, ComponentProps } from '../../types';
-import icpService from '../../services/icpService';
+import trustCareAPI from '../../api/trustcare';
 
 interface QuerySubmissionProps extends ComponentProps {
   patient: Patient;
@@ -64,7 +64,7 @@ const QuerySubmission: React.FC<QuerySubmissionProps> = ({
 
     setLoading?.(true);
     try {
-      const result = await icpService.submitQuery(
+      const result = await trustCareAPI.submitQuery(
         patient.id,
         formData.title.trim(),
         formData.description.trim()

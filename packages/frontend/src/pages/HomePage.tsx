@@ -1,29 +1,62 @@
-// Home Page Component
+// Home Page Component - Enhanced Dashboard with Real Statistics
 import React, { useState, useEffect } from 'react';
 import { SystemStats } from '../types';
 import LoadingSpinner from '../components/common/LoadingSpinner';
-import icpService from '../services/icpService';
+import trustCareAPI from '../api/trustcare';
 
 const HomePage: React.FC = () => {
   const [stats, setStats] = useState<SystemStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [connectionStatus, setConnectionStatus] = useState<string>('checking');
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loadStats();
+    // Set up periodic refresh for real-time dashboard updates
+    const interval = setInterval(loadStats, 60000); // Refresh every minute
+    return () => clearInterval(interval);
   }, []);
 
   const loadStats = async () => {
     setLoading(true);
+    setError(null);
+    
     try {
-      const result = await icpService.getStats();
+      // Test connection first
+      const connectionInfo = trustCareAPI.getConnectionInfo();
+      setConnectionStatus(connectionInfo.status);
+
+      if (connectionInfo.status !== 'connected') {
+        // Try to reconnect
+        const reconnectResult = await trustCareAPI.reconnect();
+        if (!reconnectResult.success) {
+          throw new Error('Failed to establish connection to backend');
+        }
+      }
+
+      // Load platform statistics using the new API layer
+      const result = await trustCareAPI.getSystemStats();
+      
       if (result.success && result.data) {
         setStats(result.data);
+        setLastUpdated(new Date());
+        setConnectionStatus('connected');
+        console.log('Platform statistics loaded successfully:', result.data);
+      } else {
+        throw new Error(result.error || 'Failed to load platform statistics');
       }
     } catch (error) {
-      console.error('Failed to load stats:', error);
+      console.error('Failed to load platform stats:', error);
+      setError(error instanceof Error ? error.message : 'Unknown error occurred');
+      setConnectionStatus('error');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleRefresh = async () => {
+    await loadStats();
   };
 
   return (
@@ -36,7 +69,51 @@ const HomePage: React.FC = () => {
           A secure healthcare communication platform connecting patients and doctors 
           through AI-assisted consultations with human oversight.
         </p>
+        
+        {/* Connection Status Indicator */}
+        <div className="mt-4 flex justify-center items-center space-x-2">
+          <div className={`w-3 h-3 rounded-full ${
+            connectionStatus === 'connected' ? 'bg-green-500' : 
+            connectionStatus === 'connecting' ? 'bg-yellow-500 animate-pulse' : 
+            'bg-red-500'
+          }`}></div>
+          <span className="text-sm text-gray-600">
+            Backend Status: {connectionStatus === 'connected' ? 'Connected' : 
+                           connectionStatus === 'connecting' ? 'Connecting...' : 
+                           'Connection Error'}
+          </span>
+          {lastUpdated && (
+            <span className="text-xs text-gray-400 ml-2">
+              Last updated: {lastUpdated.toLocaleTimeString()}
+            </span>
+          )}
+          <button 
+            onClick={handleRefresh}
+            disabled={loading}
+            className="ml-2 text-blue-600 hover:text-blue-800 text-sm underline disabled:opacity-50"
+          >
+            Refresh
+          </button>
+        </div>
       </div>
+
+      {/* Error Display */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+          <div className="flex items-center">
+            <div className="flex-shrink-0">
+              <span className="text-red-500 text-lg">⚠️</span>
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-red-800">Connection Error</h3>
+              <p className="text-sm text-red-700 mt-1">{error}</p>
+              <p className="text-xs text-red-600 mt-2">
+                Please check your internet connection and ensure the backend canister is running.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {loading ? (
         <div className="flex justify-center">
