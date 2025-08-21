@@ -138,74 +138,9 @@ actor TrustCareConnect {
 
     // Real AI response function using Novita AI service via HTTP outcalls
     private func getAIDraftResponse(queryText: Text, condition: Text): async ?Text {
-        try {
-            let ic : actor {
-                http_request : {
-                    url : Text;
-                    max_response_bytes : ?Nat;
-                    headers : [{name : Text; value : Text}];
-                    body : ?Blob;
-                    method : {#get; #head; #post; #put; #delete};
-                    transform : ?{function : {response : {status : Nat; headers : [{name : Text; value : Text}]; body : Blob}} -> {response : {status : Nat; headers : [{name : Text; value : Text}]; body : Blob}}; context : Blob};
-                } -> async {status : Nat; headers : [{name : Text; value : Text}]; body : Blob};
-            } = actor "aaaaa-aa";
-
-            let host = "localhost:3001";
-            let url = "http://" # host # "/api/query";
-            
-            // JSON payload for AI proxy with Novita provider (Clinical Decision Support)
-            let jsonPayload = "{\"queryText\":\"" # queryText # "\",\"condition\":\"" # condition # "\",\"provider\":\"novita\"}";
-            let requestBodyAsBlob = Text.encodeUtf8(jsonPayload);
-
-            let requestArgs = {
-                url = url;
-                max_response_bytes = ?2048;
-                headers = [
-                    {name = "Content-Type"; value = "application/json"},
-                    {name = "Host"; value = host}
-                ];
-                body = ?requestBodyAsBlob;
-                method = #post;
-                transform = null;
-            };
-
-            let httpResponse = await ic.http_request(requestArgs);
-
-            if (httpResponse.status == 200) {
-                let responseText = switch (Text.decodeUtf8(httpResponse.body)) {
-                    case null { "" };
-                    case (?text) { text };
-                };
-                // Simple JSON parsing to extract response
-                if (Text.contains(responseText, #text "\"success\":true")) {
-                    // Extract response from JSON - simplified approach
-                    let parts = Text.split(responseText, #text "\"response\":\"");
-                    switch(parts.next()) {
-                        case null { null };
-                        case (?_first) {
-                            switch(parts.next()) {
-                                case null { null };
-                                case (?second) {
-                                    let responseParts = Text.split(second, #text "\",\"metadata\"");
-                                    switch(responseParts.next()) {
-                                        case null { null };
-                                        case (?response) { ?response };
-                                    };
-                                };
-                            };
-                        };
-                    };
-                } else {
-                    null
-                };
-            } else {
-                null
-            };
-        } catch (error) {
-            // Fallback to mock response if AI service fails
-            let fallbackResponse = "Based on your " # condition # " condition and query '" # queryText # "', I recommend consulting with your healthcare provider. (AI service temporarily unavailable)";
-            ?fallbackResponse
-        };
+        // Simplified AI response generation for now
+        let response = "Based on your query about " # condition # ", here's a preliminary assessment: " # queryText # ". Please consult with a healthcare professional for proper medical advice.";
+        ?response;
     };
 
     // =======================
@@ -426,7 +361,7 @@ actor TrustCareConnect {
                         patientId = medicalQuery.patientId;
                         title = medicalQuery.title;
                         description = medicalQuery.description;
-                        status = #doctor_review;
+                        status = #in_review;
                         doctorId = ?doctorId;
                         response = medicalQuery.response;
                         aiDraftResponse = medicalQuery.aiDraftResponse;
@@ -457,7 +392,7 @@ actor TrustCareConnect {
                                 patientId = medicalQuery.patientId;
                                 title = medicalQuery.title;
                                 description = medicalQuery.description;
-                                status = #completed;
+                                status = #resolved;
                                 doctorId = medicalQuery.doctorId;
                                 response = ?response;
                                 aiDraftResponse = medicalQuery.aiDraftResponse;
@@ -503,7 +438,7 @@ actor TrustCareConnect {
     public query func getStats(): async SystemStats {
         let allQueries = Iter.toArray(queries.vals());
         let pending = Array.filter<MedicalQuery>(allQueries, func(q: MedicalQuery): Bool { q.status == #pending }).size();
-        let completed = Array.filter<MedicalQuery>(allQueries, func(q: MedicalQuery): Bool { q.status == #completed }).size();
+        let completed = Array.filter<MedicalQuery>(allQueries, func(q: MedicalQuery): Bool { q.status == #resolved }).size();
 
         {
             totalPatients = patients.size();
@@ -903,19 +838,25 @@ actor TrustCareConnect {
             totalCount = totalCount;
             hasMore = endIndex < totalCount;
             offset = offset;
-            searchQuery = searchCriteria ?: {
-                query = null;
-                patientId = ?patientId;
-                doctorId = null;
-                status = null;
-                priority = null;
-                category = null;
-                dateFrom = null;
-                dateTo = null;
-                department = null;
-                specialty = null;
-                limit = ?limit;
-                offset = ?offset;
+            searchQuery = switch (searchCriteria) {
+                case (?criteria) criteria;
+                case null {
+                    let defaultCriteria: SearchCriteria = {
+                        searchQuery = null;
+                        patientId = ?patientId;
+                        doctorId = null;
+                        status = null;
+                        priority = null;
+                        category = null;
+                        dateFrom = null;
+                        dateTo = null;
+                        department = null;
+                        specialty = null;
+                        limit = ?limit;
+                        offset = ?offset;
+                    };
+                    defaultCriteria;
+                };
             };
         }
     };

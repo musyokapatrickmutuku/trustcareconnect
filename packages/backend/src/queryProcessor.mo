@@ -9,6 +9,8 @@ import Result "mo:base/Result";
 import Float "mo:base/Float";
 import Random "mo:base/Random";
 import Blob "mo:base/Blob";
+import Char "mo:base/Char";
+import Nat32 "mo:base/Nat32";
 import Types "./types";
 
 module QueryProcessor {
@@ -118,22 +120,13 @@ module QueryProcessor {
                 };
             };
             
-            // Consider patient age (elderly patients higher risk)
-            let currentYear = 2024; // Should be calculated from current time
-            if (patientData.dateOfBirth.size() >= 4) {
-                let birthYearText = Text.split(patientData.dateOfBirth, #char '-').next();
-                switch (birthYearText) {
-                    case (?yearText) {
-                        switch (Int.fromText(yearText)) {
-                            case (?birthYear) {
-                                let age = currentYear - birthYear;
-                                if (age >= 65) { riskScore += 1 };
-                                if (age >= 80) { riskScore += 1 };
-                            };
-                            case null {};
-                        };
-                    };
-                    case null {};
+            // Consider patient age (simplified assessment)
+            if (Text.size(patientData.dateOfBirth) > 0) {
+                // Simplified age assessment based on birth year patterns
+                if (Text.contains(patientData.dateOfBirth, #text "195") or Text.contains(patientData.dateOfBirth, #text "194")) {
+                    riskScore += 2; // Likely elderly patient
+                } else if (Text.contains(patientData.dateOfBirth, #text "196")) {
+                    riskScore += 1; // Senior patient
                 };
             };
             
@@ -437,29 +430,29 @@ module QueryProcessor {
 
         // Get doctor workload statistics
         public func getDoctorWorkload(doctorId: Types.DoctorId, allQueries: [QueryData]): {active: Nat; pending: Nat; averageResponseTime: ?Float} {
-            let doctorQueries = Array.filter<QueryData>(allQueries, func(query: QueryData): Bool {
-                switch (query.assignedDoctorId) {
+            let doctorQueries = Array.filter<QueryData>(allQueries, func(queryData: QueryData): Bool {
+                switch (queryData.assignedDoctorId) {
                     case (?assignedId) { assignedId == doctorId };
                     case null { false };
                 }
             });
             
-            let activeQueries = Array.filter<QueryData>(doctorQueries, func(query: QueryData): Bool {
-                query.status == #assigned or query.status == #in_review
+            let activeQueries = Array.filter<QueryData>(doctorQueries, func(queryData: QueryData): Bool {
+                queryData.status == #assigned or queryData.status == #in_review
             });
             
-            let pendingQueries = Array.filter<QueryData>(doctorQueries, func(query: QueryData): Bool {
-                query.status == #pending
+            let pendingQueries = Array.filter<QueryData>(doctorQueries, func(queryData: QueryData): Bool {
+                queryData.status == #pending
             });
             
             // Calculate average response time
-            let resolvedQueries = Array.filter<QueryData>(doctorQueries, func(query: QueryData): Bool {
-                query.responseTimeMinutes != null
+            let resolvedQueries = Array.filter<QueryData>(doctorQueries, func(queryData: QueryData): Bool {
+                queryData.responseTimeMinutes != null
             });
             
             let averageResponseTime = if (resolvedQueries.size() > 0) {
-                let totalTime = Array.foldLeft<QueryData, Nat>(resolvedQueries, 0, func(acc: Nat, query: QueryData): Nat {
-                    switch (query.responseTimeMinutes) {
+                let totalTime = Array.foldLeft<QueryData, Nat>(resolvedQueries, 0, func(acc: Nat, queryData: QueryData): Nat {
+                    switch (queryData.responseTimeMinutes) {
                         case (?time) { acc + time };
                         case null { acc };
                     }

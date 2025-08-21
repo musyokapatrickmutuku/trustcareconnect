@@ -486,7 +486,7 @@ module Types {
     // ===============================
 
     public type SearchCriteria = {
-        query: ?Text;
+        searchQuery: ?Text;
         patientId: ?PatientId;
         doctorId: ?DoctorId;
         status: ?QueryStatus;
