@@ -1,16 +1,66 @@
 // TrustCareConnect Frontend - Main App Component with Internet Identity Authentication
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
 import { Patient, Doctor } from './types';
 import { UI_MESSAGES } from './constants';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import ProtectedRoute, { PatientRoute, DoctorRoute, AuthenticatedRoute, AuthenticationStatus, RoleBasedVisibility } from './components/ProtectedRoute';
 import MessageDisplay from './components/common/MessageDisplay';
-import HomePage from './pages/HomePage';
-import PatientPortal from './pages/PatientPortal';
-import DoctorPortal from './pages/DoctorPortal';
+import LoadingSpinner from './components/common/LoadingSpinner';
+import ErrorBoundary from './components/ErrorBoundary';
 import trustCareAPI from './api/trustcare';
 import './styles/App.css';
+
+// Lazy loaded components for code splitting
+const HomePage = lazy(() => import('./pages/HomePage'));
+const PatientPortal = lazy(() => import('./pages/PatientPortal'));
+const DoctorPortal = lazy(() => import('./pages/DoctorPortal'));
+
+// Lazy loaded form components (heavy components with rich text editor)
+const DoctorResponse = lazy(() => import('./components/DoctorResponse'));
+const PatientRegistration = lazy(() => import('./components/PatientRegistration'));
+const QueryForm = lazy(() => import('./components/QueryForm'));
+
+// Lazy loaded dashboard components
+const PatientDashboard = lazy(() => import('./components/patient/PatientDashboard'));
+const DoctorDashboard = lazy(() => import('./components/doctor/DoctorDashboard'));
+
+// Lazy loaded utility components
+const NotificationSystem = lazy(() => import('./components/NotificationSystem'));
+const MobileNavigation = lazy(() => import('./components/MobileNavigation'));
+
+// Loading fallback component for lazy-loaded components
+const LazyLoadingFallback: React.FC<{ message?: string }> = ({ 
+  message = "Loading..." 
+}) => (
+  <div className="flex justify-center items-center min-h-[200px]">
+    <div className="flex flex-col items-center space-y-4">
+      <LoadingSpinner />
+      <p className="text-gray-600 text-sm">{message}</p>
+    </div>
+  </div>
+);
+
+// Preload components for better UX
+const preloadComponents = () => {
+  // Preload critical components when user is likely to navigate to them
+  const componentsToPreload = [
+    () => import('./pages/HomePage'),
+    () => import('./pages/PatientPortal'),
+    () => import('./pages/DoctorPortal'),
+    () => import('./components/patient/PatientDashboard'),
+    () => import('./components/doctor/DoctorDashboard'),
+  ];
+  
+  // Preload after a short delay to not block initial render
+  setTimeout(() => {
+    componentsToPreload.forEach(loadComponent => {
+      loadComponent().catch(error => {
+        console.warn('Failed to preload component:', error);
+      });
+    });
+  }, 2000);
+};
 
 // Login component for unauthenticated users
 const LoginPage: React.FC<{showMessage: (msg: string, type?: string) => void}> = ({ showMessage }) => {
@@ -305,6 +355,8 @@ const AppContent: React.FC = () => {
     // Test backend connection on load
     if (isAuthenticated) {
       testConnection();
+      // Preload components for better user experience
+      preloadComponents();
     }
   }, [isAuthenticated]);
 
@@ -362,64 +414,72 @@ const AppContent: React.FC = () => {
             )}
 
             <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-              <Routes>
-                <Route path="/" element={<Navigate to="/home" replace />} />
-                <Route path="/login" element={<Navigate to="/" replace />} />
-                <Route path="/register" element={<RegistrationPage showMessage={showMessage} />} />
-                
-                <Route 
-                  path="/home" 
-                  element={
-                    <AuthenticatedRoute>
-                      <HomePage />
-                    </AuthenticatedRoute>
-                  } 
-                />
-                
-                <Route 
-                  path="/patient" 
-                  element={
-                    <PatientRoute>
-                      <PatientPortal
-                        currentUser={currentPatient}
-                        setCurrentUser={setCurrentPatient}
-                        showMessage={showMessage}
-                        loading={loading.patient || false}
-                        setLoading={(isLoading) => setLoadingState('patient', isLoading)}
-                      />
-                    </PatientRoute>
-                  } 
-                />
-                
-                <Route 
-                  path="/doctor" 
-                  element={
-                    <DoctorRoute>
-                      <DoctorPortal
-                        currentUser={currentDoctor}
-                        setCurrentUser={setCurrentDoctor}
-                        showMessage={showMessage}
-                        loading={loading.doctor || false}
-                        setLoading={(isLoading) => setLoadingState('doctor', isLoading)}
-                      />
-                    </DoctorRoute>
-                  } 
-                />
-                
-                {/* Catch-all route for unknown paths */}
-                <Route 
-                  path="*" 
-                  element={
-                    <div className="text-center py-12">
-                      <h2 className="text-2xl font-bold text-gray-900 mb-4">Page Not Found</h2>
-                      <p className="text-gray-600 mb-4">The page you're looking for doesn't exist.</p>
-                      <Link to="/" className="text-blue-600 hover:text-blue-800 underline">
-                        Return to Home
-                      </Link>
-                    </div>
-                  } 
-                />
-              </Routes>
+              <ErrorBoundary>
+                <Suspense fallback={<LazyLoadingFallback />}>
+                  <Routes>
+                    <Route path="/" element={<Navigate to="/home" replace />} />
+                    <Route path="/login" element={<Navigate to="/" replace />} />
+                    <Route path="/register" element={<RegistrationPage showMessage={showMessage} />} />
+                    
+                    <Route 
+                      path="/home" 
+                      element={
+                        <AuthenticatedRoute>
+                          <HomePage />
+                        </AuthenticatedRoute>
+                      } 
+                    />
+                    
+                    <Route 
+                      path="/patient/*" 
+                      element={
+                        <PatientRoute>
+                          <Suspense fallback={<LazyLoadingFallback message="Loading patient portal..." />}>
+                            <PatientPortal
+                              currentUser={currentPatient}
+                              setCurrentUser={setCurrentPatient}
+                              showMessage={showMessage}
+                              loading={loading.patient || false}
+                              setLoading={(isLoading) => setLoadingState('patient', isLoading)}
+                            />
+                          </Suspense>
+                        </PatientRoute>
+                      } 
+                    />
+                    
+                    <Route 
+                      path="/doctor/*" 
+                      element={
+                        <DoctorRoute>
+                          <Suspense fallback={<LazyLoadingFallback message="Loading doctor portal..." />}>
+                            <DoctorPortal
+                              currentUser={currentDoctor}
+                              setCurrentUser={setCurrentDoctor}
+                              showMessage={showMessage}
+                              loading={loading.doctor || false}
+                              setLoading={(isLoading) => setLoadingState('doctor', isLoading)}
+                            />
+                          </Suspense>
+                        </DoctorRoute>
+                      } 
+                    />
+                    
+                    {/* Catch-all route for unknown paths */}
+                    <Route 
+                      path="*" 
+                      element={
+                        <div className="text-center py-12">
+                          <h2 className="text-2xl font-bold text-gray-900 mb-4">Page Not Found</h2>
+                          <p className="text-gray-600 mb-4">The page you're looking for doesn't exist.</p>
+                          <Link to="/" className="text-blue-600 hover:text-blue-800 underline">
+                            Return to Home
+                          </Link>
+                        </div>
+                      } 
+                    />
+                  </Routes>
+                </Suspense>
+              </ErrorBoundary>
             </main>
           </>
         }
