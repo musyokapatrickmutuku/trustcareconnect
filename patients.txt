@@ -1,0 +1,419 @@
+# TrustCareConnect Platform - Diabetes Patient Test Data
+# Updated with Registration Requirements for Easy Testing
+# Last Updated: August 22, 2025
+
+===================================================================================================
+PLATFORM REGISTRATION REQUIREMENTS
+===================================================================================================
+
+Required Fields for Patient Registration:
+1. Full Name (2-100 characters, letters/spaces/hyphens/apostrophes only)
+2. Medical Condition (select from predefined list)
+3. Email Address (valid email format)
+
+Validation Rules:
+- Name: Must match pattern /^[a-zA-Z\s'-]+$/
+- Email: Must be valid email format
+- Condition: Must be selected from available medical conditions list
+
+===================================================================================================
+
+Patient Profile P001
+REGISTRATION DATA FOR PLATFORM:
+├── Full Name: "Sarah Michelle Johnson"
+├── Email: "sarah.johnson@email.com" 
+├── Medical Condition: "Diabetes Type 2"
+└── Expected Patient ID: P001
+
+Demographics & Initial Presentation
+
+Patient ID: P001
+Age at Diagnosis: 45 years
+Gender: Female
+Ethnicity: African American
+Type of Diabetes: Type 2
+Initial Symptoms: Excessive thirst, frequent urination, blurred vision, unexplained 15-pound weight loss over 3 months
+Family History: Mother-Type 2, Maternal grandmother-Type 2
+Co-morbidities at Diagnosis: Hypertension, Obesity (BMI 32.4), Dyslipidemia
+Lifestyle at Diagnosis: Sedentary office job, high-carbohydrate diet, non-smoker, occasional social drinking
+
+Baseline Diagnostic Information
+
+HbA1c: 9.8%
+Fasting Blood Glucose: 245 mg/dL
+Random Blood Glucose: 320 mg/dL
+C-peptide: Normal (2.8 ng/mL)
+Lipid Panel: Total Cholesterol 235 mg/dL, LDL-C 155 mg/dL, HDL-C 38 mg/dL, Triglycerides 220 mg/dL
+Kidney Function: eGFR 85 mL/min/1.73m², UACR 25 mg/g
+Blood Pressure: 148/92 mmHg
+Weight & Height: 88 kg, 165 cm
+
+Longitudinal Progress
+Initial Consultation (15-03-2022)
+
+Health Status: Symptomatic with polyuria, polydipsia, fatigue
+Lab Values: HbA1c 9.8%, FBG 245 mg/dL, BP 148/92 mmHg, Weight 88 kg
+Medications: Metformin 1000mg BID, Lisinopril 10mg daily
+Duration: Initial prescription, 3-month follow-up planned
+Lifestyle Recommendations: Dietary counseling, gradual exercise introduction, blood glucose monitoring
+
+3-Month Follow-up (20-06-2022)
+
+Health Status: Significant symptom improvement, 8-pound weight loss, mild GI upset from metformin
+Lab Values: HbA1c 8.1%, Average FBG 165 mg/dL, BP 138/85 mmHg, Weight 80 kg
+Medications: Continue Metformin 1000mg BID, increase Lisinopril to 15mg daily
+Duration: Ongoing, 3-month follow-up
+Lifestyle Recommendations: Continue current diet plan, increase walking to 45 minutes daily
+Reason for Change: Good response to initial therapy, BP still elevated
+
+6-Month Follow-up (18-09-2022)
+
+Health Status: Stable, experiencing occasional mild hypoglycemia, improved energy
+Lab Values: HbA1c 7.4%, Average FBG 140 mg/dL, BP 132/80 mmHg, Weight 78 kg, eGFR 88 mL/min/1.73m²
+Medications: Continue current regimen, add Empagliflozin 10mg daily
+Duration: 6-month trial
+Lifestyle Recommendations: Hypoglycemia education, continue current exercise routine
+Reason for Change: Approaching target but need additional cardiovascular protection
+
+1-Year Follow-up (22-03-2023)
+
+Health Status: Excellent control, no hypoglycemic episodes, sustained weight loss
+Lab Values: HbA1c 6.8%, Average FBG 125 mg/dL, BP 128/78 mmHg, Weight 75 kg, UACR 18 mg/g
+Medications: Continue all current medications
+Duration: Maintenance therapy
+Lifestyle Recommendations: Maintain current lifestyle, annual retinal screening
+Complications Screening: Normal fundoscopy, normal monofilament test, no neuropathy symptoms
+
+2-Year Follow-up (15-03-2024)
+
+Health Status: Sustained excellent control, developed UTI last month (resolved)
+Lab Values: HbA1c 6.9%, Average FBG 130 mg/dL, BP 125/75 mmHg, Weight 76 kg, eGFR 90 mL/min/1.73m²
+Medications: Continue current regimen
+Duration: Ongoing maintenance
+Lifestyle Recommendations: Continue current plan, stress management techniques
+Complications Screening: No retinopathy, normal kidney function, no neuropathy
+
+
+Patient Profile P002
+REGISTRATION DATA FOR PLATFORM:
+├── Full Name: "Michael David Rodriguez"
+├── Email: "mike.rodriguez@student.edu"
+├── Medical Condition: "Diabetes Type 1" 
+└── Expected Patient ID: P002
+
+Demographics & Initial Presentation
+
+Patient ID: P002
+Age at Diagnosis: 16 years
+Gender: Male
+Ethnicity: Caucasian
+Type of Diabetes: Type 1
+Initial Symptoms: Rapid 20-pound weight loss, severe fatigue, extreme thirst, frequent urination, fruity breath odor
+Family History: No known family history of diabetes
+Co-morbidities at Diagnosis: None
+Lifestyle at Diagnosis: Active high school athlete (soccer), healthy diet, non-smoker
+
+Baseline Diagnostic Information
+
+HbA1c: 12.5%
+Fasting Blood Glucose: 385 mg/dL
+Random Blood Glucose: 445 mg/dL
+C-peptide: Very low (0.3 ng/mL)
+Autoantibodies: GAD65 positive, ICA positive
+Lipid Panel: Total Cholesterol 165 mg/dL, LDL-C 95 mg/dL, HDL-C 52 mg/dL, Triglycerides 120 mg/dL
+Kidney Function: eGFR >90 mL/min/1.73m², UACR 8 mg/g
+Blood Pressure: 118/72 mmHg
+Weight & Height: 58 kg, 175 cm
+
+Longitudinal Progress
+Initial Diagnosis/Hospitalization (08-09-2021)
+
+Health Status: Admitted with DKA, ketones 4.2 mmol/L, pH 7.15
+Lab Values: HbA1c 12.5%, Random BG 445 mg/dL, BP 118/72 mmHg, Weight 58 kg
+Medications: IV insulin infusion initially, then Insulin Aspart 6 units TID with meals, Insulin Glargine 12 units at bedtime
+Duration: Hospital stay 4 days, intensive diabetes education
+Lifestyle Recommendations: Carb counting education, glucose monitoring 4x daily, gradual return to sports
+
+1-Month Follow-up (10-10-2021)
+
+Health Status: Adjusting to insulin therapy, frequent BG monitoring, honeymoon phase beginning
+Lab Values: HbA1c 9.2%, Average FBG 145 mg/dL, BP 115/70 mmHg, Weight 62 kg
+Medications: Reduce Insulin Aspart to 4 units TID, reduce Glargine to 8 units
+Duration: Ongoing adjustments expected
+Lifestyle Recommendations: Continue intensive monitoring, return to soccer with precautions
+Reason for Change: Honeymoon phase reducing insulin requirements
+
+6-Month Follow-up (15-03-2022)
+
+Health Status: Honeymoon phase ending, more insulin needed, good diabetes management skills
+Lab Values: HbA1c 7.1%, Average FBG 135 mg/dL, BP 120/75 mmHg, Weight 68 kg
+Medications: Increase Insulin Aspart to 8 units TID, increase Glargine to 18 units
+Duration: Ongoing with monthly adjustments
+Lifestyle Recommendations: Continue carb counting, exercise management education
+Reason for Change: End of honeymoon phase, growth spurt
+
+1-Year Follow-up (12-09-2022)
+
+Health Status: Stable control, occasional mild hypoglycemia during sports, growth continuing
+Lab Values: HbA1c 7.4%, Average FBG 142 mg/dL, BP 118/72 mmHg, Weight 72 kg, eGFR >90 mL/min/1.73m²
+Medications: Insulin Aspart 10 units TID, Glargine 22 units at bedtime
+Duration: Stable regimen
+Lifestyle Recommendations: Pre-exercise snack protocol, continuous glucose monitor consideration
+Complications Screening: Normal retinal exam, no neuropathy symptoms
+
+3-Year Follow-up (20-09-2024)
+
+Health Status: Good overall control, started college, some stress-related BG fluctuations
+Lab Values: HbA1c 7.8%, Average FBG 155 mg/dL, BP 122/78 mmHg, Weight 78 kg, UACR 12 mg/g
+Medications: Switch to insulin pump therapy (Aspart via pump), basal rate 1.2 units/hour
+Duration: New pump trial
+Lifestyle Recommendations: College lifestyle adaptation, stress management, regular meal timing
+Reason for Change: Improved flexibility for college schedule, better control potential
+
+
+Patient Profile P003
+REGISTRATION DATA FOR PLATFORM:
+├── Full Name: "Carlos Eduardo Mendoza"
+├── Email: "carlos.mendoza@gmail.com"
+├── Medical Condition: "Diabetes Type 2"
+└── Expected Patient ID: P003
+
+Demographics & Initial Presentation
+
+Patient ID: P003
+Age at Diagnosis: 62 years
+Gender: Male
+Ethnicity: Hispanic
+Type of Diabetes: Type 2
+Initial Symptoms: Routine health check-up revealed elevated glucose, mild fatigue, slow-healing cut on foot
+Family History: Father-Type 2, Brother-Type 2
+Co-morbidities at Diagnosis: Hypertension, CAD (prior MI 2 years ago), Dyslipidemia, Obesity (BMI 30.8)
+Lifestyle at Diagnosis: Retired, moderate activity, traditional Mexican diet high in carbs, non-smoker, quit 10 years ago
+
+Baseline Diagnostic Information
+
+HbA1c: 8.2%
+Fasting Blood Glucose: 180 mg/dL
+Random Blood Glucose: 240 mg/dL
+C-peptide: Normal (2.1 ng/mL)
+Lipid Panel: Total Cholesterol 195 mg/dL, LDL-C 115 mg/dL, HDL-C 42 mg/dL, Triglycerides 190 mg/dL
+Kidney Function: eGFR 65 mL/min/1.73m², UACR 45 mg/g
+Blood Pressure: 145/88 mmHg
+Weight & Height: 92 kg, 172 cm
+
+Longitudinal Progress
+Initial Consultation (12-04-2022)
+
+Health Status: Asymptomatic diabetes discovery, concern about cardiovascular risk
+Lab Values: HbA1c 8.2%, FBG 180 mg/dL, BP 145/88 mmHg, Weight 92 kg, eGFR 65 mL/min/1.73m²
+Medications: Metformin 500mg BID, increase Lisinopril to 20mg daily, Empagliflozin 10mg daily
+Duration: 3-month follow-up planned
+Lifestyle Recommendations: Diabetic diet education, cultural food modifications, daily walking
+Reason for Initial Choice: Cardiovascular and renal protection priority given history
+
+3-Month Follow-up (18-07-2022)
+
+Health Status: Feeling better, 6-pound weight loss, improved energy
+Lab Values: HbA1c 7.4%, Average FBG 155 mg/dL, BP 138/82 mmHg, Weight 86 kg
+Medications: Increase Metformin to 1000mg BID, continue others
+Duration: 3-month follow-up
+Lifestyle Recommendations: Continue current plan, increase walking duration
+Reason for Change: Good response but not at target yet
+
+9-Month Follow-up (25-01-2023)
+
+Health Status: Plateau in improvement, occasional fatigue, weight stable
+Lab Values: HbA1c 7.2%, Average FBG 148 mg/dL, BP 135/80 mmHg, Weight 85 kg, eGFR 62 mL/min/1.73m²
+Medications: Add Semaglutide 0.25mg weekly (titrate to 1mg), continue others
+Duration: 6-month trial
+Lifestyle Recommendations: Maintain current diet and exercise
+Reason for Change: Plateau in HbA1c, weight loss benefit, cardiovascular protection
+
+15-Month Follow-up (30-07-2023)
+
+Health Status: Significant weight loss, nausea initially but resolved, much improved energy
+Lab Values: HbA1c 6.7%, Average FBG 130 mg/dL, BP 128/75 mmHg, Weight 79 kg, UACR 35 mg/g
+Medications: Continue current regimen, Semaglutide now at 1mg weekly
+Duration: Maintenance therapy
+Lifestyle Recommendations: Maintain current lifestyle changes
+Complications Screening: Mild background retinopathy detected, ophthalmology follow-up arranged
+
+2-Year Follow-up (15-04-2024)
+
+Health Status: Excellent control maintained, retinopathy stable, no new symptoms
+Lab Values: HbA1c 6.8%, Average FBG 132 mg/dL, BP 125/78 mmHg, Weight 80 kg, eGFR 64 mL/min/1.73m²
+Medications: Continue current regimen
+Duration: Annual follow-ups now appropriate
+Lifestyle Recommendations: Annual eye exams, foot care education reinforced
+Complications Screening: Stable mild NPDR, normal monofilament test, no neuropathy symptoms
+
+
+Patient Profile P004
+REGISTRATION DATA FOR PLATFORM:
+├── Full Name: "Priya Sharma-Patel"
+├── Email: "priya.patel@work.com"
+├── Medical Condition: "Diabetes Type 2"
+└── Expected Patient ID: P004
+
+Demographics & Initial Presentation
+
+Patient ID: P004
+Age at Diagnosis: 28 years
+Gender: Female
+Ethnicity: South Asian
+Type of Diabetes: Gestational Diabetes → Type 2
+Initial Symptoms: Routine prenatal screening at 24 weeks gestation showed elevated glucose
+Family History: Mother-Type 2, Paternal grandfather-Type 2
+Co-morbidities at Diagnosis: PCOS, mild hypertension in pregnancy
+Lifestyle at Diagnosis: Office worker, irregular eating patterns, minimal exercise
+
+Baseline Diagnostic Information (During Pregnancy)
+
+HbA1c: 6.8%
+Fasting Blood Glucose: 105 mg/dL
+OGTT: 1-hour: 195 mg/dL, 2-hour: 165 mg/dL
+Lipid Panel: Not assessed during pregnancy
+Blood Pressure: 135/85 mmHg
+Weight & Height: 75 kg, 160 cm (pre-pregnancy weight 68 kg)
+
+Longitudinal Progress
+GDM Diagnosis (20-06-2022)
+
+Health Status: 24 weeks pregnant, asymptomatic, failed OGTT
+Lab Values: HbA1c 6.8%, FBG 105 mg/dL, BP 135/85 mmHg
+Medications: Diet and exercise initially, then Insulin Aspart 4 units with large meals
+Duration: Remainder of pregnancy
+Lifestyle Recommendations: GDM diet plan, daily glucose monitoring, regular walking
+
+Postpartum 6-Week Check (05-09-2022)
+
+Health Status: Normal delivery, breastfeeding, glucose normalized initially
+Lab Values: HbA1c 5.8%, FBG 95 mg/dL, BP 125/80 mmHg, Weight 70 kg
+Medications: Discontinued insulin
+Duration: Annual diabetes screening recommended
+Lifestyle Recommendations: Continue healthy eating, gradual exercise increase, weight management
+
+1-Year Postpartum (28-08-2023)
+
+Health Status: Stopped breastfeeding, weight gain, fatigue, irregular periods (PCOS symptoms)
+Lab Values: HbA1c 7.1%, FBG 140 mg/dL, BP 138/88 mmHg, Weight 78 kg
+Medications: Metformin 1000mg BID (also for PCOS)
+Duration: 6-month follow-up
+Lifestyle Recommendations: Return to structured meal plan, regular exercise routine
+Reason for Treatment: Progression to Type 2 diabetes
+
+18-Month Postpartum (20-02-2024)
+
+Health Status: Improved energy, some weight loss, planning second pregnancy
+Lab Values: HbA1c 6.5%, Average FBG 125 mg/dL, BP 132/82 mmHg, Weight 74 kg, eGFR >90 mL/min/1.73m²
+Medications: Continue Metformin, folic acid supplementation
+Duration: Pre-conception counseling ongoing
+Lifestyle Recommendations: Optimize control before conception, continue current lifestyle
+Reason for Monitoring: Pre-conception diabetes management
+
+2-Year Postpartum (15-08-2024)
+
+Health Status: Second pregnancy achieved, early first trimester, good glucose control
+Lab Values: HbA1c 6.2%, FBG 110 mg/dL, BP 128/78 mmHg, Weight 72 kg
+Medications: Discontinue Metformin, start prenatal vitamins, insulin if needed
+Duration: Throughout pregnancy monitoring
+Lifestyle Recommendations: Pregnancy-appropriate exercise, diabetic pregnancy diet
+Complications Screening: Baseline retinal exam normal, no complications noted
+
+
+Patient Profile P005
+REGISTRATION DATA FOR PLATFORM:
+├── Full Name: "Dorothy Mae Williams"
+├── Email: "dorothy.williams@senior.net"
+├── Medical Condition: "Diabetes Type 2"
+└── Expected Patient ID: P005
+
+Demographics & Initial Presentation
+
+Patient ID: P005
+Age at Diagnosis: 71 years
+Gender: Female
+Ethnicity: Caucasian
+Type of Diabetes: Type 2
+Initial Symptoms: Recurrent UTIs, slow-healing wounds, unexplained weight loss, increased thirst
+Family History: Sister-Type 2, no parental history known
+Co-morbidities at Diagnosis: Hypertension, Osteoarthritis, Mild cognitive impairment, CKD Stage 3
+Lifestyle at Diagnosis: Lives alone, limited mobility, irregular meals, non-smoker
+
+Baseline Diagnostic Information
+
+HbA1c: 10.4%
+Fasting Blood Glucose: 285 mg/dL
+Random Blood Glucose: 350 mg/dL
+C-peptide: Low-normal (1.2 ng/mL)
+Lipid Panel: Total Cholesterol 205 mg/dL, LDL-C 125 mg/dL, HDL-C 48 mg/dL, Triglycerides 160 mg/dL
+Kidney Function: eGFR 45 mL/min/1.73m², UACR 180 mg/g
+Blood Pressure: 155/88 mmHg
+Weight & Height: 68 kg, 162 cm
+
+Longitudinal Progress
+Initial Consultation (10-01-2023)
+
+Health Status: Multiple infections, fatigue, family concerned about self-care
+Lab Values: HbA1c 10.4%, FBG 285 mg/dL, BP 155/88 mmHg, Weight 68 kg, eGFR 45 mL/min/1.73m²
+Medications: Insulin glargine 15 units at bedtime, Metformin 500mg BID (reduced dose for CKD)
+Duration: Weekly initial follow-ups
+Lifestyle Recommendations: Simplified meal plan, family support arranged, glucose monitoring
+Reason for Treatment: Severe hyperglycemia requiring insulin, kidney function considered
+
+1-Month Follow-up (12-02-2023)
+
+Health Status: Improved symptoms, UTI resolved, family helping with medications
+Lab Values: HbA1c 8.9%, Average FBG 195 mg/dL, BP 148/85 mmHg, Weight 69 kg
+Medications: Increase insulin glargine to 22 units, continue Metformin
+Duration: Monthly monitoring
+Lifestyle Recommendations: Continue current plan, home health aide consideration
+Reason for Change: Good response but needs more insulin
+
+6-Month Follow-up (18-07-2023)
+
+Health Status: Stable, no recent infections, improved energy, mild hypoglycemia episodes
+Lab Values: HbA1c 7.8%, Average FBG 165 mg/dL, BP 142/82 mmHg, Weight 70 kg, eGFR 42 mL/min/1.73m²
+Medications: Reduce insulin glargine to 18 units, discontinue Metformin (eGFR decline)
+Duration: 3-month follow-up
+Lifestyle Recommendations: Hypoglycemia education, simplified testing schedule
+Reason for Change: Kidney function decline, hypoglycemia prevention
+
+1-Year Follow-up (15-01-2024)
+
+Health Status: Steady state, occasional confusion affecting compliance, family very involved
+Lab Values: HbA1c 8.2%, Average FBG 175 mg/dL, BP 138/80 mmHg, Weight 69 kg, eGFR 38 mL/min/1.73m², UACR 220 mg/g
+Medications: Continue insulin glargine 18 units, add DPP-4 inhibitor (Linagliptin 5mg daily)
+Duration: Ongoing with quarterly follow-ups
+Lifestyle Recommendations: Simplified diabetes management, focus on avoiding severe highs/lows
+Reason for Change: Kidney-safe medication needed, cognitive considerations
+Complications Screening: Mild NPDR detected, reduced sensation in feet noted
+
+18-Month Follow-up (22-07-2024)
+
+Health Status: Progressive CKD, maintained diabetes control, family considering assisted living
+Lab Values: HbA1c 8.0%, Average FBG 170 mg/dL, BP 135/78 mmHg, Weight 67 kg, eGFR 35 mL/min/1.73m²
+Medications: Continue current regimen, nephrology referral
+Duration: Palliative approach to diabetes management
+Lifestyle Recommendations: Quality of life focus, avoid severe hypoglycemia
+Complications Screening: Stable mild retinopathy, peripheral neuropathy present, foot care crucial
+
+===================================================================================================
+QUICK REGISTRATION GUIDE FOR TESTING
+===================================================================================================
+
+Use this data to register patients in the platform:
+
+Patient 1: registerPatient("Sarah Michelle Johnson", "Diabetes Type 2", "sarah.johnson@email.com")
+Patient 2: registerPatient("Michael David Rodriguez", "Diabetes Type 1", "mike.rodriguez@student.edu")  
+Patient 3: registerPatient("Carlos Eduardo Mendoza", "Diabetes Type 2", "carlos.mendoza@gmail.com")
+Patient 4: registerPatient("Priya Sharma-Patel", "Diabetes Type 2", "priya.patel@work.com")
+Patient 5: registerPatient("Dorothy Mae Williams", "Diabetes Type 2", "dorothy.williams@senior.net")
+
+Expected Registration Flow:
+1. Navigate to Patient Portal
+2. Use registration data above
+3. Verify patient ID generation (P001-P005)
+4. Proceed with doctor assignment and query testing
+
+Last Updated: August 22, 2025
