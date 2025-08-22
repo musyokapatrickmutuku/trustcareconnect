@@ -1,7 +1,10 @@
-/* TrustCareConnect Frontend - Main Styles */
+/* TrustCareConnect Frontend - Modern Design System */
 @import 'tailwindcss/base';
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
+
+/* Import our modern design system */
+@import './modern.css';
 
 /* Global styles */
 * {
