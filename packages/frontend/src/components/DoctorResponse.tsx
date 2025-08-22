@@ -144,7 +144,7 @@ const DoctorResponse: React.FC<DoctorResponseProps> = ({
 
   const loadResponseTemplates = async () => {
     try {
-      const result = await trustCareAPI.getResponseTemplates(doctor.specialization);
+      const result = await trustCareAPI.getResponseTemplates();
       if (result.success && result.data) {
         setTemplates(result.data);
       }
@@ -158,7 +158,7 @@ const DoctorResponse: React.FC<DoctorResponseProps> = ({
 
     setAutoSaveStatus('saving');
     try {
-      await trustCareAPI.saveDraftResponse(query.id, responseData);
+      await trustCareAPI.saveDraftResponse(query.id, doctor.id, responseData.content);
       setAutoSaveStatus('saved');
       setTimeout(() => setAutoSaveStatus(null), 3000);
     } catch (error) {
@@ -298,7 +298,7 @@ const DoctorResponse: React.FC<DoctorResponseProps> = ({
         wordCount
       };
 
-      const result = await trustCareAPI.submitDoctorResponse(completeResponse);
+      const result = await trustCareAPI.submitDoctorResponse(query.id, doctor.id, responseData.content);
 
       if (result.success) {
         showMessage?.('✅ Response submitted successfully! The patient has been notified.', 'success');

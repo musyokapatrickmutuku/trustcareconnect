@@ -9,7 +9,13 @@ export type WebSocketEvent =
   | 'doctor_offline'
   | 'system_stats_updated'
   | 'notification'
-  | 'connection_status';
+  | 'connection_status'
+  | 'query_subscribe'
+  | 'query_unsubscribe'
+  | 'system_stats_subscribe'
+  | 'user_status'
+  | 'typing_indicator'
+  | 'ping';
 
 export interface WebSocketMessage {
   event: WebSocketEvent;

@@ -304,10 +304,10 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({
   const handleAssignPatient = async (patientId: string) => {
     setLoading(true);
     try {
-      const result = await icpService.assignPatientToDoctor(patientId, currentDoctor.id);
+      const result = await trustCareAPI.assignPatientToDoctor(patientId, currentDoctor.id);
       if (result.success) {
         showMessage('Patient successfully assigned to your care!', 'success');
-        await loadDashboardData();
+        window.location.reload();
       } else {
         showMessage(`Error: ${result.error}`, 'error');
       }
@@ -324,10 +324,10 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({
     
     setLoading(true);
     try {
-      const result = await icpService.unassignPatient(patientId, currentDoctor.id);
+      const result = await trustCareAPI.unassignPatient(patientId, currentDoctor.id);
       if (result.success) {
         showMessage('Patient unassigned successfully.', 'success');
-        await loadDashboardData();
+        window.location.reload();
       } else {
         showMessage(`Error: ${result.error}`, 'error');
       }
@@ -468,7 +468,7 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({
                     key={query.id}
                     query={query}
                     currentDoctor={currentDoctor}
-                    onUpdate={loadMyQueries}
+                    onUpdate={() => window.location.reload()}
                     showMessage={showMessage}
                     loading={loading}
                     setLoading={setLoading}
@@ -521,7 +521,7 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({
                     key={query.id}
                     query={query}
                     currentDoctor={currentDoctor}
-                    onUpdate={loadMyQueries}
+                    onUpdate={() => window.location.reload()}
                     showMessage={showMessage}
                     loading={loading}
                     setLoading={setLoading}

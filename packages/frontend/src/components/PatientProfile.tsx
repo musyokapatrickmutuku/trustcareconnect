@@ -86,7 +86,7 @@ const PatientProfile: React.FC<PatientProfileProps> = ({
     setLoading?.(true);
     try {
       const result = await trustCareAPI.getPatientProfile(patient.id);
-      if (result.success && result.data) {
+      if (result.success && 'data' in result && result.data) {
         setPatientData({ ...patient, ...result.data });
       }
     } catch (error) {

@@ -86,8 +86,8 @@ const QueryManagement: React.FC<QueryManagementProps> = ({
       let bValue = b[filters.sortBy];
       
       if (filters.sortBy === 'title') {
-        aValue = aValue.toLowerCase();
-        bValue = bValue.toLowerCase();
+        aValue = typeof aValue === 'string' ? aValue.toLowerCase() : aValue;
+        bValue = typeof bValue === 'string' ? bValue.toLowerCase() : bValue;
       }
       
       if (filters.sortOrder === 'asc') {

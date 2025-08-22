@@ -3,7 +3,7 @@ import React from 'react';
 
 interface FormFieldProps {
   label: string;
-  type?: 'text' | 'email' | 'textarea' | 'select';
+  type?: 'text' | 'email' | 'textarea' | 'select' | 'date' | 'number' | 'password' | 'tel';
   name: string;
   value?: string;
   placeholder?: string;

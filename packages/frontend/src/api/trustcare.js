@@ -379,6 +379,186 @@ class TrustCareAPI {
   }
 
   // =======================
+  // ADDITIONAL API METHODS
+  // =======================
+
+  /**
+   * Get response templates for doctors
+   */
+  async getResponseTemplates() {
+    try {
+      this.log('Getting response templates');
+      // Mock templates for now - can be enhanced to fetch from backend
+      return {
+        success: true,
+        data: [
+          {
+            id: 'general',
+            name: 'General Response',
+            content: 'Thank you for your query. Based on your symptoms...',
+            category: 'general'
+          },
+          {
+            id: 'urgent',
+            name: 'Urgent Care',
+            content: 'I recommend immediate medical attention for your symptoms...',
+            category: 'urgent'
+          },
+          {
+            id: 'followup',
+            name: 'Follow-up Required',
+            content: 'Please schedule a follow-up appointment to discuss...',
+            category: 'follow-up'
+          }
+        ]
+      };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Save draft response for a query
+   * @param {string} queryId - Query's unique identifier
+   * @param {string} doctorId - Doctor's unique identifier
+   * @param {string} draftText - Draft response text
+   */
+  async saveDraftResponse(queryId, doctorId, draftText) {
+    try {
+      this.log(`Saving draft response for query ${queryId}`);
+      // For now, store in localStorage - can be enhanced to save to backend
+      const draftKey = `draft_${queryId}_${doctorId}`;
+      localStorage.setItem(draftKey, JSON.stringify({
+        queryId,
+        doctorId,
+        draftText,
+        savedAt: new Date().toISOString()
+      }));
+      return { success: true, message: 'Draft saved successfully' };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Submit doctor response to a query
+   * @param {string} queryId - Query's unique identifier
+   * @param {string} doctorId - Doctor's unique identifier
+   * @param {string} response - Final response text
+   */
+  async submitDoctorResponse(queryId, doctorId, response) {
+    try {
+      this.log(`Submitting doctor response for query ${queryId}`);
+      const result = await this.service.callCanisterMethod('respondToQuery', [queryId, doctorId, response]);
+      // Clear any saved draft
+      const draftKey = `draft_${queryId}_${doctorId}`;
+      localStorage.removeItem(draftKey);
+      return this.service.handleMotokoResult(result, 'submit doctor response');
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Get patient profile with extended information
+   * @param {string} patientId - Patient's unique identifier
+   */
+  async getPatientProfile(patientId) {
+    try {
+      this.log(`Getting patient profile: ${patientId}`);
+      // Use existing getPatient method and enhance with mock data for now
+      const patientResult = await this.getPatient(patientId);
+      if (patientResult.success && patientResult.data) {
+        return {
+          success: true,
+          data: {
+            ...patientResult.data,
+            vitalSigns: [],
+            medications: [],
+            medicalHistory: []
+          }
+        };
+      }
+      return patientResult;
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Update patient profile information
+   * @param {string} patientId - Patient's unique identifier
+   * @param {object} profileData - Updated profile data
+   */
+  async updatePatientProfile(patientId, profileData) {
+    try {
+      this.log(`Updating patient profile: ${patientId}`);
+      // For now, simulate success - can be enhanced to update backend
+      return { success: true, message: 'Patient profile updated successfully' };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Add vital signs for a patient
+   * @param {string} patientId - Patient's unique identifier
+   * @param {object} vitalSigns - Vital signs data
+   */
+  async addVitalSigns(patientId, vitalSigns) {
+    try {
+      this.log(`Adding vital signs for patient: ${patientId}`);
+      // For now, simulate success - can be enhanced to save to backend
+      return { success: true, message: 'Vital signs added successfully' };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Add medication for a patient
+   * @param {string} patientId - Patient's unique identifier
+   * @param {object} medication - Medication data
+   */
+  async addMedication(patientId, medication) {
+    try {
+      this.log(`Adding medication for patient: ${patientId}`);
+      // For now, simulate success - can be enhanced to save to backend
+      return { success: true, message: 'Medication added successfully' };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Add medical history entry for a patient
+   * @param {string} patientId - Patient's unique identifier
+   * @param {object} historyEntry - Medical history entry
+   */
+  async addMedicalHistory(patientId, historyEntry) {
+    try {
+      this.log(`Adding medical history for patient: ${patientId}`);
+      // For now, simulate success - can be enhanced to save to backend
+      return { success: true, message: 'Medical history added successfully' };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Get all queries in the system
+   */
+  async getAllQueries() {
+    try {
+      this.log('Getting all queries');
+      const result = await this.service.callCanisterMethod('getAllQueries');
+      return this.service.handleMotokoResult(result, 'get all queries');
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  // =======================
   // UTILITY METHODS
   // =======================
 

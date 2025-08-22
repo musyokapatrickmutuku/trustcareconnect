@@ -180,10 +180,10 @@ export const RoleBasedVisibility = ({
  * Shows different content based on authentication state
  */
 export const AuthenticationStatus = ({ 
-  authenticatedContent = null,
-  unauthenticatedContent = null,
-  loadingContent = null,
-  errorContent = null
+  authenticatedContent,
+  unauthenticatedContent,
+  loadingContent,
+  errorContent
 }) => {
   const { authState, isLoading, error, AUTH_STATES } = useAuth();
 

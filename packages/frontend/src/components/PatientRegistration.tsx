@@ -319,7 +319,13 @@ const PatientRegistration: React.FC<PatientRegistrationProps> = ({
         registrationDate: new Date().toISOString()
       };
 
-      const result = await trustCareAPI.registerPatient(patientData);
+      const result = await trustCareAPI.registerPatient(
+        patientData.fullName,
+        Array.isArray(patientData.medicalConditions) 
+          ? patientData.medicalConditions.join(', ') 
+          : (patientData.medicalConditions || ''),
+        patientData.email
+      );
       
       if (result.success && result.data) {
         showMessage?.('✅ Registration completed successfully! Welcome to TrustCareConnect.', 'success');

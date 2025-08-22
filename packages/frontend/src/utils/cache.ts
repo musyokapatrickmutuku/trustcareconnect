@@ -49,7 +49,7 @@ const CACHE_CONFIGS: Record<string, CacheConfig> = {
 };
 
 class DataCache {
-  private storage: Storage;
+  private storage: Storage | null;
   private memoryCache: Map<string, CacheItem<any>> = new Map();
   private stats: CacheStats = {
     hitRate: 0,
@@ -198,11 +198,11 @@ class DataCache {
       const prefix = `${cacheType}_`;
       
       // Clear from memory cache
-      for (const key of this.memoryCache.keys()) {
+      Array.from(this.memoryCache.keys()).forEach(key => {
         if (key.startsWith(prefix)) {
           this.memoryCache.delete(key);
         }
-      }
+      });
 
       // Clear from persistent storage
       if (this.storage) {
@@ -213,7 +213,7 @@ class DataCache {
             keysToRemove.push(key);
           }
         }
-        keysToRemove.forEach(key => this.storage.removeItem(key));
+        keysToRemove.forEach(key => this.storage!.removeItem(key));
       }
 
       this.updateCacheStats();
@@ -238,7 +238,7 @@ class DataCache {
             cacheKeys.push(key);
           }
         }
-        cacheKeys.forEach(key => this.storage.removeItem(key));
+        cacheKeys.forEach(key => this.storage!.removeItem(key));
       }
 
       this.stats = {
@@ -270,11 +270,11 @@ class DataCache {
     const now = Date.now();
     
     // Cleanup memory cache
-    for (const [key, item] of this.memoryCache.entries()) {
+    Array.from(this.memoryCache.entries()).forEach(([key, item]) => {
       if (!this.isValidItem(item)) {
         this.memoryCache.delete(key);
       }
-    }
+    });
 
     // Cleanup persistent storage
     if (this.storage) {
@@ -283,7 +283,9 @@ class DataCache {
         const key = this.storage.key(i);
         if (key && this.isCacheKey(key)) {
           try {
-            const item = JSON.parse(this.storage.getItem(key));
+            const itemData = this.storage!.getItem(key);
+            if (!itemData) continue;
+            const item = JSON.parse(itemData);
             if (!this.isValidItem(item)) {
               keysToRemove.push(key);
             }
@@ -293,7 +295,7 @@ class DataCache {
           }
         }
       }
-      keysToRemove.forEach(key => this.storage.removeItem(key));
+      keysToRemove.forEach(key => this.storage!.removeItem(key));
     }
 
     this.updateCacheStats();
@@ -371,7 +373,9 @@ class DataCache {
       const key = this.storage.key(i);
       if (key && this.isCacheKey(key)) {
         try {
-          const item = JSON.parse(this.storage.getItem(key));
+          const itemData = this.storage!.getItem(key);
+          if (!itemData) continue;
+          const item = JSON.parse(itemData);
           // Remove items older than 1 hour
           if (now - item.timestamp > 60 * 60 * 1000) {
             keysToRemove.push(key);
@@ -382,7 +386,7 @@ class DataCache {
       }
     }
     
-    keysToRemove.forEach(key => this.storage.removeItem(key));
+    keysToRemove.forEach(key => this.storage!.removeItem(key));
   }
 
   private isCacheKey(key: string): boolean {

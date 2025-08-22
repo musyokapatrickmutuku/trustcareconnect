@@ -120,10 +120,15 @@ class InternetIdentityAuth {
         ...(identityProvider && { identityProvider })
       };
 
-      // For development, use local Internet Identity if available
-      if (process.env.NODE_ENV === 'development') {
+      // Use Internet Identity provider based on network
+      if (process.env.REACT_APP_NETWORK === 'local') {
+        // Local development with local Internet Identity
         const localII = process.env.REACT_APP_LOCAL_II_URL || 'http://localhost:4943/?canisterId=rdmx6-jaaaa-aaaaa-aaadq-cai';
         loginOptions.identityProvider = localII;
+      } else {
+        // Production/IC mainnet
+        const iiProvider = process.env.REACT_APP_II_URL || 'https://identity.ic0.app';
+        loginOptions.identityProvider = iiProvider;
       }
 
       await new Promise((resolve, reject) => {

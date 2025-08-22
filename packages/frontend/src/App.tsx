@@ -8,6 +8,7 @@ import ProtectedRoute, { PatientRoute, DoctorRoute, AuthenticatedRoute, Authenti
 import MessageDisplay from './components/common/MessageDisplay';
 import LoadingSpinner from './components/common/LoadingSpinner';
 import ErrorBoundary from './components/ErrorBoundary';
+import ConnectionStatus from './components/ConnectionStatus';
 import trustCareAPI from './api/trustcare';
 import './styles/App.css';
 
@@ -18,6 +19,8 @@ const DoctorPortal = lazy(() => import('./pages/DoctorPortal'));
 
 // Lazy loaded form components (heavy components with rich text editor)
 const DoctorResponse = lazy(() => import('./components/DoctorResponse'));
+
+// Placeholder components will be defined later
 const PatientRegistration = lazy(() => import('./components/PatientRegistration'));
 const QueryForm = lazy(() => import('./components/QueryForm'));
 
@@ -63,7 +66,7 @@ const preloadComponents = () => {
 };
 
 // Login component for unauthenticated users
-const LoginPage: React.FC<{showMessage: (msg: string, type?: string) => void}> = ({ showMessage }) => {
+const LoginPage: React.FC<{showMessage: (msg: string, type?: 'success' | 'error' | 'info' | 'warning') => void}> = ({ showMessage }) => {
   const { login, isLoading } = useAuth();
   
   const handleLogin = async () => {
@@ -120,7 +123,7 @@ const LoginPage: React.FC<{showMessage: (msg: string, type?: string) => void}> =
 };
 
 // Registration component for users who need to set up their profile
-const RegistrationPage: React.FC<{showMessage: (msg: string, type?: string) => void}> = ({ showMessage }) => {
+const RegistrationPage: React.FC<{showMessage: (msg: string, type?: 'success' | 'error' | 'info' | 'warning') => void}> = ({ showMessage }) => {
   const { registerUser, principal, isLoading } = useAuth();
   const [selectedRole, setSelectedRole] = useState<'patient' | 'doctor' | null>(null);
   const [formData, setFormData] = useState({
@@ -141,14 +144,10 @@ const RegistrationPage: React.FC<{showMessage: (msg: string, type?: string) => v
     const userData = {
       name: formData.name,
       email: formData.email,
-      isActive: true
+      isActive: true,
+      ...(selectedRole === 'patient' ? { condition: formData.condition || 'General' } : {}),
+      ...(selectedRole === 'doctor' ? { specialization: formData.specialization || 'General Practice' } : {})
     };
-    
-    if (selectedRole === 'patient') {
-      userData.condition = formData.condition || 'General';
-    } else if (selectedRole === 'doctor') {
-      userData.specialization = formData.specialization || 'General Practice';
-    }
     
     const result = await registerUser(userData, selectedRole);
     if (result.success) {
@@ -390,6 +389,8 @@ const AppContent: React.FC = () => {
     <div className="app min-h-screen bg-gray-50">
       <AuthenticationStatus
         unauthenticatedContent={<LoginPage showMessage={showMessage} />}
+        loadingContent={<div className="min-h-screen flex items-center justify-center"><LoadingSpinner /></div>}
+        errorContent={<div className="min-h-screen flex items-center justify-center text-red-600">Authentication Error</div>}
         authenticatedContent={
           <>
             <header className="bg-white shadow-sm border-b">
@@ -484,6 +485,9 @@ const AppContent: React.FC = () => {
           </>
         }
       />
+      
+      {/* Connection Status Indicator */}
+      <ConnectionStatus />
     </div>
   );
 };
