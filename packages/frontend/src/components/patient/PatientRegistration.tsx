@@ -27,10 +27,11 @@ const PatientRegistration: React.FC<PatientRegistrationProps> = ({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     const maxLength = FORM_VALIDATION[`MAX_${name.toUpperCase()}_LENGTH` as keyof typeof FORM_VALIDATION] || 100;
+    const maxLengthNum = typeof maxLength === 'number' ? maxLength : 100;
     
     setFormData(prev => ({
       ...prev,
-      [name]: sanitizeInput(value, maxLength)
+      [name]: sanitizeInput(value, maxLengthNum)
     }));
 
     // Clear error when user starts typing
