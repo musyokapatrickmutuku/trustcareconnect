@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import FormField from '../common/FormField';
 import Button from '../common/Button';
 import { Patient, ComponentProps } from '../../types';
-import trustCareAPI from '../../api/trustcare.js';
+import icpService from '../../services/icpService';
 
 interface QuerySubmissionProps extends ComponentProps {
   patient: Patient;

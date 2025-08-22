@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { SystemStats } from '../types';
 import LoadingSpinner from '../components/common/LoadingSpinner';
-import trustCareAPI from '../api/trustcare.js';
+import icpService from '../services/icpService';
 
 const HomePage: React.FC = () => {
   const [stats, setStats] = useState<SystemStats | null>(null);
@@ -24,19 +24,8 @@ const HomePage: React.FC = () => {
     
     try {
       // Test connection first
-      const connectionInfo = trustCareAPI.getConnectionInfo();
-      setConnectionStatus(connectionInfo.status);
-
-      if (connectionInfo.status !== 'connected') {
-        // Try to reconnect
-        const reconnectResult = await trustCareAPI.reconnect();
-        if (!reconnectResult.success) {
-          throw new Error('Failed to establish connection to backend');
-        }
-      }
-
-      // Load platform statistics using the new API layer
-      const result = await trustCareAPI.getSystemStats();
+      // Test connection and load platform statistics
+      const result = await icpService.getStats();
       
       if (result.success && result.data) {
         setStats(result.data);
