@@ -5,8 +5,6 @@ import LoadingSpinner from '../common/LoadingSpinner';
 import QuerySubmission from './QuerySubmission';
 import icpService from '../../services/icpService';
 import { formatters } from '../../utils/formatters';
-import { useWebSocket } from '../../services/websocket';
-import { useSmartPolling } from '../../hooks/usePolling';
 
 interface PatientDashboardProps {
   patient: Patient;
@@ -36,65 +34,9 @@ const PatientDashboard: React.FC<PatientDashboardProps> = ({
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
   const [realtimeUpdates, setRealtimeUpdates] = useState(0);
   
-  // WebSocket integration for real-time updates
-  const {
-    isConnected: wsConnected,
-    connectionStatus,
-    subscribe,
-    setUserStatus
-  } = useWebSocket(patient.id, 'patient');
-  
-  // Smart polling as fallback when WebSocket is not available
-  const [pollingState, pollingControls] = useSmartPolling(
-    useCallback(async () => {
-      const result = await trustCareAPI.getPatientPortalData(patient.id);
-      if (result.success && result.data?.queries?.success) {
-        return result.data.queries.data || [];
-      }
-      throw new Error(result.error || 'Failed to load queries');
-    }, [patient.id]),
-    wsConnected,
-    {
-      interval: 30000, // Poll every 30 seconds when WebSocket is not connected
-      onSuccess: (queryData) => {
-        const queriesWithEstimates = queryData.map((query: MedicalQuery) => ({
-          ...query,
-          estimatedResponseTime: calculateEstimatedResponseTime(query),
-          timeRemaining: calculateTimeRemaining(query)
-        }));
-        
-        checkForStatusUpdates(queriesWithEstimates);
-        setQueries(queriesWithEstimates);
-        setLastRefresh(new Date());
-        setError(null);
-        setRealtimeUpdates(prev => prev + 1);
-      },
-      onError: (error) => {
-        setError(error.message);
-        showMessage('Failed to refresh query data', 'error');
-      }
-    }
-  );
+  const [wsConnected] = useState(false);
+  const [connectionStatus] = useState({ reconnecting: false });
 
-  // WebSocket event listeners
-  useEffect(() => {
-    if (!wsConnected) return;
-
-    // Set user status as online
-    setUserStatus('online');
-
-    // Subscribe to relevant events
-    const unsubscribeFunctions = [
-      subscribe('query_created', handleQueryCreated),
-      subscribe('query_updated', handleQueryUpdated),
-      subscribe('response_received', handleResponseReceived),
-      subscribe('notification', handleNotification)
-    ];
-
-    return () => {
-      unsubscribeFunctions.forEach(unsub => unsub());
-    };
-  }, [wsConnected, subscribe, setUserStatus]);
 
   useEffect(() => {
     loadPatientQueries();
@@ -175,11 +117,11 @@ const PatientDashboard: React.FC<PatientDashboardProps> = ({
       console.log(`Loading queries for patient: ${patient.id}`);
       
       // Use the enhanced API to load patient portal data (includes patient info and queries)
-      const result = await trustCareAPI.getPatientPortalData(patient.id);
+      const result = await icpService.getPatientQueries(patient.id);
       console.log('Patient portal data result:', result);
       
-      if (result.success && result.data?.queries?.success && result.data.queries.data) {
-        const queryData = result.data.queries.data;
+      if (result.success && result.data) {
+        const queryData = result.data || [];
         console.log(`Found ${queryData.length} queries for patient`);
         
         const queriesWithEstimates = queryData.map((query: MedicalQuery) => ({
@@ -193,19 +135,9 @@ const PatientDashboard: React.FC<PatientDashboardProps> = ({
         
         setQueries(queriesWithEstimates);
         setLastRefresh(new Date());
-        
-        // Log any partial errors from batch operation
-        if (result.errors && result.errors.length > 0) {
-          console.warn('Some patient data failed to load:', result.errors);
-        }
-      } else if (result.success && result.data?.queries?.success && !result.data.queries.data) {
-        // No queries found (empty array)
-        console.log('No queries found for patient');
-        setQueries([]);
-        setLastRefresh(new Date());
       } else {
         // API error
-        const errorMessage = result.data?.queries?.error || result.error || 'Failed to load queries';
+        const errorMessage = result.error || 'Failed to load queries';
         throw new Error(errorMessage);
       }
     } catch (error) {

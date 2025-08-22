@@ -64,7 +64,7 @@ const QuerySubmission: React.FC<QuerySubmissionProps> = ({
 
     setLoading?.(true);
     try {
-      const result = await trustCareAPI.submitQuery(
+      const result = await icpService.submitQuery(
         patient.id,
         formData.title.trim(),
         formData.description.trim()
