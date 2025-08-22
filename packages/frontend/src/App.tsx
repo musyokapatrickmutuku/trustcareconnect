@@ -3,13 +3,13 @@ import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
 import { Patient, Doctor } from './types';
 import { UI_MESSAGES } from './constants';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
-import ProtectedRoute, { PatientRoute, DoctorRoute, AuthenticatedRoute, AuthenticationStatus, RoleBasedVisibility } from './components/ProtectedRoute';
+import { AuthProvider, useAuth } from './contexts/AuthContext.js';
+import ProtectedRoute, { PatientRoute, DoctorRoute, AuthenticatedRoute, AuthenticationStatus, RoleBasedVisibility } from './components/ProtectedRoute.js';
 import MessageDisplay from './components/common/MessageDisplay';
 import LoadingSpinner from './components/common/LoadingSpinner';
 import ErrorBoundary from './components/ErrorBoundary';
 import ConnectionStatus from './components/ConnectionStatus';
-import trustCareAPI from './api/trustcare';
+import trustCareAPI from './api/trustcare.js';
 import './styles/App.css';
 
 // Lazy loaded components for code splitting
@@ -17,20 +17,7 @@ const HomePage = lazy(() => import('./pages/HomePage'));
 const PatientPortal = lazy(() => import('./pages/PatientPortal'));
 const DoctorPortal = lazy(() => import('./pages/DoctorPortal'));
 
-// Lazy loaded form components (heavy components with rich text editor)
-const DoctorResponse = lazy(() => import('./components/DoctorResponse'));
-
-// Placeholder components will be defined later
-const PatientRegistration = lazy(() => import('./components/PatientRegistration'));
-const QueryForm = lazy(() => import('./components/QueryForm'));
-
-// Lazy loaded dashboard components
-const PatientDashboard = lazy(() => import('./components/patient/PatientDashboard'));
-const DoctorDashboard = lazy(() => import('./components/doctor/DoctorDashboard'));
-
-// Lazy loaded utility components
-const NotificationSystem = lazy(() => import('./components/NotificationSystem'));
-const MobileNavigation = lazy(() => import('./components/MobileNavigation'));
+// Remove lazy imports for components that aren't used in current App structure
 
 // Loading fallback component for lazy-loaded components
 const LazyLoadingFallback: React.FC<{ message?: string }> = ({ 

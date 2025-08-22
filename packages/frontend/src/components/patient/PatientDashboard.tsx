@@ -3,7 +3,7 @@ import { Patient, MedicalQuery, QueryStatus } from '../../types';
 import Button from '../common/Button';
 import LoadingSpinner from '../common/LoadingSpinner';
 import QuerySubmission from './QuerySubmission';
-import trustCareAPI from '../../api/trustcare';
+import trustCareAPI from '../../api/trustcare.js';
 import { formatters } from '../../utils/formatters';
 import { useWebSocket } from '../../services/websocket';
 import { useSmartPolling } from '../../hooks/usePolling';

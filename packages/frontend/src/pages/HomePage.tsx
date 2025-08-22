@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { SystemStats } from '../types';
 import LoadingSpinner from '../components/common/LoadingSpinner';
-import trustCareAPI from '../api/trustcare';
+import trustCareAPI from '../api/trustcare.js';
 
 const HomePage: React.FC = () => {
   const [stats, setStats] = useState<SystemStats | null>(null);
