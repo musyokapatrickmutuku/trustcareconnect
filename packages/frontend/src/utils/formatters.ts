@@ -1,12 +1,11 @@
 // Utility functions for formatting data
 import { QueryStatus } from '../types';
-import { QUERY_STATUS } from '../constants';
 
 export const formatQueryStatus = (status: QueryStatus): string => {
   switch (status) {
-    case 'pending': return QUERY_STATUS.PENDING;
-    case 'doctor_review': return QUERY_STATUS.DOCTOR_REVIEW;
-    case 'completed': return QUERY_STATUS.COMPLETED;
+    case 'pending': return 'Pending Review';
+    case 'doctor_review': return 'Under Doctor Review';
+    case 'completed': return 'Completed';
     default: return 'Unknown';
   }
 };

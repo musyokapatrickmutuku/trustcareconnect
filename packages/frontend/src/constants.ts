@@ -12,8 +12,11 @@ export const UI_MESSAGES = {
     LOGIN_SUCCESS: 'Login successful!',
     LOGOUT_SUCCESS: 'Logged out successfully.',
     REGISTRATION_SUCCESS: 'Registration completed successfully!',
+    PATIENT_REGISTERED: 'Patient registered successfully!',
     QUERY_SUBMITTED: 'Your query has been submitted successfully.',
+    QUERY_TAKEN: 'Query has been assigned to you.',
     RESPONSE_SENT: 'Your response has been sent to the patient.',
+    RESPONSE_SUBMITTED: 'Your response has been submitted successfully.',
   },
   LOADING: {
     SIGNING_IN: 'Signing in...',
@@ -68,6 +71,50 @@ export const USER_ROLES = {
   PATIENT: 'patient',
   DOCTOR: 'doctor',
   ADMIN: 'admin'
+} as const;
+
+export const FORM_VALIDATION = {
+  MIN_NAME_LENGTH: 2,
+  MAX_NAME_LENGTH: 100,
+  MIN_EMAIL_LENGTH: 5,
+  MAX_EMAIL_LENGTH: 255,
+  MIN_CONDITION_LENGTH: 5,
+  MAX_CONDITION_LENGTH: 500,
+  EMAIL_PATTERN: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+  NAME_PATTERN: /^[a-zA-Z\s'-]+$/
+};
+
+export const MEDICAL_CONDITIONS = [
+  'Hypertension',
+  'Diabetes Type 1',
+  'Diabetes Type 2',
+  'Heart Disease',
+  'Asthma',
+  'COPD (Chronic Obstructive Pulmonary Disease)',
+  'Arthritis',
+  'Osteoporosis',
+  'Depression',
+  'Anxiety Disorder',
+  'Migraine',
+  'Chronic Pain',
+  'Allergies',
+  'High Cholesterol',
+  'Thyroid Disorder',
+  'Cancer (specify type)',
+  'Kidney Disease',
+  'Liver Disease',
+  'Stroke History',
+  'Sleep Apnea',
+  'Fibromyalgia',
+  'Chronic Fatigue Syndrome',
+  'Other (please specify)'
+];
+
+export const QUERY_STATUS = {
+  PENDING: 'pending',
+  DOCTOR_REVIEW: 'doctor_review', 
+  COMPLETED: 'completed',
+  ARCHIVED: 'archived'
 } as const;
 
 export const API_ENDPOINTS = {
