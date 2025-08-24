@@ -3,6 +3,7 @@ import { Patient, MedicalQuery, QueryStatus } from '../../types';
 import Button from '../common/Button';
 import LoadingSpinner from '../common/LoadingSpinner';
 import QuerySubmission from './QuerySubmission';
+import QueryStatusNotification from './QueryStatusNotification';
 import icpService from '../../services/icpService';
 import { formatters } from '../../utils/formatters';
 
@@ -367,6 +368,15 @@ const PatientDashboard: React.FC<PatientDashboardProps> = ({
         </div>
       )}
 
+      {/* Query Status Notifications */}
+      <QueryStatusNotification 
+        queries={queries}
+        showMessage={showMessage}
+        onDismiss={(queryId, type) => {
+          console.log(`Dismissed ${type} notification for query ${queryId}`);
+        }}
+      />
+
       {/* Navigation Tabs */}
       <div className="mb-6">
         <div className="border-b border-gray-200">
@@ -470,7 +480,7 @@ const PatientDashboard: React.FC<PatientDashboardProps> = ({
                 </div>
               ) : (
                 queries.slice(0, 5).map((query) => (
-                  <div key={query.id} className="p-6">
+                  <div key={query.id} id={`query-${query.id}`} className="p-6 transition-all duration-300">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center mb-2">
@@ -518,7 +528,7 @@ const PatientDashboard: React.FC<PatientDashboardProps> = ({
               </div>
               <div className="divide-y divide-gray-200">
                 {pendingQueries.map((query) => (
-                  <div key={query.id} className="p-6">
+                  <div key={query.id} id={`query-${query.id}`} className="p-6 transition-all duration-300">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center mb-2">
@@ -567,7 +577,7 @@ const PatientDashboard: React.FC<PatientDashboardProps> = ({
                 </div>
               ) : (
                 completedQueries.map((query) => (
-                  <div key={query.id} className="p-6">
+                  <div key={query.id} id={`query-${query.id}`} className="p-6 transition-all duration-300">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center mb-2">

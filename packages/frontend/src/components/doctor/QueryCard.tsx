@@ -49,16 +49,17 @@ const QueryCard: React.FC<QueryCardProps> = ({
     }
   };
 
-  const handleRespondToQuery = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!responseForm.response.trim()) return;
+  const handleRespondToQuery = async (e?: React.FormEvent, directResponse?: string) => {
+    if (e) e.preventDefault();
+    const responseText = directResponse || responseForm.response;
+    if (!responseText.trim()) return;
     
     setLoading(true);
     try {
       const result = await trustCareAPI.respondToQuery(
         query.id,
         currentDoctor.id,
-        responseForm.response
+        responseText
       );
       
       if (result.success) {
@@ -73,6 +74,29 @@ const QueryCard: React.FC<QueryCardProps> = ({
       showMessage('Failed to submit response. Please try again.', 'error');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleApproveAndSend = async () => {
+    if (query.aiDraftResponse && query.status === 'in_review') {
+      // Directly submit the AI draft response
+      await handleRespondToQuery(undefined, query.aiDraftResponse);
+    } else if (query.aiDraftResponse) {
+      // For pending queries, need to take the query first
+      try {
+        setLoading(true);
+        const takeResult = await trustCareAPI.takeQuery(query.id, currentDoctor.id);
+        if (takeResult.success) {
+          // Now submit the response
+          await handleRespondToQuery(undefined, query.aiDraftResponse);
+        } else {
+          showMessage(`Error taking query: ${takeResult.error}`, 'error');
+        }
+      } catch (error) {
+        showMessage('Failed to approve response. Please try again.', 'error');
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -148,12 +172,7 @@ const QueryCard: React.FC<QueryCardProps> = ({
                   setResponseForm({ response: editedResponse });
                   setShowResponse(true);
                 }}
-                onApproveResponse={() => {
-                  if (query.aiDraftResponse) {
-                    setResponseForm({ response: query.aiDraftResponse });
-                    setShowResponse(true);
-                  }
-                }}
+                onApproveResponse={handleApproveAndSend}
                 onOrderAction={(action) => {
                   console.log(`Clinical action ordered: ${action} for patient ${query.patientId}`);
                   showMessage(`Action "${action}" has been noted in the clinical workflow`, 'info');

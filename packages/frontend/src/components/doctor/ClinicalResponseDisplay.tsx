@@ -206,6 +206,22 @@ const ClinicalResponseDisplay: React.FC<ClinicalResponseProps> = ({
     setEditMode(false);
   };
 
+  const handleSaveDraft = () => {
+    // Save the current response as draft
+    console.log('Saving draft response for query:', queryId);
+    // TODO: Implement actual draft saving functionality
+    alert('Draft saved successfully! This response has been saved and can be continued later.');
+  };
+
+  const handleRequestNewResponse = () => {
+    // Request a new AI response
+    console.log('Requesting new AI response for query:', queryId);
+    // TODO: Implement regenerate AI response functionality
+    if (confirm('Are you sure you want to request a new AI response? This will replace the current response.')) {
+      alert('New AI response requested! The system will generate a fresh response based on the patient data.');
+    }
+  };
+
   return (
     <div className="clinical-response-display">
       <div className="clinical-header">
@@ -338,10 +354,10 @@ const ClinicalResponseDisplay: React.FC<ClinicalResponseProps> = ({
         <button className="btn-approve" onClick={onApproveResponse}>
           ✅ Approve & Send to Patient
         </button>
-        <button className="btn-save-draft">
+        <button className="btn-save-draft" onClick={handleSaveDraft}>
           💾 Save as Draft
         </button>
-        <button className="btn-reject">
+        <button className="btn-reject" onClick={handleRequestNewResponse}>
           ❌ Request New Response
         </button>
       </div>

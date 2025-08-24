@@ -71,7 +71,7 @@ const QuerySubmission: React.FC<QuerySubmissionProps> = ({
       );
 
       if (result.success) {
-        showMessage?.('✅ Query submitted successfully! Your query has been processed by our AI system and sent to your assigned doctor for review. You will receive notifications as your query progresses.', 'success');
+        showMessage?.('🎉 Query submitted successfully! Your query has been processed by our AI system and sent to your doctor for review. Keep an eye on your notifications for updates on the progress.', 'success');
         setFormData({ title: '', description: '' });
         onQuerySubmitted();
       } else {
