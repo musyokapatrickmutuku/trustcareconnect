@@ -2,6 +2,98 @@ export const idlFactory = ({ IDL }) => {
   const PatientId = IDL.Text;
   const DoctorId = IDL.Text;
   const Result = IDL.Variant({ 'ok' : IDL.Null, 'err' : IDL.Text });
+  const InsuranceId = IDL.Text;
+  const InsuranceInfo = IDL.Record({
+    'id' : InsuranceId,
+    'memberId' : IDL.Text,
+    'groupNumber' : IDL.Opt(IDL.Text),
+    'provider' : IDL.Text,
+    'isActive' : IDL.Bool,
+    'deductibleAmount' : IDL.Opt(IDL.Float64),
+    'expirationDate' : IDL.Opt(IDL.Int),
+    'copayAmount' : IDL.Opt(IDL.Float64),
+    'policyNumber' : IDL.Text,
+    'effectiveDate' : IDL.Int,
+  });
+  const BloodType = IDL.Variant({
+    'B_negative' : IDL.Null,
+    'AB_positive' : IDL.Null,
+    'O_positive' : IDL.Null,
+    'A_negative' : IDL.Null,
+    'B_positive' : IDL.Null,
+    'unknown' : IDL.Null,
+    'AB_negative' : IDL.Null,
+    'A_positive' : IDL.Null,
+    'O_negative' : IDL.Null,
+  });
+  const EmergencyContact = IDL.Record({
+    'relationship' : IDL.Text,
+    'name' : IDL.Text,
+    'email' : IDL.Opt(IDL.Text),
+    'address' : IDL.Opt(IDL.Text),
+    'phoneNumber' : IDL.Text,
+  });
+  const MedicalHistory = IDL.Record({
+    'surgeries' : IDL.Vec(IDL.Text),
+    'lastUpdated' : IDL.Int,
+    'medications' : IDL.Vec(IDL.Text),
+    'familyHistory' : IDL.Vec(IDL.Text),
+    'conditions' : IDL.Vec(IDL.Text),
+    'allergies' : IDL.Vec(IDL.Text),
+  });
+  const Gender = IDL.Variant({
+    'other' : IDL.Null,
+    'female' : IDL.Null,
+    'male' : IDL.Null,
+    'prefer_not_to_say' : IDL.Null,
+  });
+  const UserId = IDL.Text;
+  const VitalSigns = IDL.Record({
+    'weight' : IDL.Opt(IDL.Float64),
+    'height' : IDL.Opt(IDL.Float64),
+    'temperature' : IDL.Opt(IDL.Float64),
+    'recordedAt' : IDL.Int,
+    'recordedBy' : IDL.Opt(UserId),
+    'oxygenSaturation' : IDL.Opt(IDL.Nat),
+    'heartRate' : IDL.Opt(IDL.Nat),
+    'bloodPressureDiastolic' : IDL.Opt(IDL.Nat),
+    'bloodPressureSystolic' : IDL.Opt(IDL.Nat),
+  });
+  const PatientData = IDL.Record({
+    'id' : PatientId,
+    'insuranceInfo' : IDL.Opt(InsuranceInfo),
+    'bloodType' : BloodType,
+    'country' : IDL.Text,
+    'dateOfBirth' : IDL.Text,
+    'communicationPreferences' : IDL.Record({
+      'sms' : IDL.Bool,
+      'email' : IDL.Bool,
+      'phone' : IDL.Bool,
+      'portal' : IDL.Bool,
+    }),
+    'city' : IDL.Text,
+    'createdAt' : IDL.Int,
+    'emergencyContact' : EmergencyContact,
+    'dataProcessingConsent' : IDL.Bool,
+    'medicalRecordNumber' : IDL.Text,
+    'isActive' : IDL.Bool,
+    'email' : IDL.Text,
+    'zipCode' : IDL.Text,
+    'updatedAt' : IDL.Int,
+    'lastVisit' : IDL.Opt(IDL.Int),
+    'state' : IDL.Text,
+    'primaryDoctorId' : IDL.Opt(DoctorId),
+    'hipaaAcknowledged' : IDL.Bool,
+    'medicalHistory' : MedicalHistory,
+    'consentToTreatment' : IDL.Bool,
+    'address' : IDL.Text,
+    'gender' : Gender,
+    'assignedDoctorIds' : IDL.Vec(DoctorId),
+    'phoneNumber' : IDL.Text,
+    'currentVitals' : IDL.Opt(VitalSigns),
+    'lastName' : IDL.Text,
+    'firstName' : IDL.Text,
+  });
   const Patient = IDL.Record({
     'id' : PatientId,
     'name' : IDL.Text,
@@ -17,9 +109,14 @@ export const idlFactory = ({ IDL }) => {
   });
   const QueryId = IDL.Text;
   const QueryStatus = IDL.Variant({
-    'doctor_review' : IDL.Null,
+    'resolved' : IDL.Null,
+    'closed' : IDL.Null,
+    'assigned' : IDL.Null,
+    'submitted' : IDL.Null,
     'pending' : IDL.Null,
-    'completed' : IDL.Null,
+    'escalated' : IDL.Null,
+    'awaiting_patient_response' : IDL.Null,
+    'in_review' : IDL.Null,
   });
   const MedicalQuery = IDL.Record({
     'id' : QueryId,
@@ -33,6 +130,182 @@ export const idlFactory = ({ IDL }) => {
     'aiDraftResponse' : IDL.Opt(IDL.Text),
     'response' : IDL.Opt(IDL.Text),
   });
+  const DoctorSpecialty = IDL.Variant({
+    'radiology' : IDL.Null,
+    'cardiology' : IDL.Null,
+    'other' : IDL.Text,
+    'general_practice' : IDL.Null,
+    'psychiatry' : IDL.Null,
+    'surgery' : IDL.Null,
+    'gastroenterology' : IDL.Null,
+    'oncology' : IDL.Null,
+    'emergency_medicine' : IDL.Null,
+    'orthopedics' : IDL.Null,
+    'internal_medicine' : IDL.Null,
+    'pediatrics' : IDL.Null,
+    'endocrinology' : IDL.Null,
+    'dermatology' : IDL.Null,
+    'neurology' : IDL.Null,
+  });
+  const QueryCategory = IDL.Variant({
+    'second_opinion' : IDL.Null,
+    'medication_question' : IDL.Null,
+    'other' : IDL.Text,
+    'test_results' : IDL.Null,
+    'appointment_request' : IDL.Null,
+    'general_inquiry' : IDL.Null,
+    'symptom_assessment' : IDL.Null,
+    'follow_up' : IDL.Null,
+    'emergency_consultation' : IDL.Null,
+    'prescription_refill' : IDL.Null,
+  });
+  const QueryPriority = IDL.Variant({
+    'low' : IDL.Null,
+    'emergency' : IDL.Null,
+    'normal' : IDL.Null,
+    'high' : IDL.Null,
+    'urgent' : IDL.Null,
+  });
+  const SearchCriteria = IDL.Record({
+    'status' : IDL.Opt(QueryStatus),
+    'doctorId' : IDL.Opt(DoctorId),
+    'dateTo' : IDL.Opt(IDL.Int),
+    'patientId' : IDL.Opt(PatientId),
+    'offset' : IDL.Opt(IDL.Nat),
+    'limit' : IDL.Opt(IDL.Nat),
+    'specialty' : IDL.Opt(DoctorSpecialty),
+    'category' : IDL.Opt(QueryCategory),
+    'priority' : IDL.Opt(QueryPriority),
+    'searchQuery' : IDL.Opt(IDL.Text),
+    'department' : IDL.Opt(IDL.Text),
+    'dateFrom' : IDL.Opt(IDL.Int),
+  });
+  const AIAnalysis = IDL.Record({
+    'flaggedSymptoms' : IDL.Vec(IDL.Text),
+    'suggestedSpecialty' : IDL.Opt(DoctorSpecialty),
+    'recommendedActions' : IDL.Vec(IDL.Text),
+    'modelVersion' : IDL.Text,
+    'confidence' : IDL.Float64,
+    'analysisTimestamp' : IDL.Int,
+    'riskAssessment' : IDL.Text,
+  });
+  const AttachmentType = IDL.Variant({
+    'prescription' : IDL.Null,
+    'lab_result' : IDL.Null,
+    'document' : IDL.Null,
+    'image' : IDL.Null,
+    'medical_record' : IDL.Null,
+  });
+  const Attachment = IDL.Record({
+    'id' : IDL.Text,
+    'isEncrypted' : IDL.Bool,
+    'fileSizeBytes' : IDL.Nat,
+    'fileName' : IDL.Text,
+    'fileType' : AttachmentType,
+    'accessPermissions' : IDL.Vec(UserId),
+    'uploadedAt' : IDL.Int,
+    'uploadedBy' : UserId,
+  });
+  const QueryResponse = IDL.Record({
+    'id' : IDL.Text,
+    'readByPatient' : IDL.Bool,
+    'readTimestamp' : IDL.Opt(IDL.Int),
+    'isOfficial' : IDL.Bool,
+    'timestamp' : IDL.Int,
+    'responseText' : IDL.Text,
+    'responderId' : UserId,
+    'attachments' : IDL.Vec(Attachment),
+  });
+  const QueryData = IDL.Record({
+    'id' : QueryId,
+    'status' : QueryStatus,
+    'aiAnalysis' : IDL.Opt(AIAnalysis),
+    'title' : IDL.Text,
+    'hipaaCompliant' : IDL.Bool,
+    'assignedAt' : IDL.Opt(IDL.Int),
+    'responses' : IDL.Vec(QueryResponse),
+    'dataClassification' : IDL.Text,
+    'patientId' : PatientId,
+    'createdAt' : IDL.Int,
+    'description' : IDL.Text,
+    'patientSatisfactionRating' : IDL.Opt(IDL.Nat),
+    'escalationLevel' : IDL.Nat,
+    'assignedDoctorId' : IDL.Opt(DoctorId),
+    'resolutionComplexity' : IDL.Opt(IDL.Text),
+    'updatedAt' : IDL.Int,
+    'relatedQueryIds' : IDL.Vec(QueryId),
+    'followUpRequired' : IDL.Bool,
+    'aiDraftResponse' : IDL.Opt(IDL.Text),
+    'patientMessages' : IDL.Vec(QueryResponse),
+    'responseTimeMinutes' : IDL.Opt(IDL.Nat),
+    'category' : QueryCategory,
+    'auditTrail' : IDL.Vec(IDL.Text),
+    'priority' : QueryPriority,
+    'internalNotes' : IDL.Vec(QueryResponse),
+    'attachments' : IDL.Vec(Attachment),
+    'departmentId' : IDL.Opt(IDL.Text),
+    'requiresHumanReview' : IDL.Bool,
+    'resolvedAt' : IDL.Opt(IDL.Int),
+    'followUpDate' : IDL.Opt(IDL.Int),
+  });
+  const SearchResult = IDL.Record({
+    'hasMore' : IDL.Bool,
+    'totalCount' : IDL.Nat,
+    'offset' : IDL.Nat,
+    'results' : IDL.Vec(QueryData),
+    'searchQuery' : SearchCriteria,
+  });
+  const SystemPerformanceMetrics = IDL.Record({
+    'activeUsers' : IDL.Nat,
+    'databaseResponseTime' : IDL.Float64,
+    'averageQueryProcessingTime' : IDL.Float64,
+    'errorRate' : IDL.Float64,
+    'systemUptime' : IDL.Float64,
+    'peakConcurrentUsers' : IDL.Nat,
+    'apiResponseTime' : IDL.Float64,
+  });
+  const HealthcareMetrics = IDL.Record({
+    'averagePatientSatisfaction' : IDL.Float64,
+    'averageDoctorResponseTime' : IDL.Float64,
+    'specialtyDistribution' : IDL.Vec(IDL.Tuple(DoctorSpecialty, IDL.Nat)),
+    'queryResolutionRate' : IDL.Float64,
+    'patientEngagementRate' : IDL.Float64,
+    'criticalQueryResponse' : IDL.Float64,
+    'doctorUtilizationRate' : IDL.Float64,
+  });
+  const PlatformStats = IDL.Record({
+    'patientSatisfactionAverage' : IDL.Float64,
+    'queriesLastMonth' : IDL.Nat,
+    'totalPatients' : IDL.Nat,
+    'systemPerformance' : SystemPerformanceMetrics,
+    'doctorPerformanceAverage' : IDL.Float64,
+    'pendingQueries' : IDL.Nat,
+    'totalQueries' : IDL.Nat,
+    'queriesLast24Hours' : IDL.Nat,
+    'lastUpdated' : IDL.Int,
+    'dataBreaches' : IDL.Nat,
+    'dataAccuracy' : IDL.Float64,
+    'auditCompletionRate' : IDL.Float64,
+    'hipaaCompliantQueries' : IDL.Nat,
+    'inReviewQueries' : IDL.Nat,
+    'patientsByCondition' : IDL.Vec(IDL.Tuple(IDL.Text, IDL.Nat)),
+    'doctorsOnline' : IDL.Nat,
+    'totalDoctors' : IDL.Nat,
+    'peakUsageHours' : IDL.Vec(IDL.Nat),
+    'activeDoctors' : IDL.Nat,
+    'doctorsBySpecialty' : IDL.Vec(IDL.Tuple(DoctorSpecialty, IDL.Nat)),
+    'queriesLastWeek' : IDL.Nat,
+    'emergencyQueries' : IDL.Nat,
+    'averageQueryResolutionTime' : IDL.Float64,
+    'queriesByDepartment' : IDL.Vec(IDL.Tuple(IDL.Text, IDL.Nat)),
+    'healthcareMetrics' : HealthcareMetrics,
+    'systemReliability' : IDL.Float64,
+    'securityIncidents' : IDL.Nat,
+    'resolvedQueries' : IDL.Nat,
+    'newPatientsThisMonth' : IDL.Nat,
+    'reportingPeriod' : IDL.Text,
+    'activePatients' : IDL.Nat,
+  });
   const SystemStats = IDL.Record({
     'totalPatients' : IDL.Nat,
     'pendingQueries' : IDL.Nat,
@@ -41,8 +314,17 @@ export const idlFactory = ({ IDL }) => {
     'completedQueries' : IDL.Nat,
   });
   const Result_1 = IDL.Variant({ 'ok' : QueryId, 'err' : IDL.Text });
+  const ApiError = IDL.Record({
+    'code' : IDL.Text,
+    'message' : IDL.Text,
+    'timestamp' : IDL.Int,
+    'details' : IDL.Opt(IDL.Text),
+  });
+  const ApiResult_1 = IDL.Variant({ 'ok' : QueryId, 'err' : ApiError });
+  const ApiResult = IDL.Variant({ 'ok' : IDL.Null, 'err' : ApiError });
   return IDL.Service({
     'assignPatientToDoctor' : IDL.Func([PatientId, DoctorId], [Result], []),
+    'createEnhancedPatient' : IDL.Func([PatientData], [PatientId], []),
     'findPatientByEmail' : IDL.Func([IDL.Text], [IDL.Opt(Patient)], ['query']),
     'getAllDoctors' : IDL.Func([], [IDL.Vec(Doctor)], ['query']),
     'getDoctor' : IDL.Func([DoctorId], [IDL.Opt(Doctor)], ['query']),
@@ -52,13 +334,24 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Vec(MedicalQuery)],
         ['query'],
       ),
+    'getEnhancedPatient' : IDL.Func(
+        [PatientId],
+        [IDL.Opt(PatientData)],
+        ['query'],
+      ),
     'getPatient' : IDL.Func([PatientId], [IDL.Opt(Patient)], ['query']),
     'getPatientQueries' : IDL.Func(
         [PatientId],
         [IDL.Vec(MedicalQuery)],
         ['query'],
       ),
+    'getPatientQueriesEnhanced' : IDL.Func(
+        [PatientId, IDL.Opt(SearchCriteria)],
+        [SearchResult],
+        ['query'],
+      ),
     'getPendingQueries' : IDL.Func([], [IDL.Vec(MedicalQuery)], ['query']),
+    'getPlatformStats' : IDL.Func([], [PlatformStats], ['query']),
     'getQuery' : IDL.Func([QueryId], [IDL.Opt(MedicalQuery)], ['query']),
     'getStats' : IDL.Func([], [SystemStats], ['query']),
     'getUnassignedPatients' : IDL.Func([], [IDL.Vec(Patient)], ['query']),
@@ -71,8 +364,10 @@ export const idlFactory = ({ IDL }) => {
       ),
     'respondToQuery' : IDL.Func([QueryId, DoctorId, IDL.Text], [Result], []),
     'submitQuery' : IDL.Func([PatientId, IDL.Text, IDL.Text], [Result_1], []),
+    'submitQueryEnhanced' : IDL.Func([QueryData], [ApiResult_1], []),
     'takeQuery' : IDL.Func([QueryId, DoctorId], [Result], []),
     'unassignPatient' : IDL.Func([PatientId, DoctorId], [Result], []),
+    'updatePatient' : IDL.Func([PatientId, PatientData], [ApiResult], []),
   });
 };
 export const init = ({ IDL }) => { return []; };

@@ -80,6 +80,17 @@ class ICPService {
     }
   }
 
+  async getEnhancedPatient(patientId: string): Promise<ApiResponse<any | null>> {
+    try {
+      const actor = await this.ensureActor();
+      const result = await actor.getEnhancedPatient(patientId);
+      // ICP returns Option type as array - check if array has elements
+      return { success: true, data: result.length > 0 ? result[0] : null };
+    } catch (error) {
+      return this.handleError(error, 'get enhanced patient');
+    }
+  }
+
   async findPatientByEmail(email: string): Promise<ApiResponse<Patient | null>> {
     try {
       const actor = await this.ensureActor();

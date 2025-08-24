@@ -42,8 +42,8 @@ const DoctorLogin: React.FC<DoctorLoginProps> = ({
 
       // Validate against test doctor credentials
       const testCredentials = [
-        { email: 'dr.rodriguez@trustcare.com', password: 'DrMaria2024Endo!', id: 'D001' },
-        { email: 'dr.thompson@trustcare.com', password: 'DrJames2024Endo!', id: 'D002' }
+        { email: 'dr.rodriguez@trustcare.com', password: 'DrMaria2024Endo!', id: 'doctor_1' },
+        { email: 'dr.thompson@trustcare.com', password: 'DrJames2024Endo!', id: 'doctor_2' }
       ];
 
       const credential = testCredentials.find(

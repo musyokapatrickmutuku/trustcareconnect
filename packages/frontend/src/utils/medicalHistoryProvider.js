@@ -1,12 +1,12 @@
 // Medical History Provider - Context Integration for AI Queries
 // Provides patient medical history context for AI query processing
 
-import patientDataImporter from './patientDataImporter.js';
+import icpService from '../services/icpService.ts';
 
 /**
  * Medical History Provider Class
  * Manages patient medical history data for AI context generation
- * Integrates with the imported patient data from patients.txt
+ * Integrates with backend enhanced patient data
  */
 class MedicalHistoryProvider {
   constructor() {
@@ -43,25 +43,45 @@ class MedicalHistoryProvider {
   }
 
   /**
-   * Get comprehensive medical history for a patient
-   * @param {string} platformId - Patient's platform ID
-   * @returns {object} Medical history data or null if not found
+   * Get comprehensive medical history for a patient from backend
+   * @param {string} platformId - Patient's platform ID  
+   * @returns {Promise<object>} Medical history data or null if not found
    */
-  getPatientMedicalHistory(platformId) {
+  async getPatientMedicalHistory(platformId) {
     // First check cache
     if (this.historyCache.has(platformId)) {
       return this.historyCache.get(platformId);
     }
 
-    // Get from importer
-    const history = patientDataImporter.getPatientMedicalHistory(platformId);
-    
-    if (history) {
-      // Cache the result
-      this.historyCache.set(platformId, history);
+    try {
+      // Get enhanced patient data from backend
+      const result = await icpService.getEnhancedPatient(platformId);
+      
+      if (result.success && result.data) {
+        const enhancedPatient = result.data;
+        
+        // Transform backend data to medical history format
+        const history = {
+          patientId: enhancedPatient.id,
+          name: `${enhancedPatient.firstName} ${enhancedPatient.lastName}`,
+          email: enhancedPatient.email,
+          dateOfBirth: enhancedPatient.dateOfBirth,
+          medicalHistory: enhancedPatient.medicalHistory,
+          currentVitals: enhancedPatient.currentVitals,
+          assignedDoctorId: enhancedPatient.primaryDoctorId,
+          isActive: enhancedPatient.isActive,
+          lastVisit: enhancedPatient.lastVisit
+        };
+        
+        // Cache the result
+        this.historyCache.set(platformId, history);
+        return history;
+      }
+    } catch (error) {
+      console.error('Failed to get patient medical history:', error);
     }
 
-    return history;
+    return null;
   }
 
   /**
@@ -69,10 +89,10 @@ class MedicalHistoryProvider {
    * @param {string} platformId - Patient's platform ID
    * @param {string} queryType - Type of query (general, medication, symptoms, lifestyle, emergency)
    * @param {string} queryText - The actual patient query text
-   * @returns {string} Formatted context for AI processing
+   * @returns {Promise<string>} Formatted context for AI processing
    */
-  generateAIContext(platformId, queryType = 'general', queryText = '') {
-    const history = this.getPatientMedicalHistory(platformId);
+  async generateAIContext(platformId, queryType = 'general', queryText = '') {
+    const history = await this.getPatientMedicalHistory(platformId);
     
     if (!history) {
       return this.generateGenericContext(queryText);

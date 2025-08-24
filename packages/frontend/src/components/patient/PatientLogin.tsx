@@ -50,11 +50,11 @@ const PatientLogin: React.FC<PatientLoginProps> = ({
       if (loginMode === 'email') {
         // For demo purposes, we'll validate against our test credentials
         const testCredentials = [
-          { email: 'sarah.johnson@email.com', password: 'SarahDiabetes2024!', id: 'P001' },
-          { email: 'mike.rodriguez@student.edu', password: 'MikeType1Diabetes!', id: 'P002' },
-          { email: 'carlos.mendoza@gmail.com', password: 'CarlosDiabetes62!', id: 'P003' },
-          { email: 'priya.patel@work.com', password: 'PriyaDiabetes28!', id: 'P004' },
-          { email: 'dorothy.williams@senior.net', password: 'DorothyDiabetes71!', id: 'P005' }
+          { email: 'sarah.johnson@email.com', password: 'SarahDiabetes2024!', id: 'patient_1' },
+          { email: 'mike.rodriguez@student.edu', password: 'MikeType1Diabetes!', id: 'patient_2' },
+          { email: 'carlos.mendoza@gmail.com', password: 'CarlosDiabetes62!', id: 'patient_3' },
+          { email: 'priya.patel@work.com', password: 'PriyaDiabetes28!', id: 'patient_4' },
+          { email: 'dorothy.williams@senior.net', password: 'DorothyDiabetes71!', id: 'patient_5' }
         ];
 
         const credential = testCredentials.find(

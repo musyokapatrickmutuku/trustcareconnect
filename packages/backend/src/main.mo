@@ -191,9 +191,21 @@ actor TrustCareConnect {
         patientId
     };
 
+    // Create enhanced patient with comprehensive medical history
+    public func createEnhancedPatient(patientData: PatientData): async PatientId {
+        let patientId = patientData.id;
+        enhancedPatients.put(patientId, patientData);
+        patientId
+    };
+
     // Get patient by ID
     public query func getPatient(patientId: PatientId): async ?Patient {
         patients.get(patientId)
+    };
+
+    // Get enhanced patient by ID
+    public query func getEnhancedPatient(patientId: PatientId): async ?PatientData {
+        enhancedPatients.get(patientId)
     };
 
     // Find patient by email
@@ -316,37 +328,77 @@ actor TrustCareConnect {
     // QUERY MANAGEMENT
     // =======================
 
-    // Submit a medical query
+    // Submit a medical query with enhanced medical context
     public func submitQuery(patientId: PatientId, title: Text, description: Text): async Result.Result<QueryId, Text> {
-        switch (patients.get(patientId)) {
-            case null { #err("Patient not found") };
-            case (?patient) {
-                switch (patient.assignedDoctorId) {
-                    case null { #err("Patient must be assigned to a doctor first") };
-                    case (?assignedDoctorId) {
-                        let queryId = generateQueryId();
-                        let now = Time.now();
-                        
-                        // Get AI clinical decision support response from AI proxy service
-                        // Create comprehensive patient profile for clinical decision support
-                        let patientProfile = "Patient ID: " # patient.id # ", Name: " # patient.name # ", Primary Condition: " # patient.condition # ", Email: " # patient.email # ", Active Status: " # (if (patient.isActive) {"Active"} else {"Inactive"}) # ", Assigned Doctor: " # (switch (patient.assignedDoctorId) { case null {"Unassigned"}; case (?docId) {docId} });
-                        let aiDraft = await getAIDraftResponse(title # " " # description, patientProfile);
-                        
-                        let medicalQuery: MedicalQuery = {
-                            id = queryId;
-                            patientId = patientId;
-                            title = title;
-                            description = description;
-                            status = #pending;
-                            doctorId = ?assignedDoctorId;
-                            response = null;
-                            aiDraftResponse = aiDraft;
-                            createdAt = now;
-                            updatedAt = now;
-                        };
-                        
-                        queries.put(queryId, medicalQuery);
-                        #ok(queryId)
+        // First check for enhanced patient data
+        switch (enhancedPatients.get(patientId)) {
+            case (?enhancedPatient) {
+                // Use enhanced patient data for comprehensive context
+                let queryId = generateQueryId();
+                let now = Time.now();
+                
+                // Create comprehensive medical context from enhanced patient data
+                let medicalContext = "COMPREHENSIVE PATIENT PROFILE:\n" #
+                    "Patient ID: " # enhancedPatient.id # "\n" #
+                    "Name: " # enhancedPatient.firstName # " " # enhancedPatient.lastName # "\n" #
+                    "Email: " # enhancedPatient.email # "\n" #
+                    "Age: " # enhancedPatient.dateOfBirth # "\n" #
+                    "Current Medications: " # (Array.foldLeft<Text, Text>(enhancedPatient.medicalHistory.medications, "", func(acc: Text, med: Text): Text { acc # med # "; " })) # "\n" #
+                    "Medical Conditions: " # (Array.foldLeft<Text, Text>(enhancedPatient.medicalHistory.conditions, "", func(acc: Text, cond: Text): Text { acc # cond # "; " })) # "\n" #
+                    "Allergies: " # (Array.foldLeft<Text, Text>(enhancedPatient.medicalHistory.allergies, "", func(acc: Text, allergy: Text): Text { acc # allergy # "; " })) # "\n" #
+                    "Family History: " # (Array.foldLeft<Text, Text>(enhancedPatient.medicalHistory.familyHistory, "", func(acc: Text, fh: Text): Text { acc # fh # "; " })) # "\n" #
+                    "Current Vitals: " # (switch (enhancedPatient.currentVitals) { case null { "Not available" }; case (?vitals) { "BP: " # (switch (vitals.bloodPressureSystolic) { case null {"N/A"}; case (?sys) {Int.toText(sys)} }) # "/" # (switch (vitals.bloodPressureDiastolic) { case null {"N/A"}; case (?dia) {Int.toText(dia)} }) # " mmHg, Weight: " # (switch (vitals.weight) { case null {"N/A"}; case (?wt) {Float.toText(wt)} }) # " kg" } }) # "\n" #
+                    "Assigned Doctor ID: " # (switch (enhancedPatient.primaryDoctorId) { case null {"Unassigned"}; case (?docId) {docId} });
+                
+                let aiDraft = await getAIDraftResponse(title # " " # description, medicalContext);
+                
+                let medicalQuery: MedicalQuery = {
+                    id = queryId;
+                    patientId = patientId;
+                    title = title;
+                    description = description;
+                    status = #pending;
+                    doctorId = enhancedPatient.primaryDoctorId;
+                    response = null;
+                    aiDraftResponse = aiDraft;
+                    createdAt = now;
+                    updatedAt = now;
+                };
+                
+                queries.put(queryId, medicalQuery);
+                #ok(queryId)
+            };
+            case null {
+                // Fallback to basic patient data if enhanced data not available
+                switch (patients.get(patientId)) {
+                    case null { #err("Patient not found") };
+                    case (?patient) {
+                        switch (patient.assignedDoctorId) {
+                            case null { #err("Patient must be assigned to a doctor first") };
+                            case (?assignedDoctorId) {
+                                let queryId = generateQueryId();
+                                let now = Time.now();
+                                
+                                let patientProfile = "Patient ID: " # patient.id # ", Name: " # patient.name # ", Primary Condition: " # patient.condition # ", Email: " # patient.email # ", Active Status: " # (if (patient.isActive) {"Active"} else {"Inactive"}) # ", Assigned Doctor: " # (switch (patient.assignedDoctorId) { case null {"Unassigned"}; case (?docId) {docId} });
+                                let aiDraft = await getAIDraftResponse(title # " " # description, patientProfile);
+                                
+                                let medicalQuery: MedicalQuery = {
+                                    id = queryId;
+                                    patientId = patientId;
+                                    title = title;
+                                    description = description;
+                                    status = #pending;
+                                    doctorId = ?assignedDoctorId;
+                                    response = null;
+                                    aiDraftResponse = aiDraft;
+                                    createdAt = now;
+                                    updatedAt = now;
+                                };
+                                
+                                queries.put(queryId, medicalQuery);
+                                #ok(queryId)
+                            };
+                        }
                     };
                 }
             };
