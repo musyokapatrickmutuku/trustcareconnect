@@ -183,9 +183,9 @@ actor TrustCareConnect {
     // NOTE: HTTP outcalls are configured for production deployment
     private func getAIDraftResponse(queryText: Text, medicalContext: Text): async ?Text {
         
-        // For local development, generate enhanced response with personalized medical context
-        // In production deployment, this will make actual HTTP outcalls to Novita AI API
-        let isDevelopment = true; // Set to false in production
+        // Always use real AI model for responses - BaiChuan M2 32B via Novita AI API
+        // Set to production mode to enable actual AI model integration
+        let isDevelopment = false; // Always keep AI model active
         
         if (isDevelopment) {
             // Enhanced local response with real medical context integration
