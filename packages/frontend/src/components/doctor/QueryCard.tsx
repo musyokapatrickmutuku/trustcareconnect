@@ -78,7 +78,7 @@ const QueryCard: React.FC<QueryCardProps> = ({
   };
 
   const handleApproveAndSend = async () => {
-    if (query.aiDraftResponse && query.status === 'in_review') {
+    if (query.aiDraftResponse && query.status === 'doctor_review') {
       // Directly submit the AI draft response
       await handleRespondToQuery(undefined, query.aiDraftResponse);
     } else if (query.aiDraftResponse) {

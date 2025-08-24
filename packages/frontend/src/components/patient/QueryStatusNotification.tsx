@@ -27,7 +27,7 @@ const QueryStatusNotification: React.FC<QueryStatusNotificationProps> = ({
     const newCompletions = completedIds.filter(id => !previouslyCompleted.includes(id));
     
     if (newCompletions.length > 0) {
-      const newSet = new Set([...newlyCompleted, ...newCompletions]);
+      const newSet = new Set(Array.from(newlyCompleted).concat(newCompletions));
       setNewlyCompleted(newSet);
       
       // Show success message for newly completed queries
@@ -50,7 +50,7 @@ const QueryStatusNotification: React.FC<QueryStatusNotificationProps> = ({
   };
 
   const pendingQueries = queries.filter(q => 
-    (q.status === 'pending' || q.status === 'in_review') && 
+    (q.status === 'pending' || q.status === 'doctor_review') && 
     !dismissedPending.has(q.id)
   );
 
