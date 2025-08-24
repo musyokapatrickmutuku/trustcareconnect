@@ -5,7 +5,7 @@ import { idlFactory } from '../declarations/backend';
 import { Patient, Doctor, MedicalQuery, SystemStats, ApiResponse } from '../types';
 
 // Backend canister ID (will be set after deployment)
-const BACKEND_CANISTER_ID = process.env.REACT_APP_BACKEND_CANISTER_ID || 'lqy7q-dh777-77777-aaaaq-cai';
+const BACKEND_CANISTER_ID = process.env.REACT_APP_BACKEND_CANISTER_ID || 'uxrrr-q7777-77774-qaaaq-cai';
 
 class ICPService {
   private actor: any = null;
