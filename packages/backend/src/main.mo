@@ -16,33 +16,50 @@ import QueryProcessor "./queryProcessor";
 actor TrustCareConnect {
 
     // HTTP Outcall types for AI API integration
-    type HttpMethod = {
-        #get;
-        #post;
-        #head;
-    };
-
+    // Management Canister HTTP Outcall Types
+    type HttpMethod = { #get; #post; #head };
+    
     type HttpHeader = {
         name: Text;
         value: Text;
     };
-
-    type HttpRequest = {
+    
+    type TransformArgs = {
+        response: HttpResponsePayload;
+        context: Blob;
+    };
+    
+    type HttpRequestArgs = {
         url: Text;
         max_response_bytes: ?Nat64;
         headers: [HttpHeader];
         body: ?[Nat8];
         method: HttpMethod;
         transform: ?{
-            function: shared (response: HttpResponse) -> async HttpResponse;
+            function: shared query (TransformArgs) -> async HttpResponsePayload;
             context: Blob;
         };
     };
-
-    type HttpResponse = {
+    
+    type HttpResponsePayload = {
         status: Nat;
         headers: [HttpHeader];
         body: [Nat8];
+    };
+    
+    type ManagementCanister = actor {
+        http_request : HttpRequestArgs -> async HttpResponsePayload;
+    };
+    
+    let IC : ManagementCanister = actor "aaaaa-aa";
+    
+    // Transform function for HTTP response
+    public query func transform_response(args: TransformArgs): async HttpResponsePayload {
+        {
+            status = args.response.status;
+            headers = [];
+            body = args.response.body;
+        }
     };
 
     // Import enhanced type definitions
@@ -208,9 +225,9 @@ actor TrustCareConnect {
                 let requestBodyBytes = Text.encodeUtf8(requestBody);
                 
                 // Set up HTTP request to Novita AI API
-                let httpRequest: HttpRequest = {
-                    url = "https://api.novita.ai/openai/v1/chat/completions";
-                    max_response_bytes = ?2048;
+                let httpRequest: HttpRequestArgs = {
+                    url = "https://api.novita.ai/v1/chat/completions";
+                    max_response_bytes = ?8192;
                     headers = [
                         { name = "Content-Type"; value = "application/json" },
                         { name = "Authorization"; value = "Bearer sk_F_8dAOPzGPmh98MZPYGOQyYFrPdy2l6d29HQjmj6PA8" },
@@ -218,18 +235,14 @@ actor TrustCareConnect {
                     ];
                     body = ?Blob.toArray(requestBodyBytes);
                     method = #post;
-                    transform = null;
+                    transform = ?{
+                        function = transform_response;
+                        context = Blob.fromArray([]);
+                    };
                 };
                 
-                // Add cycles for HTTP outcall
-                Cycles.add(20_949_972_000);
-                
-                // Make the HTTP outcall to Novita AI API
-                let ic : actor {
-                    http_request : HttpRequest -> async HttpResponse;
-                } = actor "aaaaa-aa";
-                
-                let httpResponse = await ic.http_request(httpRequest);
+                // Make the HTTP outcall to Novita AI API with cycles
+                let httpResponse = await IC.http_request<system>(httpRequest);
                 
                 if (httpResponse.status == 200) {
                     // Parse the response

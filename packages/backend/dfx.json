@@ -4,7 +4,11 @@
     "backend": {
       "type": "motoko",
       "main": "src/main.mo",
-      "dependencies": []
+      "dependencies": [],
+      "declarations": {
+        "output": "src/declarations/backend",
+        "bindings": ["js", "ts", "did", "mo"]
+      }
     },
     "internet_identity": {
       "type": "pull",
@@ -15,12 +19,18 @@
     "build": {
       "args": "",
       "packtool": ""
+    },
+    "replica": {
+      "subnet_type": "application"
     }
   },
   "networks": {
     "local": {
       "bind": "127.0.0.1:4943",
-      "type": "ephemeral"
+      "type": "ephemeral",
+      "replica": {
+        "subnet_type": "application"
+      }
     },
     "ic": {
       "providers": ["https://icp0.io", "https://icp-api.io"],
