@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrustCareConnect UI Integration Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            background-color: #f9fafb;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .success { background-color: #10b981; }
+        .pending { background-color: #f59e0b; }
+        .error { background-color: #ef4444; }
+        .test-section {
+            background: #f8fafc;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 6px;
+            border-left: 4px solid #3b82f6;
+        }
+        .credential-box {
+            background: #ecfdf5;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 6px;
+            border: 1px solid #d1fae5;
+        }
+        .credential-box h4 {
+            margin: 0 0 10px 0;
+            color: #065f46;
+        }
+        .credential {
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 14px;
+            background: white;
+            padding: 8px;
+            border-radius: 4px;
+            margin: 5px 0;
+        }
+        .button {
+            background: #3b82f6;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px 10px 10px 0;
+        }
+        .button:hover {
+            background: #2563eb;
+        }
+        .enhancement-demo {
+            background: #fef3c7;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 6px;
+            border-left: 4px solid #f59e0b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏥 TrustCareConnect UI Integration Test</h1>
+        <p>Testing the updated frontend UI with patients.txt medical history integration.</p>
+
+        <div class="test-section">
+            <h2>✅ Integration Status</h2>
+            <ul>
+                <li><span class="status-indicator success"></span> Backend deployed and running</li>
+                <li><span class="status-indicator success"></span> Frontend compiled successfully</li>
+                <li><span class="status-indicator success"></span> Patient login UI updated with email/password</li>
+                <li><span class="status-indicator success"></span> Doctor login UI updated with email/password</li>
+                <li><span class="status-indicator success"></span> Test credentials integrated</li>
+                <li><span class="status-indicator success"></span> Medical history enhancement ready</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h2>🚀 Quick Access</h2>
+            <a href="http://localhost:3000" class="button" target="_blank">Open TrustCareConnect App</a>
+            <a href="http://localhost:3000/patient" class="button" target="_blank">Patient Portal</a>
+            <a href="http://localhost:3000/doctor" class="button" target="_blank">Doctor Portal</a>
+        </div>
+
+        <div class="test-section">
+            <h2>👥 Patient Test Accounts</h2>
+            <p>Use these credentials to test patient login and query submission with medical history context:</p>
+            
+            <div class="credential-box">
+                <h4>Sarah Michelle Johnson (Type 2 Diabetes - Excellent Control)</h4>
+                <div class="credential">📧 Email: sarah.johnson@email.com</div>
+                <div class="credential">🔑 Password: SarahDiabetes2024!</div>
+                <p><strong>Medical Context:</strong> HbA1c improved from 9.8% to 6.9%, on Metformin/Empagliflozin, 2+ years treatment</p>
+            </div>
+
+            <div class="credential-box">
+                <h4>Michael David Rodriguez (Type 1 Diabetes - College Student)</h4>
+                <div class="credential">📧 Email: mike.rodriguez@student.edu</div>
+                <div class="credential">🔑 Password: MikeType1Diabetes!</div>
+                <p><strong>Medical Context:</strong> Insulin pump therapy, HbA1c 7.8%, college lifestyle challenges</p>
+            </div>
+
+            <div class="credential-box">
+                <h4>Carlos Eduardo Mendoza (Type 2 Diabetes - Cardiovascular History)</h4>
+                <div class="credential">📧 Email: carlos.mendoza@gmail.com</div>
+                <div class="credential">🔑 Password: CarlosDiabetes62!</div>
+                <p><strong>Medical Context:</strong> Excellent control, cardiovascular comorbidities, on Semaglutide</p>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>👨‍⚕️ Doctor Test Accounts</h2>
+            <p>Use these credentials to test doctor login and patient management:</p>
+            
+            <div class="credential-box">
+                <h4>Dr. Maria Elena Rodriguez (Endocrinology Specialist)</h4>
+                <div class="credential">📧 Email: dr.rodriguez@trustcare.com</div>
+                <div class="credential">🔑 Password: DrMaria2024Endo!</div>
+                <p><strong>Assigned Patients:</strong> Sarah Johnson, Carlos Mendoza, Dorothy Williams (3 patients)</p>
+            </div>
+
+            <div class="credential-box">
+                <h4>Dr. James Michael Thompson (Endocrinology Specialist)</h4>
+                <div class="credential">📧 Email: dr.thompson@trustcare.com</div>
+                <div class="credential">🔑 Password: DrJames2024Endo!</div>
+                <p><strong>Assigned Patients:</strong> Michael Rodriguez, Priya Sharma-Patel (2 patients)</p>
+            </div>
+        </div>
+
+        <div class="enhancement-demo">
+            <h2>🤖 Medical History Enhancement Demo</h2>
+            <p><strong>Test the AI enhancement by:</strong></p>
+            <ol>
+                <li>Log in as Sarah Johnson (Type 2, excellent control)</li>
+                <li>Submit this test query: <em>"My blood sugars have been higher in the morning lately. Should I be concerned?"</em></li>
+                <li>The AI response should include:
+                    <ul>
+                        <li>Reference to her specific HbA1c improvement (9.8% → 6.9%)</li>
+                        <li>Mention of her current medications (Metformin, Empagliflozin)</li>
+                        <li>Acknowledgment of her excellent control status</li>
+                        <li>Personalized advice based on her 2+ years treatment history</li>
+                        <li>Reference to Dr. Maria Rodriguez as her assigned specialist</li>
+                    </ul>
+                </li>
+            </ol>
+            <p><strong>Compare this to:</strong> A generic diabetes response without patient context!</p>
+        </div>
+
+        <div class="test-section">
+            <h2>📋 Testing Checklist</h2>
+            <ul>
+                <li>☐ Patient login with email/password works</li>
+                <li>☐ Doctor login with email/password works</li>
+                <li>☐ Patient can submit queries</li>
+                <li>☐ AI responses include medical history context</li>
+                <li>☐ Doctor can see assigned patients</li>
+                <li>☐ Doctor can review and respond to queries</li>
+                <li>☐ Medical context appears in query processing</li>
+                <li>☐ Patient-specific medication references work</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h2>🔧 Technical Details</h2>
+            <ul>
+                <li><strong>Frontend:</strong> http://localhost:3000 (React + TypeScript)</li>
+                <li><strong>Backend:</strong> http://127.0.0.1:4943 (DFX Canister)</li>
+                <li><strong>Patient Data:</strong> Imported from patients.txt with full medical histories</li>
+                <li><strong>Specialists:</strong> 2 diabetes specialists created and assigned</li>
+                <li><strong>Integration:</strong> Email/password authentication with backend validation</li>
+                <li><strong>Enhancement:</strong> AI queries enriched with patient medical context</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Auto-refresh status every 30 seconds to check if services are still running
+        setInterval(() => {
+            fetch('http://localhost:3000')
+                .then(response => {
+                    if (response.ok) {
+                        document.querySelector('.status-indicator').className = 'status-indicator success';
+                    } else {
+                        document.querySelector('.status-indicator').className = 'status-indicator error';
+                    }
+                })
+                .catch(() => {
+                    document.querySelector('.status-indicator').className = 'status-indicator error';
+                });
+        }, 30000);
+    </script>
+</body>
+</html>

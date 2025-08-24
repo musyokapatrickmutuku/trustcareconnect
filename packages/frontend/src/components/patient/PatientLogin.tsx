@@ -20,6 +20,7 @@ const PatientLogin: React.FC<PatientLoginProps> = ({
 }) => {
   const [loginData, setLoginData] = useState({
     email: '',
+    password: '',
     patientId: ''
   });
   const [loginMode, setLoginMode] = useState<'email' | 'id'>('email');
@@ -32,8 +33,8 @@ const PatientLogin: React.FC<PatientLoginProps> = ({
   };
 
   const handleLogin = async () => {
-    if (loginMode === 'email' && !loginData.email.trim()) {
-      showMessage('Please enter your email address', 'error');
+    if (loginMode === 'email' && (!loginData.email.trim() || !loginData.password.trim())) {
+      showMessage('Please enter both email and password', 'error');
       return;
     }
     
@@ -47,8 +48,31 @@ const PatientLogin: React.FC<PatientLoginProps> = ({
     try {
       let result;
       if (loginMode === 'email') {
-        // Search for patient by email (we'll need to add this to backend)
-        result = await icpService.findPatientByEmail(loginData.email);
+        // For demo purposes, we'll validate against our test credentials
+        const testCredentials = [
+          { email: 'sarah.johnson@email.com', password: 'SarahDiabetes2024!', id: 'P001' },
+          { email: 'mike.rodriguez@student.edu', password: 'MikeType1Diabetes!', id: 'P002' },
+          { email: 'carlos.mendoza@gmail.com', password: 'CarlosDiabetes62!', id: 'P003' },
+          { email: 'priya.patel@work.com', password: 'PriyaDiabetes28!', id: 'P004' },
+          { email: 'dorothy.williams@senior.net', password: 'DorothyDiabetes71!', id: 'P005' }
+        ];
+
+        const credential = testCredentials.find(
+          cred => cred.email === loginData.email && cred.password === loginData.password
+        );
+
+        if (credential) {
+          // Search for patient by email in the backend
+          result = await icpService.findPatientByEmail(loginData.email);
+          if (!result.success || !result.data) {
+            // If not found, try to get by our expected ID
+            result = await icpService.getPatient(credential.id);
+          }
+        } else {
+          showMessage('Invalid email or password. Please check your credentials.', 'error');
+          setLoading(false);
+          return;
+        }
       } else {
         // Get patient by ID
         result = await icpService.getPatient(loginData.patientId);
@@ -70,7 +94,7 @@ const PatientLogin: React.FC<PatientLoginProps> = ({
 
   const switchLoginMode = () => {
     setLoginMode(prev => prev === 'email' ? 'id' : 'email');
-    setLoginData({ email: '', patientId: '' });
+    setLoginData({ email: '', password: '', patientId: '' });
   };
 
   return (
@@ -106,15 +130,26 @@ const PatientLogin: React.FC<PatientLoginProps> = ({
       </div>
 
       {loginMode === 'email' ? (
-        <FormField
-          label="Email Address"
-          type="email"
-          name="email"
-          value={loginData.email}
-          onChange={(e) => handleInputChange('email', e.target.value)}
-          placeholder="Enter your registered email address"
-          required
-        />
+        <>
+          <FormField
+            label="Email Address"
+            type="email"
+            name="email"
+            value={loginData.email}
+            onChange={(e) => handleInputChange('email', e.target.value)}
+            placeholder="Enter your registered email address"
+            required
+          />
+          <FormField
+            label="Password"
+            type="password"
+            name="password"
+            value={loginData.password}
+            onChange={(e) => handleInputChange('password', e.target.value)}
+            placeholder="Enter your password"
+            required
+          />
+        </>
       ) : (
         <FormField
           label="Patient ID"
@@ -151,10 +186,26 @@ const PatientLogin: React.FC<PatientLoginProps> = ({
 
       <div className="mt-6 p-4 bg-blue-50 rounded-lg">
         <div className="text-sm text-blue-800">
-          <p className="font-medium mb-2">Demo Credentials:</p>
-          <div className="space-y-1">
-            <p>• Patient ID: patient_1, patient_2, patient_3</p>
-            <p>• Email: Any registered patient email</p>
+          <p className="font-medium mb-2">Test Patient Accounts:</p>
+          <div className="space-y-2 text-xs">
+            <div>
+              <p className="font-medium">Sarah Johnson (Type 2 Diabetes)</p>
+              <p>📧 sarah.johnson@email.com</p>
+              <p>🔑 SarahDiabetes2024!</p>
+            </div>
+            <div>
+              <p className="font-medium">Michael Rodriguez (Type 1 Diabetes)</p>
+              <p>📧 mike.rodriguez@student.edu</p>
+              <p>🔑 MikeType1Diabetes!</p>
+            </div>
+            <div>
+              <p className="font-medium">Carlos Mendoza (Type 2 Diabetes)</p>
+              <p>📧 carlos.mendoza@gmail.com</p>
+              <p>🔑 CarlosDiabetes62!</p>
+            </div>
+            <div className="text-xs text-blue-600 mt-2">
+              💡 All accounts include comprehensive medical histories for AI context testing
+            </div>
           </div>
         </div>
       </div>

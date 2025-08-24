@@ -182,6 +182,56 @@ const HomePage: React.FC = () => {
         </div>
       </div>
 
+      {/* Test Accounts Section */}
+      <div className="bg-gradient-to-r from-blue-50 to-green-50 rounded-lg p-6 mb-8">
+        <h3 className="text-xl font-semibold text-gray-900 mb-4">🧪 Ready for Testing!</h3>
+        <p className="text-gray-700 mb-4">
+          The platform is now loaded with comprehensive diabetes patient data from patients.txt. 
+          Use these test accounts to experience the enhanced AI responses with medical history context.
+        </p>
+        
+        <div className="grid md:grid-cols-2 gap-6">
+          <div className="bg-white rounded-lg p-4">
+            <h4 className="font-semibold text-blue-600 mb-3">👥 Patient Test Accounts</h4>
+            <div className="space-y-2 text-sm">
+              <div>
+                <span className="font-medium">Sarah Johnson (Type 2)</span><br/>
+                <span className="text-gray-600">sarah.johnson@email.com • SarahDiabetes2024!</span>
+              </div>
+              <div>
+                <span className="font-medium">Michael Rodriguez (Type 1)</span><br/>
+                <span className="text-gray-600">mike.rodriguez@student.edu • MikeType1Diabetes!</span>
+              </div>
+              <div>
+                <span className="font-medium">Carlos Mendoza (Type 2)</span><br/>
+                <span className="text-gray-600">carlos.mendoza@gmail.com • CarlosDiabetes62!</span>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-lg p-4">
+            <h4 className="font-semibold text-green-600 mb-3">👨‍⚕️ Doctor Test Accounts</h4>
+            <div className="space-y-2 text-sm">
+              <div>
+                <span className="font-medium">Dr. Maria Rodriguez (Endocrinology)</span><br/>
+                <span className="text-gray-600">dr.rodriguez@trustcare.com • DrMaria2024Endo!</span>
+              </div>
+              <div>
+                <span className="font-medium">Dr. James Thompson (Endocrinology)</span><br/>
+                <span className="text-gray-600">dr.thompson@trustcare.com • DrJames2024Endo!</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div className="mt-4 p-3 bg-yellow-50 rounded-lg">
+          <p className="text-sm text-yellow-800">
+            💡 <strong>Test the Enhancement:</strong> Patient queries now include comprehensive medical histories, 
+            current medications, HbA1c levels, and treatment progress for personalized AI responses.
+          </p>
+        </div>
+      </div>
+
       <div className="bg-gray-50 rounded-lg p-6">
         <h3 className="text-xl font-semibold text-gray-900 mb-4">How It Works</h3>
         <div className="grid md:grid-cols-3 gap-6">
