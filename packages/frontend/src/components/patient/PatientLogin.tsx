@@ -175,12 +175,9 @@ const PatientLogin: React.FC<PatientLoginProps> = ({
       <div className="mt-4 text-center">
         <p className="text-sm text-gray-600">
           Don't have an account?{' '}
-          <button
-            onClick={switchLoginMode}
-            className="text-blue-600 hover:text-blue-800 font-medium"
-          >
-            Register as new patient
-          </button>
+          <span className="text-blue-600 font-medium">
+            Click "New patient? Register here →" below to register
+          </span>
         </p>
       </div>
 

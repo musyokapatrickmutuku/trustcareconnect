@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate, Link, useLocation } f
 import { Patient, Doctor } from './types';
 import { UI_MESSAGES } from './constants';
 import MessageDisplay from './components/common/MessageDisplay';
+import ErrorBoundary from './components/ErrorBoundary';
 import HomePage from './pages/HomePage';
 import PatientPortal from './pages/PatientPortal';
 import DoctorPortal from './pages/DoctorPortal';
@@ -85,9 +86,10 @@ function App() {
   };
 
   return (
-    <Router>
-      <div className="app min-h-screen bg-gray-50">
-        <header className="bg-white shadow-sm border-b">
+    <ErrorBoundary>
+      <Router>
+        <div className="app min-h-screen bg-gray-50">
+          <header className="bg-white shadow-sm border-b">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
               <div className="flex items-center">
@@ -143,8 +145,9 @@ function App() {
             />
           </Routes>
         </main>
-      </div>
-    </Router>
+        </div>
+      </Router>
+    </ErrorBoundary>
   );
 }
 

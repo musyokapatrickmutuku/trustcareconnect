@@ -1,43 +1,34 @@
 /* Clinical Response Display Styles */
+
 .clinical-response-display {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
   background: #ffffff;
+  border: 1px solid #e5e7eb;
   border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
 }
 
-/* Header Styles */
 .clinical-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
-  padding-bottom: 16px;
-  border-bottom: 2px solid #e5e7eb;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #f3f4f6;
 }
 
 .clinical-header h3 {
-  margin: 0;
   color: #1f2937;
-  font-size: 24px;
+  font-size: 1.25rem;
   font-weight: 600;
+  margin: 0;
 }
 
 .patient-info {
   display: flex;
-  gap: 16px;
-  font-size: 14px;
+  gap: 1rem;
   color: #6b7280;
-}
-
-.patient-info span {
-  background: #f3f4f6;
-  padding: 4px 12px;
-  border-radius: 6px;
-  font-weight: 500;
+  font-size: 0.875rem;
 }
 
 /* Quick Actions Panel */
@@ -45,66 +36,68 @@
   background: #f8fafc;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 24px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .quick-actions-panel h4 {
-  margin: 0 0 12px 0;
+  margin: 0 0 0.75rem 0;
   color: #374151;
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 600;
 }
 
 .quick-actions-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.75rem;
 }
 
 .quick-action-btn {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 12px 16px;
+  padding: 0.75rem;
   background: #ffffff;
   border: 1px solid #d1d5db;
-  border-radius: 8px;
+  border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
+  font-size: 0.875rem;
   position: relative;
 }
 
 .quick-action-btn:hover {
-  background: #f9fafb;
-  border-color: #3b82f6;
+  background: #f3f4f6;
+  border-color: #9ca3af;
   transform: translateY(-1px);
 }
 
 .quick-action-btn.completed {
-  background: #d1fae5;
-  border-color: #10b981;
-  color: #065f46;
+  background: #dcfce7;
+  border-color: #16a34a;
+  color: #166534;
 }
 
 .action-icon {
-  font-size: 18px;
+  font-size: 1.5rem;
+  margin-bottom: 0.25rem;
 }
 
 .action-label {
-  font-weight: 500;
-  font-size: 14px;
+  text-align: center;
+  line-height: 1.2;
 }
 
 .checkmark {
   position: absolute;
-  top: 4px;
-  right: 4px;
-  background: #10b981;
+  top: -4px;
+  right: -4px;
+  background: #16a34a;
   color: white;
   border-radius: 50%;
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -114,91 +107,91 @@
 
 /* Clinical Sections */
 .clinical-sections {
-  margin-bottom: 24px;
+  margin-bottom: 1.5rem;
 }
 
 .clinical-section {
-  margin-bottom: 16px;
-  background: #ffffff;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
+  margin-bottom: 1rem;
   overflow: hidden;
-  transition: box-shadow 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .clinical-section:hover {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-/* Priority Color Coding */
 .clinical-section.priority-urgent {
   border-left: 4px solid #dc2626;
+  background: #fef2f2;
 }
 
 .clinical-section.priority-high {
   border-left: 4px solid #ea580c;
+  background: #fff7ed;
 }
 
 .clinical-section.priority-medium {
-  border-left: 4px solid #d97706;
+  border-left: 4px solid #ca8a04;
+  background: #fefce8;
 }
 
 .clinical-section.priority-low {
-  border-left: 4px solid #65a30d;
+  border-left: 4px solid #16a34a;
+  background: #f0fdf4;
 }
 
 .section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 20px;
-  background: #f8fafc;
+  padding: 1rem;
+  background: #f9fafb;
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
 
 .section-header:hover {
-  background: #f1f5f9;
+  background: #f3f4f6;
 }
 
 .section-title {
   display: flex;
   align-items: center;
-  gap: 12px;
-  flex: 1;
+  gap: 0.5rem;
 }
 
 .section-icon {
-  font-size: 20px;
+  font-size: 1.25rem;
 }
 
 .title-text {
   font-weight: 600;
-  font-size: 16px;
   color: #374151;
 }
 
 .priority-badge {
-  padding: 2px 8px;
+  padding: 0.125rem 0.5rem;
   border-radius: 12px;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.05em;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-left: 0.5rem;
 }
 
 .priority-badge.urgent {
-  background: #fecaca;
+  background: #fee2e2;
   color: #991b1b;
 }
 
 .priority-badge.high {
   background: #fed7aa;
-  color: #9a3412;
+  color: #c2410c;
 }
 
 .priority-badge.medium {
-  background: #fde68a;
-  color: #92400e;
+  background: #fef3c7;
+  color: #a16207;
 }
 
 .priority-badge.low {
@@ -207,7 +200,7 @@
 }
 
 .collapse-icon {
-  font-size: 14px;
+  font-size: 0.875rem;
   color: #6b7280;
   transition: transform 0.2s ease;
 }
@@ -221,29 +214,39 @@
 }
 
 .section-content {
-  padding: 20px;
+  padding: 1rem;
   background: #ffffff;
+}
+
+.section-text .content-line {
+  margin-bottom: 0.5rem;
+  line-height: 1.6;
+  color: #374151;
+}
+
+.section-text .content-line:last-child {
+  margin-bottom: 0;
 }
 
 /* Action Checklist */
 .action-checklist {
-  space-y: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
 .action-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 8px 0;
+  gap: 0.75rem;
   cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 6px;
   transition: background-color 0.2s ease;
 }
 
 .action-item:hover {
   background: #f9fafb;
-  border-radius: 4px;
-  padding-left: 8px;
-  padding-right: 8px;
 }
 
 .action-item input[type="checkbox"] {
@@ -259,44 +262,24 @@
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
+  flex-shrink: 0;
 }
 
-.action-item input[type="checkbox"]:checked + .checkmark-custom {
-  background: #3b82f6;
-  border-color: #3b82f6;
-}
-
-.action-item input[type="checkbox"]:checked + .checkmark-custom::after {
-  content: "✓";
+.action-item input:checked + .checkmark-custom {
+  background: #16a34a;
+  border-color: #16a34a;
   color: white;
-  font-weight: bold;
+}
+
+.action-item input:checked + .checkmark-custom::after {
+  content: '✓';
   font-size: 12px;
+  font-weight: bold;
 }
 
 .item-text {
-  font-size: 14px;
   color: #374151;
   line-height: 1.5;
-}
-
-.action-item input[type="checkbox"]:checked + .checkmark-custom + .item-text {
-  text-decoration: line-through;
-  color: #6b7280;
-}
-
-/* Section Text */
-.section-text {
-  color: #374151;
-  line-height: 1.6;
-}
-
-.content-line {
-  margin: 0 0 8px 0;
-  font-size: 14px;
-}
-
-.content-line:last-child {
-  margin-bottom: 0;
 }
 
 /* Response Editor */
@@ -304,31 +287,32 @@
   background: #f8fafc;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 24px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .editor-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 1rem;
 }
 
 .editor-header h4 {
   margin: 0;
   color: #374151;
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 600;
 }
 
 .edit-toggle-btn {
+  padding: 0.5rem 1rem;
   background: #3b82f6;
   color: white;
   border: none;
-  padding: 8px 16px;
   border-radius: 6px;
   cursor: pointer;
+  font-size: 0.875rem;
   font-weight: 500;
   transition: background-color 0.2s ease;
 }
@@ -338,19 +322,22 @@
 }
 
 .editor-container {
-  margin-top: 16px;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 1rem;
 }
 
 .response-editor-textarea {
   width: 100%;
   min-height: 200px;
-  padding: 12px;
   border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-family: inherit;
-  font-size: 14px;
+  border-radius: 4px;
+  padding: 0.75rem;
+  font-size: 0.875rem;
   line-height: 1.5;
   resize: vertical;
+  font-family: system-ui, -apple-system, sans-serif;
 }
 
 .response-editor-textarea:focus {
@@ -361,32 +348,36 @@
 
 .editor-actions {
   display: flex;
-  gap: 12px;
-  margin-top: 12px;
+  gap: 0.75rem;
+  margin-top: 1rem;
 }
 
 .btn-save {
-  background: #10b981;
+  padding: 0.5rem 1rem;
+  background: #16a34a;
   color: white;
   border: none;
-  padding: 8px 16px;
   border-radius: 6px;
   cursor: pointer;
+  font-size: 0.875rem;
   font-weight: 500;
+  transition: background-color 0.2s ease;
 }
 
 .btn-save:hover {
-  background: #059669;
+  background: #15803d;
 }
 
 .btn-cancel {
+  padding: 0.5rem 1rem;
   background: #6b7280;
   color: white;
   border: none;
-  padding: 8px 16px;
   border-radius: 6px;
   cursor: pointer;
+  font-size: 0.875rem;
   font-weight: 500;
+  transition: background-color 0.2s ease;
 }
 
 .btn-cancel:hover {
@@ -396,71 +387,75 @@
 /* Clinical Actions */
 .clinical-actions {
   display: flex;
-  gap: 16px;
-  justify-content: flex-end;
-  padding-top: 20px;
-  border-top: 1px solid #e5e7eb;
-}
-
-.clinical-actions button {
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .btn-approve {
-  background: #10b981;
+  padding: 0.75rem 1.5rem;
+  background: #16a34a;
   color: white;
   border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .btn-approve:hover {
-  background: #059669;
+  background: #15803d;
   transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .btn-save-draft {
-  background: #f3f4f6;
-  color: #374151;
-  border: 1px solid #d1d5db;
+  padding: 0.75rem 1.5rem;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .btn-save-draft:hover {
-  background: #e5e7eb;
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .btn-reject {
-  background: #fef2f2;
-  color: #dc2626;
-  border: 1px solid #fecaca;
+  padding: 0.75rem 1.5rem;
+  background: #dc2626;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .btn-reject:hover {
-  background: #fee2e2;
+  background: #b91c1c;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
   .clinical-response-display {
-    padding: 16px;
-  }
-  
-  .clinical-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-  }
-  
-  .patient-info {
-    flex-direction: column;
-    gap: 8px;
+    padding: 1rem;
   }
   
   .quick-actions-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
   }
   
   .clinical-actions {
@@ -470,25 +465,10 @@
   .clinical-actions button {
     width: 100%;
   }
-}
-
-/* Loading and Animation States */
-.clinical-section.loading {
-  opacity: 0.6;
-  pointer-events: none;
-}
-
-.section-content {
-  animation: slideDown 0.3s ease-out;
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+  
+  .editor-header {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: stretch;
   }
 }

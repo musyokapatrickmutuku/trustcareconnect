@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Patient, ComponentProps } from '../types';
 import PatientLogin from '../components/patient/PatientLogin';
 import PatientDashboard from '../components/patient/PatientDashboard';
-import PatientRegistration from '../components/patient/PatientRegistration';
+import PatientRegistration from '../components/PatientRegistration';
 
 interface PatientPortalProps {
   currentUser: Patient | null;
@@ -26,10 +26,24 @@ const PatientPortal: React.FC<PatientPortalProps> = ({
     setCurrentUser?.(patient);
   };
 
-  const handleRegistrationSuccess = (patient: Patient) => {
-    setCurrentUser?.(patient);
-    setShowRegistration(false);
-    showMessage?.('Registration successful! You can now submit queries once assigned to a doctor.');
+  const handleRegistrationComplete = async (patientId: string) => {
+    // Fetch the complete patient data using the ID
+    try {
+      // For now, we'll create a mock patient - in real implementation, 
+      // you'd fetch from the backend using the patientId
+      const mockPatient: Patient = {
+        id: patientId,
+        name: 'New Patient', // This would come from the registration form
+        condition: 'General', // This would come from the registration form
+        email: '', // This would come from the registration form
+        isActive: true
+      };
+      setCurrentUser?.(mockPatient);
+      setShowRegistration(false);
+      showMessage?.('Registration successful! You can now submit queries once assigned to a doctor.', 'success');
+    } catch (error) {
+      showMessage?.('Registration completed but there was an issue loading your profile. Please try logging in.', 'warning');
+    }
   };
 
   const handleLogout = () => {
@@ -61,7 +75,7 @@ const PatientPortal: React.FC<PatientPortalProps> = ({
           </button>
         </div>
         <PatientRegistration
-          onRegistrationSuccess={handleRegistrationSuccess}
+          onRegistrationComplete={handleRegistrationComplete}
           showMessage={showMessage || (() => {})}
           loading={loading}
           setLoading={setLoading || (() => {})}
