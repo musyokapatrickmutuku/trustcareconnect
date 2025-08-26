@@ -32,9 +32,62 @@ TrustCareConnect is a **production-ready** healthcare communication platform tha
 └─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
 
-## 🚀 Quick Start - FULLY TESTED ✅
+## 🚀 Quick Start - ONE COMMAND SETUP! ✅
 
-### Prerequisites
+### 🎯 **INSTANT SETUP** (Recommended for Everyone)
+
+**Get TrustCareConnect running in under 5 minutes with a single command!**
+
+```bash
+# Clone and run automated setup
+git clone https://github.com/musyokapatrickmutuku/trustcareconnect.git
+cd trustcareconnect
+./setup.sh
+```
+
+**For Windows Users:**
+```batch
+git clone https://github.com/musyokapatrickmutuku/trustcareconnect.git
+cd trustcareconnect
+setup.bat
+```
+
+**That's it! The script automatically:**
+- ✅ Checks all prerequisites (Node.js, npm, DFX)
+- ✅ Installs dependencies
+- ✅ Starts DFX replica
+- ✅ Deploys backend canister
+- ✅ Configures environment variables
+- ✅ Loads comprehensive test data (5 patients, 2 doctors)
+- ✅ Starts frontend server
+- ✅ Provides all test credentials
+
+### 🔐 **AUTO-LOADED TEST CREDENTIALS**
+
+**The setup script automatically creates these accounts for immediate testing:**
+
+#### 👥 Patient Accounts (Ready to Login)
+- **Sarah Johnson**: `sarah.johnson@email.com` / `SarahDiabetes2024!` (Type 2, well-controlled)
+- **Michael Rodriguez**: `mike.rodriguez@student.edu` / `MikeType1Diabetes!` (Type 1, college student)  
+- **Carlos Mendoza**: `carlos.mendoza@gmail.com` / `CarlosType2_2024!` (Type 2, cardiac history)
+- **Priya Patel**: `priya.patel@work.com` / `PriyaDiabetes2024!` (Type 2, pregnant)
+- **Dorothy Williams**: `dorothy.williams@senior.net` / `Dorothy2024Senior!` (Type 2, elderly)
+
+#### 👨‍⚕️ Doctor Accounts (Ready to Login)
+- **Dr. Maria Rodriguez**: `dr.rodriguez@trustcare.com` / `DrMaria2024Endo!` (3 patients assigned)
+- **Dr. James Thompson**: `dr.thompson@trustcare.com` / `DrJames2024Endo!` (2 patients assigned)
+
+#### 💬 Sample Queries (Pre-Created)
+- **Sarah**: "Morning Blood Sugar Higher Than Usual" ✅ AI Response Generated
+- **Michael**: "Blood Sugar Issues During College Exams" ✅ AI Response Generated  
+- Ready for doctor review and patient testing
+
+**After setup completes:**
+1. Open http://localhost:3000
+2. Use any credentials above to login immediately
+3. Test the complete healthcare workflow!
+
+### Prerequisites (Auto-Checked)
 
 **Required Dependencies:**
 - **Node.js**: ≥ 16.0.0 (Tested with v20.x) ✅
@@ -42,7 +95,7 @@ TrustCareConnect is a **production-ready** healthcare communication platform tha
 - **DFX**: ≥ 0.28.0 (Internet Computer SDK) ✅
 - **Git**: For cloning the repository ✅
 
-### Installation Instructions
+### Manual Installation Instructions (If Preferred)
 
 #### Step 1: Install DFX (Internet Computer SDK)
 
