@@ -20,8 +20,8 @@ class ICPApiService {
     
     // Environment configuration
     this.config = {
-      host: process.env.REACT_APP_IC_HOST || 'https://ic0.app',
-      canisterId: process.env.REACT_APP_BACKEND_CANISTER_ID || process.env.REACT_APP_CANISTER_ID || 'uxrrr-q7777-77774-qaaaq-cai',
+      host: process.env.REACT_APP_IC_HOST || 'http://127.0.0.1:4943',
+      canisterId: process.env.REACT_APP_BACKEND_CANISTER_ID || process.env.REACT_APP_CANISTER_ID || 'lqy7q-dh777-77777-aaaaq-cai',
       network: process.env.REACT_APP_NETWORK || 'ic',
       isDevelopment: process.env.NODE_ENV === 'development',
       debugMode: process.env.REACT_APP_DEBUG_MODE === 'true',
@@ -53,17 +53,24 @@ class ICPApiService {
       this.connectionStatus = 'connecting';
 
       // Create HTTP agent with environment-specific configuration
-      this.agent = new HttpAgent({
+      const agentOptions = {
         host: this.config.host,
-        // Additional options for production
-        ...(!this.config.isDevelopment && {
-          // Production-specific options
-          verifyQuerySignatures: true,
-        })
-      });
+      };
+
+      // Configure for local development vs production
+      if (this.config.isDevelopment || this.config.host.includes('localhost') || this.config.host.includes('127.0.0.1')) {
+        // Local development options - disable certificate verification
+        agentOptions.verifyQuerySignatures = false;
+        this.log('Development mode: Disabling certificate verification');
+      } else {
+        // Production options
+        agentOptions.verifyQuerySignatures = true;
+      }
+
+      this.agent = new HttpAgent(agentOptions);
 
       // Fetch root key for local development (required for local replica)
-      if (this.config.isDevelopment && this.config.network === 'local') {
+      if (this.config.isDevelopment || this.config.host.includes('localhost') || this.config.host.includes('127.0.0.1')) {
         this.log('Development mode: Fetching root key...');
         await this.agent.fetchRootKey();
       }

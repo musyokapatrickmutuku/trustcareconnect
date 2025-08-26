@@ -1,5 +1,3 @@
-import { AxiosError } from 'axios';
-
 export interface ErrorDetails {
   message: string;
   code?: string;
@@ -21,6 +19,16 @@ export interface NetworkError extends Error {
   statusText?: string;
 }
 
+export interface HttpError extends Error {
+  response?: {
+    status: number;
+    data?: APIError;
+    statusText?: string;
+  };
+  request?: any;
+  isHttpError?: boolean;
+}
+
 /**
  * Central error handler for the application
  */
@@ -31,13 +39,13 @@ export class ErrorHandler {
   static handleAPIError(error: any): ErrorDetails {
     const timestamp = new Date().toISOString();
     
-    // Handle Axios errors
-    if (this.isAxiosError(error)) {
-      const axiosError = error as AxiosError<APIError>;
+    // Handle HTTP errors (fetch API or custom)
+    if (this.isHttpError(error)) {
+      const httpError = error as HttpError;
       
-      if (axiosError.response) {
+      if (httpError.response) {
         // Server responded with error status
-        const { status, data } = axiosError.response;
+        const { status, data } = httpError.response;
         
         return {
           message: this.getStatusMessage(status, data?.error),
@@ -46,7 +54,7 @@ export class ErrorHandler {
           details: data?.details,
           timestamp
         };
-      } else if (axiosError.request) {
+      } else if (httpError.request) {
         // Request made but no response received
         return {
           message: 'Unable to connect to the server. Please check your internet connection and try again.',
@@ -176,8 +184,8 @@ export class ErrorHandler {
   /**
    * Type guards
    */
-  private static isAxiosError(error: any): error is AxiosError {
-    return error && error.isAxiosError === true;
+  private static isHttpError(error: any): error is HttpError {
+    return error && (error.isHttpError === true || (error.response && error.request));
   }
 
   private static isAPIError(error: any): error is APIError {
