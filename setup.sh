@@ -108,7 +108,7 @@ install_dependencies() {
     print_header "📦 INSTALLING DEPENDENCIES"
     
     print_step "Installing project dependencies..."
-    if npm install; then
+    if npm install --legacy-peer-deps; then
         print_success "Dependencies installed successfully"
     else
         print_error "Failed to install dependencies"

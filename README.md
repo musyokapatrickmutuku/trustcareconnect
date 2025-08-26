@@ -95,6 +95,41 @@ setup.bat
 - **DFX**: ≥ 0.28.0 (Internet Computer SDK) ✅
 - **Git**: For cloning the repository ✅
 
+---
+
+## 🔧 Troubleshooting & Manual Setup
+
+**If the automated setup encounters issues, or if you prefer manual control:**
+
+### 📖 Complete Manual Setup Guide
+👉 **[MANUAL-STARTUP-GUIDE.md](./MANUAL-STARTUP-GUIDE.md)**
+
+This comprehensive guide includes:
+- ✅ Step-by-step manual startup procedures
+- 🚨 Common failure scenarios and solutions
+- 🔍 Advanced troubleshooting techniques
+- 🆘 Recovery procedures for edge cases
+- 📝 Environment-specific fixes (WSL, macOS, Linux)
+
+### Quick Troubleshooting
+```bash
+# If setup script fails with npm issues:
+rm -rf node_modules package-lock.json
+npm cache clean --force
+npm install --legacy-peer-deps
+
+# If DFX replica won't start:
+dfx stop
+dfx start --background --clean
+
+# If frontend won't start:
+cd packages/frontend
+npm install react-dev-utils@12.0.1 --save-dev
+npm start
+```
+
+---
+
 ### Manual Installation Instructions (If Preferred)
 
 #### Step 1: Install DFX (Internet Computer SDK)

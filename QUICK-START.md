@@ -55,7 +55,24 @@ The setup script does everything for you:
 - **Full Documentation**: README.md  
 - **Detailed Setup**: SETUP-GUIDE.md
 - **All Credentials**: TEST-CREDENTIALS.md
-- **Troubleshooting**: README.md (troubleshooting section)
+- **Manual Setup & Troubleshooting**: MANUAL-STARTUP-GUIDE.md 🔧
+
+### 🚨 If Setup Script Fails
+
+**Quick fixes for common issues:**
+```bash
+# NPM dependency issues
+rm -rf node_modules package-lock.json
+npm install --legacy-peer-deps
+
+# DFX replica issues  
+dfx stop && dfx start --background --clean
+
+# Frontend startup issues
+cd packages/frontend && npm install react-dev-utils@12.0.1 --save-dev
+```
+
+👉 **For detailed troubleshooting**: [MANUAL-STARTUP-GUIDE.md](./MANUAL-STARTUP-GUIDE.md)
 
 ## Prerequisites (Auto-Checked)
 

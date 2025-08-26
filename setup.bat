@@ -57,7 +57,7 @@ echo ✅ All prerequisites satisfied!
 echo.
 
 echo 📦 INSTALLING DEPENDENCIES...
-npm install
+npm install --legacy-peer-deps
 if errorlevel 1 (
     echo ❌ Failed to install dependencies
     pause
