@@ -52,13 +52,14 @@
     "tslib": "^2.8.1"
   },
   "dependencies": {
-    "@dfinity/agent": "^3.2.1",
+    "@dfinity/agent": "^3.2.2",
     "@dfinity/auth-client": "^3.2.1",
-    "@dfinity/candid": "^3.2.1",
+    "@dfinity/candid": "^3.2.2",
     "@dfinity/identity": "^3.2.1",
     "@dfinity/principal": "^3.2.1",
     "@rollup/plugin-typescript": "^12.1.4",
     "azle": "^0.32.0",
+    "isomorphic-fetch": "^3.0.0",
     "typescript": "^5.9.2"
   },
   "engines": {

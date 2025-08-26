@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "canisters": {
+    "backend": {
+      "main": "packages/backend/src/main.mo",
+      "type": "motoko"
+    },
+    "frontend": {
+      "dependencies": [
+        "backend"
+      ],
+      "frontend": {
+        "entrypoint": "packages/frontend/src/index.html"
+      },
+      "source": [
+        "packages/frontend/dist/"
+      ],
+      "type": "assets"
+    }
+  },
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": ""
+    }
+  },
+  "output_env_file": ".env",
+  "networks": {
+    "local": {
+      "bind": "127.0.0.1:4943",
+      "type": "ephemeral"
+    }
+  }
+}
