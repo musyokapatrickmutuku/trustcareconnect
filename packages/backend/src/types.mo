@@ -49,16 +49,11 @@ module Types {
     };
 
     public type InsuranceInfo = {
-        id: InsuranceId;
         provider: Text;
         policyNumber: Text;
         groupNumber: ?Text;
-        memberId: Text;
-        effectiveDate: Int;
-        expirationDate: ?Int;
-        copayAmount: ?Float;
-        deductibleAmount: ?Float;
-        isActive: Bool;
+        effectiveDate: Text;
+        expirationDate: Text;
     };
 
     public type MedicalHistory = {
@@ -67,19 +62,21 @@ module Types {
         medications: [Text];
         surgeries: [Text];
         familyHistory: [Text];
-        lastUpdated: Int;
+        socialHistory: Text;
+        notes: Text;
     };
 
     public type VitalSigns = {
+        height: ?Float;
+        weight: ?Float;
         bloodPressureSystolic: ?Nat;
         bloodPressureDiastolic: ?Nat;
         heartRate: ?Nat;
         temperature: ?Float;
-        weight: ?Float;
-        height: ?Float;
+        respiratoryRate: ?Nat;
         oxygenSaturation: ?Nat;
-        recordedAt: Int;
-        recordedBy: ?UserId;
+        bmi: ?Float;
+        lastUpdated: Int;
     };
 
     public type PatientData = {
@@ -122,10 +119,11 @@ module Types {
         hipaaAcknowledged: Bool;
         dataProcessingConsent: Bool;
         communicationPreferences: {
-            email: Bool;
-            sms: Bool;
-            phone: Bool;
-            portal: Bool;
+            preferredLanguage: Text;
+            emailNotifications: Bool;
+            smsNotifications: Bool;
+            callNotifications: Bool;
+            emergencyContactConsent: Bool;
         };
     };
 

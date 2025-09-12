@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { SystemStats } from '../types';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import MvpTester from '../components/MvpTester';
 import icpService from '../services/icpService';
 
 const HomePage: React.FC = () => {
@@ -10,6 +11,9 @@ const HomePage: React.FC = () => {
   const [connectionStatus, setConnectionStatus] = useState<string>('checking');
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [setupStatus, setSetupStatus] = useState<string>('ready');
+  const [showSetup, setShowSetup] = useState(false);
+  const [showMvpTester, setShowMvpTester] = useState(false);
 
   useEffect(() => {
     loadStats();
@@ -46,6 +50,43 @@ const HomePage: React.FC = () => {
 
   const handleRefresh = async () => {
     await loadStats();
+  };
+
+  const handleInitializeTestPatients = async () => {
+    setSetupStatus('initializing');
+    try {
+      const result = await icpService.initializeTestPatients();
+      if (result.success) {
+        setSetupStatus('success');
+        loadStats(); // Refresh stats after setup
+      } else {
+        setSetupStatus('error');
+        setError(result.error || 'Failed to initialize test patients');
+      }
+    } catch (error) {
+      setSetupStatus('error');
+      setError(error instanceof Error ? error.message : 'Setup failed');
+    }
+  };
+
+  const handleSetApiKey = async () => {
+    const apiKey = prompt('Enter Novita AI API Key (starts with sk_):');
+    if (!apiKey) return;
+    
+    setSetupStatus('setting_key');
+    try {
+      const result = await icpService.setApiKey(apiKey);
+      if (result.success) {
+        setSetupStatus('key_set');
+        alert('API key set successfully! You can now test the AI functionality.');
+      } else {
+        setSetupStatus('error');
+        setError(result.error || 'Failed to set API key');
+      }
+    } catch (error) {
+      setSetupStatus('error');
+      setError(error instanceof Error ? error.message : 'Failed to set API key');
+    }
   };
 
   return (
@@ -182,9 +223,64 @@ const HomePage: React.FC = () => {
         </div>
       </div>
 
+      {/* MVP Setup Section */}
+      <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg p-6 mb-8">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-xl font-semibold text-gray-900">🚀 MVP Setup</h3>
+          <button
+            onClick={() => setShowSetup(!showSetup)}
+            className="text-sm text-blue-600 hover:text-blue-800"
+          >
+            {showSetup ? 'Hide Setup' : 'Show Setup'}
+          </button>
+        </div>
+        
+        {showSetup && (
+          <div className="space-y-4">
+            <p className="text-gray-700">
+              Set up the TrustCareConnect MVP with test patient data and AI functionality:
+            </p>
+            
+            <div className="grid md:grid-cols-2 gap-4">
+              <button
+                onClick={handleSetApiKey}
+                disabled={setupStatus === 'setting_key'}
+                className="bg-blue-600 text-white p-4 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+              >
+                {setupStatus === 'setting_key' ? 'Setting API Key...' : '1. Set Novita AI API Key'}
+                <div className="text-xs mt-1 opacity-80">Required for AI responses</div>
+              </button>
+              
+              <button
+                onClick={handleInitializeTestPatients}
+                disabled={setupStatus === 'initializing'}
+                className="bg-green-600 text-white p-4 rounded-lg hover:bg-green-700 disabled:opacity-50"
+              >
+                {setupStatus === 'initializing' ? 'Initializing...' : '2. Initialize Test Patients'}
+                <div className="text-xs mt-1 opacity-80">P001 Sarah & P002 Michael</div>
+              </button>
+            </div>
+
+            {setupStatus === 'success' && (
+              <div className="bg-green-100 border border-green-200 rounded-lg p-4">
+                <p className="text-green-800 font-medium">✅ Setup completed successfully!</p>
+                <p className="text-green-700 text-sm mt-1">Test patients initialized with medical histories</p>
+              </div>
+            )}
+
+            {setupStatus === 'key_set' && (
+              <div className="bg-blue-100 border border-blue-200 rounded-lg p-4">
+                <p className="text-blue-800 font-medium">🔑 API Key configured!</p>
+                <p className="text-blue-700 text-sm mt-1">AI functionality is now available</p>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
       {/* Test Accounts Section */}
       <div className="bg-gradient-to-r from-blue-50 to-green-50 rounded-lg p-6 mb-8">
-        <h3 className="text-xl font-semibold text-gray-900 mb-4">🧪 Ready for Testing!</h3>
+        <h3 className="text-xl font-semibold text-gray-900 mb-4">🧪 Test Patient Data</h3>
         <p className="text-gray-700 mb-4">
           The platform is now loaded with comprehensive diabetes patient data from patients.txt. 
           Use these test accounts to experience the enhanced AI responses with medical history context.
@@ -192,19 +288,17 @@ const HomePage: React.FC = () => {
         
         <div className="grid md:grid-cols-2 gap-6">
           <div className="bg-white rounded-lg p-4">
-            <h4 className="font-semibold text-blue-600 mb-3">👥 Patient Test Accounts</h4>
-            <div className="space-y-2 text-sm">
+            <h4 className="font-semibold text-blue-600 mb-3">👥 Test Patient Data (for processMedicalQuery)</h4>
+            <div className="space-y-3 text-sm">
               <div>
-                <span className="font-medium">Sarah Johnson (Type 2)</span><br/>
-                <span className="text-gray-600">sarah.johnson@email.com • SarahDiabetes2024!</span>
+                <span className="font-medium text-blue-600">P001 - Sarah Michelle Johnson</span><br/>
+                <span className="text-gray-600">Type 2 Diabetes • HbA1c 6.9%</span><br/>
+                <span className="text-xs text-gray-500">Metformin 1000mg BID, Empagliflozin 10mg daily</span>
               </div>
               <div>
-                <span className="font-medium">Michael Rodriguez (Type 1)</span><br/>
-                <span className="text-gray-600">mike.rodriguez@student.edu • MikeType1Diabetes!</span>
-              </div>
-              <div>
-                <span className="font-medium">Carlos Mendoza (Type 2)</span><br/>
-                <span className="text-gray-600">carlos.mendoza@gmail.com • CarlosDiabetes62!</span>
+                <span className="font-medium text-green-600">P002 - Michael David Rodriguez</span><br/>
+                <span className="text-gray-600">Type 1 Diabetes • HbA1c 7.8%</span><br/>
+                <span className="text-xs text-gray-500">Insulin pump therapy, basal rate 1.2 units/hour</span>
               </div>
             </div>
           </div>
@@ -224,13 +318,29 @@ const HomePage: React.FC = () => {
           </div>
         </div>
         
-        <div className="mt-4 p-3 bg-yellow-50 rounded-lg">
-          <p className="text-sm text-yellow-800">
-            💡 <strong>Test the Enhancement:</strong> Patient queries now include comprehensive medical histories, 
-            current medications, HbA1c levels, and treatment progress for personalized AI responses.
-          </p>
+        <div className="mt-4 flex justify-between items-center">
+          <div className="p-3 bg-yellow-50 rounded-lg flex-1 mr-4">
+            <p className="text-sm text-yellow-800">
+              💡 <strong>Test the Enhancement:</strong> Patient queries now include comprehensive medical histories, 
+              current medications, HbA1c levels, and treatment progress for personalized AI responses.
+            </p>
+          </div>
+          
+          <button
+            onClick={() => setShowMvpTester(!showMvpTester)}
+            className="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 font-medium"
+          >
+            {showMvpTester ? 'Hide' : 'Test'} MVP
+          </button>
         </div>
       </div>
+
+      {/* MVP Tester Section */}
+      {showMvpTester && (
+        <div className="mb-8">
+          <MvpTester />
+        </div>
+      )}
 
       <div className="bg-gray-50 rounded-lg p-6">
         <h3 className="text-xl font-semibold text-gray-900 mb-4">How It Works</h3>

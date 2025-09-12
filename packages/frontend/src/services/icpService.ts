@@ -191,6 +191,22 @@ class ICPService {
   // QUERY METHODS
   // =======================
 
+  // MVP Core Function - Process Medical Query
+  async processMedicalQuery(patientId: string, query: string, vitalSigns?: any): Promise<ApiResponse<any>> {
+    try {
+      const actor = await this.ensureActor();
+      const result = await actor.processMedicalQuery(patientId, query, vitalSigns ? [vitalSigns] : []);
+      
+      if ('ok' in result) {
+        return { success: true, data: result.ok };
+      } else {
+        return { success: false, error: result.err };
+      }
+    } catch (error) {
+      return this.handleError(error, 'process medical query');
+    }
+  }
+
   async submitQuery(patientId: string, title: string, description: string): Promise<ApiResponse<string>> {
     try {
       const actor = await this.ensureActor();
@@ -269,6 +285,33 @@ class ICPService {
   // =======================
   // SYSTEM METHODS
   // =======================
+
+  // Set API key for Novita AI (admin function)
+  async setApiKey(key: string): Promise<ApiResponse<void>> {
+    try {
+      const actor = await this.ensureActor();
+      await actor.setApiKey(key);
+      return { success: true };
+    } catch (error) {
+      return this.handleError(error, 'set API key');
+    }
+  }
+
+  // Initialize test patients as per CLAUDE.md
+  async initializeTestPatients(): Promise<ApiResponse<string>> {
+    try {
+      const actor = await this.ensureActor();
+      const result = await actor.initializeTestPatients();
+      
+      if ('ok' in result) {
+        return { success: true, data: result.ok };
+      } else {
+        return { success: false, error: result.err };
+      }
+    } catch (error) {
+      return this.handleError(error, 'initialize test patients');
+    }
+  }
 
   async getStats(): Promise<ApiResponse<SystemStats>> {
     try {

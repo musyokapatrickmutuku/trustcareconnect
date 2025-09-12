@@ -117,6 +117,9 @@ actor TrustCareConnect {
         completedQueries: Nat;
     };
 
+    // Configuration
+    private stable var NOVITA_API_KEY: Text = "";
+    
     // Storage maps using stable memory
     private stable var nextPatientId: Nat = 1;
     private stable var nextDoctorId: Nat = 1;
@@ -230,7 +233,7 @@ actor TrustCareConnect {
                     max_response_bytes = ?8192;
                     headers = [
                         { name = "Content-Type"; value = "application/json" },
-                        { name = "Authorization"; value = "Bearer sk_F_8dAOPzGPmh98MZPYGOQyYFrPdy2l6d29HQjmj6PA8" },
+                        { name = "Authorization"; value = "Bearer " # NOVITA_API_KEY },
                         { name = "User-Agent"; value = "TrustCareConnect/1.0" }
                     ];
                     body = ?Blob.toArray(requestBodyBytes);
@@ -767,8 +770,295 @@ actor TrustCareConnect {
     };
 
     // =======================
+    // MVP CORE FUNCTION - processMedicalQuery
+    // =======================
+
+    type VitalSigns = {
+        bloodGlucose: ?Float;
+        bloodPressure: ?Text;
+        heartRate: ?Nat;
+        temperature: ?Float;
+    };
+
+    type MedicalResponse = {
+        content: Text;
+        safetyScore: Nat;
+        urgency: Text; // "LOW", "MEDIUM", "HIGH"
+        timestamp: Int;
+        requiresReview: Bool;
+    };
+
+    // Main MVP function for processing medical queries
+    public func processMedicalQuery(
+        patientId: Text,
+        queryText: Text,
+        vitalSigns: ?VitalSigns
+    ): async Result.Result<MedicalResponse, Text> {
+        
+        // Step 1: Input validation
+        if (Text.size(queryText) == 0) {
+            return #err("Query cannot be empty");
+        };
+
+        // Step 2: Get patient context
+        let patientContext = await getPatientContext(patientId);
+        
+        // Step 3: Get AI response
+        let aiResponse = await getAIDraftResponse(queryText, patientContext);
+        
+        // Step 4: Calculate safety score and urgency
+        let safetyScore = calculateSafetyScore(queryText, vitalSigns);
+        let urgency = determineUrgency(safetyScore, queryText);
+        let requiresReview = (safetyScore < 70 or urgency == "HIGH");
+        
+        // Step 5: Build final response
+        let finalContent = switch (aiResponse) {
+            case (?response) { response };
+            case null { "Unable to generate AI response at this time. Please consult with your healthcare provider." };
+        };
+
+        let medicalResponse: MedicalResponse = {
+            content = finalContent;
+            safetyScore = safetyScore;
+            urgency = urgency;
+            timestamp = Time.now();
+            requiresReview = requiresReview;
+        };
+
+        #ok(medicalResponse)
+    };
+
+    // Get patient context for AI analysis
+    private func getPatientContext(patientId: Text): async Text {
+        // Check enhanced patients first
+        switch (enhancedPatients.get(patientId)) {
+            case (?enhancedPatient) {
+                "Patient: " # enhancedPatient.firstName # " " # enhancedPatient.lastName #
+                ", Medications: " # Array.foldLeft<Text, Text>(enhancedPatient.medicalHistory.medications, "", func(acc: Text, med: Text): Text { acc # med # "; " }) #
+                ", Conditions: " # Array.foldLeft<Text, Text>(enhancedPatient.medicalHistory.conditions, "", func(acc: Text, cond: Text): Text { acc # cond # "; " })
+            };
+            case null {
+                // Fallback to regular patients
+                switch (patients.get(patientId)) {
+                    case (?patient) {
+                        "Patient: " # patient.name # ", Condition: " # patient.condition
+                    };
+                    case null { "Patient information not available" };
+                }
+            };
+        }
+    };
+
+    // Calculate safety score based on query content and vitals
+    private func calculateSafetyScore(queryText: Text, vitalSigns: ?VitalSigns): Nat {
+        var score: Int = 100;
+
+        // Critical symptoms check
+        let criticalSymptoms = ["chest pain", "unconscious", "severe bleeding", "difficulty breathing", "seizure"];
+        for (symptom in criticalSymptoms.vals()) {
+            if (Text.contains(queryText, #text symptom)) {
+                score -= 60;
+            };
+        };
+
+        // Vital signs assessment
+        switch (vitalSigns) {
+            case (?vitals) {
+                switch (vitals.bloodGlucose) {
+                    case (?glucose) {
+                        if (glucose < 54.0) { score -= 50 }        // Severe hypoglycemia
+                        else if (glucose < 70.0) { score -= 30 }   // Hypoglycemia  
+                        else if (glucose > 400.0) { score -= 45 }  // Severe hyperglycemia
+                        else if (glucose > 250.0) { score -= 25 }; // Hyperglycemia
+                    };
+                    case null {};
+                };
+            };
+            case null {};
+        };
+
+        // Medication concerns
+        let medicationFlags = ["stop medication", "quit drug", "discontinue"];
+        for (flag in medicationFlags.vals()) {
+            if (Text.contains(queryText, #text flag)) {
+                score -= 40;
+            };
+        };
+
+        // Ensure score stays within bounds
+        if (score < 0) { 0 } else if (score > 100) { 100 } else { Int.abs(score) }
+    };
+
+    // Determine urgency level based on safety score
+    private func determineUrgency(safetyScore: Nat, queryText: Text): Text {
+        if (safetyScore < 40) {
+            "HIGH"
+        } else if (safetyScore < 70) {
+            "MEDIUM"  
+        } else {
+            "LOW"
+        }
+    };
+
+    // =======================
     // SYSTEM FUNCTIONS
     // =======================
+
+    // Set API key for Novita AI (admin function)
+    public func setApiKey(key: Text): async () {
+        NOVITA_API_KEY := key;
+    };
+
+    // Initialize test patients as specified in CLAUDE.md
+    public func initializeTestPatients(): async Result.Result<Text, Text> {
+        try {
+            // Test Patient P001 - Sarah Michelle Johnson  
+            let sarahPatientData: PatientData = {
+                id = "P001";
+                firstName = "Sarah Michelle";
+                lastName = "Johnson";
+                dateOfBirth = "1979-01-01"; // 45 years old
+                gender = #female;
+                phoneNumber = "+254722123456";
+                email = "sarah.johnson@email.com";
+                address = "123 Nairobi Street";
+                city = "Nairobi";
+                state = "Nairobi County";
+                zipCode = "00100";
+                country = "Kenya";
+                medicalRecordNumber = "MRN001";
+                bloodType = #O_positive;
+                medicalHistory = {
+                    conditions = ["Type 2 Diabetes", "Hypertension"];
+                    medications = ["Metformin 1000mg BID", "Empagliflozin 10mg daily", "Lisinopril 15mg daily"];
+                    allergies = [];
+                    surgeries = [];
+                    familyHistory = ["Mother: Type 2 Diabetes", "Maternal grandmother: Type 2 Diabetes"];
+                    socialHistory = "Non-smoker, occasional alcohol";
+                    notes = "45-year-old African American female with Type 2 diabetes diagnosed 2022. Current HbA1c 6.9%, on Metformin 1000mg BID, Empagliflozin 10mg daily, Lisinopril 15mg daily. Weight 76kg, BP 125/75. No complications, excellent control achieved.";
+                };
+                currentVitals = ?{
+                    height = ?165.0;
+                    weight = ?76.0;
+                    bloodPressureSystolic = ?125;
+                    bloodPressureDiastolic = ?75;
+                    heartRate = ?72;
+                    temperature = ?37.0;
+                    respiratoryRate = ?18;
+                    oxygenSaturation = ?98;
+                    bmi = ?27.9;
+                    lastUpdated = Time.now();
+                };
+                emergencyContact = {
+                    name = "John Johnson";
+                    relationship = "Spouse";
+                    phoneNumber = "+254722123457";
+                    email = ?"john.johnson@email.com";
+                    address = null;
+                };
+                insuranceInfo = ?{
+                    provider = "SHA";
+                    policyNumber = "SHA123456";
+                    groupNumber = ?"GRP001";
+                    effectiveDate = "2022-01-01";
+                    expirationDate = "2025-12-31";
+                };
+                primaryDoctorId = null;
+                assignedDoctorIds = [];
+                isActive = true;
+                createdAt = Time.now();
+                updatedAt = Time.now();
+                lastVisit = ?Time.now();
+                consentToTreatment = true;
+                hipaaAcknowledged = true;
+                dataProcessingConsent = true;
+                communicationPreferences = {
+                    preferredLanguage = "English";
+                    emailNotifications = true;
+                    smsNotifications = true;
+                    callNotifications = false;
+                    emergencyContactConsent = true;
+                };
+            };
+
+            // Test Patient P002 - Michael David Rodriguez
+            let michaelPatientData: PatientData = {
+                id = "P002";
+                firstName = "Michael David";
+                lastName = "Rodriguez";
+                dateOfBirth = "2005-01-01"; // 19 years old
+                gender = #male;
+                phoneNumber = "+254722234567";
+                email = "mike.rodriguez@student.edu";
+                address = "456 University Ave";
+                city = "Nairobi";
+                state = "Nairobi County";
+                zipCode = "00200";
+                country = "Kenya";
+                medicalRecordNumber = "MRN002";
+                bloodType = #A_positive;
+                medicalHistory = {
+                    conditions = ["Type 1 Diabetes"];
+                    medications = ["Insulin pump therapy", "Basal rate 1.2 units/hour"];
+                    allergies = [];
+                    surgeries = [];
+                    familyHistory = ["No known family history of diabetes"];
+                    socialHistory = "College student, non-smoker, no alcohol";
+                    notes = "19-year-old Caucasian male college student with Type 1 diabetes diagnosed at 16 with DKA. Currently on insulin pump therapy, basal rate 1.2 units/hour. HbA1c 7.8%, weight 78kg. Stress-related glucose fluctuations during college.";
+                };
+                currentVitals = ?{
+                    height = ?175.0;
+                    weight = ?78.0;
+                    bloodPressureSystolic = ?120;
+                    bloodPressureDiastolic = ?80;
+                    heartRate = ?75;
+                    temperature = ?37.0;
+                    respiratoryRate = ?16;
+                    oxygenSaturation = ?99;
+                    bmi = ?25.5;
+                    lastUpdated = Time.now();
+                };
+                emergencyContact = {
+                    name = "Maria Rodriguez";
+                    relationship = "Mother";
+                    phoneNumber = "+254722234568";
+                    email = ?"maria.rodriguez@email.com";
+                    address = null;
+                };
+                insuranceInfo = ?{
+                    provider = "Student Health Insurance";
+                    policyNumber = "STU123456";
+                    groupNumber = ?"UNIV001";
+                    effectiveDate = "2024-01-01";
+                    expirationDate = "2024-12-31";
+                };
+                primaryDoctorId = null;
+                assignedDoctorIds = [];
+                isActive = true;
+                createdAt = Time.now();
+                updatedAt = Time.now();
+                lastVisit = ?Time.now();
+                consentToTreatment = true;
+                hipaaAcknowledged = true;
+                dataProcessingConsent = true;
+                communicationPreferences = {
+                    preferredLanguage = "English";
+                    emailNotifications = true;
+                    smsNotifications = true;
+                    callNotifications = true;
+                    emergencyContactConsent = true;
+                };
+            };
+
+            // Store the test patients
+            enhancedPatients.put("P001", sarahPatientData);
+            enhancedPatients.put("P002", michaelPatientData);
+
+            #ok("Test patients P001 (Sarah Johnson) and P002 (Michael Rodriguez) initialized successfully")
+        } catch (error) {
+            #err("Failed to initialize test patients")
+        }
+    };
 
     // Health check
     public query func healthCheck(): async Text {
