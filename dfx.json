@@ -10,7 +10,7 @@
         "backend"
       ],
       "frontend": {
-        "entrypoint": "packages/frontend/src/index.html"
+        "entrypoint": "packages/frontend/dist/index.html"
       },
       "source": [
         "packages/frontend/dist/"

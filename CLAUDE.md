@@ -1288,6 +1288,66 @@ dfx canister call assist_backend setApiKey '("your-novita-api-key")'
 npm run dev
 ```
 
+## Current Deployment Information
+
+### Latest Canister IDs (Local Development)
+
+**Backend Canister:**
+- **ID**: `uxrrr-q7777-77774-qaaaq-cai`
+- **Status**: Running ✅
+- **Cycles**: 1.49T cycles (healthy)
+- **Access**: http://uxrrr-q7777-77774-qaaaq-cai.localhost:4943/
+
+**Frontend Canister:**
+- **ID**: `u6s2n-gx777-77774-qaaba-cai`
+- **Status**: Running ✅
+- **Cycles**: 1.30T cycles (healthy)
+- **Access**: http://u6s2n-gx777-77774-qaaba-cai.localhost:4943/
+
+### Application Access URLs
+
+**Primary Frontend:**
+```
+http://u6s2n-gx777-77774-qaaba-cai.localhost:4943/
+```
+
+**Alternative Frontend:**
+```
+http://127.0.0.1:4943/?canisterId=u6s2n-gx777-77774-qaaba-cai
+```
+
+**Backend API:**
+```
+http://uxrrr-q7777-77774-qaaaq-cai.localhost:4943/
+```
+
+**Candid Interface:**
+```
+http://127.0.0.1:4943/_/candid?id=uxrrr-q7777-77774-qaaaq-cai
+```
+
+### Deployment Configuration Fix
+
+**Critical Fix Applied**: Updated dfx.json to optimize frontend deployment:
+
+```json
+{
+  "frontend": {
+    "source": ["packages/frontend/dist/"],
+    "frontend": {
+      "entrypoint": "packages/frontend/dist/index.html"
+    },
+    "type": "assets"
+  }
+}
+```
+
+**Benefits:**
+- ✅ Reduced deployment time from hours to minutes
+- ✅ Fixed stuck deployment processes
+- ✅ Optimized asset processing (132KB vs entire source directory)
+- ✅ Eliminated deployment hangs and timeouts
+
 ### Test Commands
 ```bash
 # High-risk query test

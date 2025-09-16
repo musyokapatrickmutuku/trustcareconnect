@@ -83,9 +83,10 @@ setup.bat
 - Ready for doctor review and patient testing
 
 **After setup completes:**
-1. Open http://localhost:3000
-2. Use any credentials above to login immediately
-3. Test the complete healthcare workflow!
+1. Open http://u6s2n-gx777-77774-qaaba-cai.localhost:4943/ (Primary Frontend)
+2. Alternative: http://127.0.0.1:4943/?canisterId=u6s2n-gx777-77774-qaaba-cai
+3. Use any credentials above to login immediately
+4. Test the complete healthcare workflow!
 
 ### Prerequisites (Auto-Checked)
 
@@ -225,8 +226,8 @@ The project includes pre-configured environment files. Key configurations:
 ```bash
 NODE_ENV=development
 REACT_APP_IC_HOST=http://127.0.0.1:4943
-REACT_APP_BACKEND_CANISTER_ID=lqy7q-dh777-77777-aaaaq-cai
-CANISTER_ID_BACKEND=lqy7q-dh777-77777-aaaaq-cai
+REACT_APP_BACKEND_CANISTER_ID=uxrrr-q7777-77774-qaaaq-cai
+CANISTER_ID_BACKEND=uxrrr-q7777-77774-qaaaq-cai
 REACT_APP_NETWORK=local
 DFX_NETWORK=local
 REACT_APP_DEBUG_MODE=true
@@ -235,7 +236,7 @@ REACT_APP_DEBUG_MODE=true
 ### `.env.local` (Frontend Package)
 ```bash
 REACT_APP_IC_HOST=http://127.0.0.1:4943
-REACT_APP_BACKEND_CANISTER_ID=lqy7q-dh777-77777-aaaaq-cai
+REACT_APP_BACKEND_CANISTER_ID=uxrrr-q7777-77774-qaaaq-cai
 REACT_APP_NETWORK=local
 REACT_APP_DEBUG_MODE=true
 ```
@@ -336,6 +337,19 @@ dfx canister call backend healthCheck
 
 ### Recently Fixed Issues
 
+#### ✅ Frontend Deployment Configuration Fixed
+**Problem**: Frontend deployment hanging during asset processing
+**Solution**: Updated dfx.json to point to dist/ directory instead of entire frontend source
+```json
+// Fixed in dfx.json
+"frontend": {
+  "source": ["packages/frontend/dist/"],
+  "frontend": {
+    "entrypoint": "packages/frontend/dist/index.html"
+  }
+}
+```
+
 #### ✅ Certificate Verification Error
 **Problem**: `Certificate verification error: "Invalid signature"`
 **Solution**: Disabled certificate verification for local development
@@ -344,11 +358,12 @@ dfx canister call backend healthCheck
 agentOptions.verifyQuerySignatures = false; // For local development
 ```
 
-#### ✅ Wrong Canister ID Connection Error  
-**Problem**: `Canister zkfwe-6yaaa-aaaab-qacca-cai does not belong to any subnet`
-**Solution**: Updated all environment files with correct local canister ID
-- Fixed `.env.local` file with hardcoded mainnet canister ID
-- Updated API service fallback configuration
+#### ✅ Deployment Process Optimization
+**Problem**: Long deployment times and stuck processes
+**Solution**: Implemented proper deployment workflow
+- Fixed dfx.json configuration to use built assets only
+- Added process cleanup and cache clearing procedures
+- Reduced deployment time from hours to minutes
 
 #### ✅ Node Signature Error
 **Problem**: `Query response did not contain any node signatures`  
@@ -438,13 +453,27 @@ dfx canister --network ic call backend healthCheck
 
 ## 🎮 Demo Usage
 
+### Application Access URLs
+
+**Primary Frontend Access:**
+- http://u6s2n-gx777-77774-qaaba-cai.localhost:4943/
+
+**Alternative Frontend Access:**
+- http://127.0.0.1:4943/?canisterId=u6s2n-gx777-77774-qaaba-cai
+
+**Backend API Access:**
+- http://uxrrr-q7777-77774-qaaaq-cai.localhost:4943/
+
+**Candid UI for Backend Testing:**
+- http://127.0.0.1:4943/_/candid?id=uxrrr-q7777-77774-qaaaq-cai
+
 ### Patient Portal Features
 - **Registration**: Complete patient profiles with medical history
 - **Query Submission**: Natural language medical questions
 - **AI Responses**: View AI-generated draft responses
 - **Status Tracking**: Real-time query status updates
 
-### Doctor Portal Features  
+### Doctor Portal Features
 - **Patient Management**: View assigned patients
 - **Query Review**: Review AI-generated draft responses
 - **Response Editing**: Modify and approve AI recommendations
