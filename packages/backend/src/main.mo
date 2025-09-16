@@ -39,6 +39,7 @@ actor TrustCareConnect {
             function: shared query (TransformArgs) -> async HttpResponsePayload;
             context: Blob;
         };
+        is_replicated: ?Bool;
     };
     
     type HttpResponsePayload = {
@@ -242,6 +243,7 @@ actor TrustCareConnect {
                         function = transform_response;
                         context = Blob.fromArray([]);
                     };
+                    is_replicated = ?false;
                 };
                 
                 // Make the HTTP outcall to Novita AI API with cycles

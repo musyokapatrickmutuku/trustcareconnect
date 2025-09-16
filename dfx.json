@@ -22,13 +22,19 @@
     "build": {
       "args": "",
       "packtool": ""
+    },
+    "replica": {
+      "subnet_type": "application"
     }
   },
   "output_env_file": ".env",
   "networks": {
     "local": {
       "bind": "127.0.0.1:4943",
-      "type": "ephemeral"
+      "type": "ephemeral",
+      "replica": {
+        "subnet_type": "application"
+      }
     }
   }
 }
