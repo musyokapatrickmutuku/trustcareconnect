@@ -10,10 +10,10 @@
         "backend"
       ],
       "frontend": {
-        "entrypoint": "packages/frontend/dist/index.html"
+        "entrypoint": "frontend-simple/index.html"
       },
       "source": [
-        "packages/frontend/dist/"
+        "frontend-simple/"
       ],
       "type": "assets"
     }

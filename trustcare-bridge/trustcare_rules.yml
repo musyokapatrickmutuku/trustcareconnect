@@ -1,0 +1,212 @@
+# TrustCareConnect Alert Rules for Prometheus
+
+groups:
+  - name: trustcare_service_alerts
+    rules:
+      # Service availability
+      - alert: TrustCareServiceDown
+        expr: up{job="trustcare-bridge"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: trustcare-bridge
+        annotations:
+          summary: "TrustCare Bridge service is down"
+          description: "TrustCare Bridge service has been down for more than 1 minute"
+
+      # High response time
+      - alert: HighResponseTime
+        expr: histogram_quantile(0.95, rate(trustcare_response_time_seconds_bucket{endpoint="query"}[5m])) > 5
+        for: 2m
+        labels:
+          severity: warning
+          service: trustcare-bridge
+        annotations:
+          summary: "High response time detected"
+          description: "95th percentile response time is {{ $value }}s, above threshold of 5s"
+
+      # Low safety scores
+      - alert: LowSafetyScoreQueries
+        expr: rate(trustcare_safety_score_distribution_bucket{le="40"}[5m]) / rate(trustcare_safety_score_distribution_count[5m]) > 0.1
+        for: 1m
+        labels:
+          severity: critical
+          service: trustcare-bridge
+        annotations:
+          summary: "High percentage of low safety score queries"
+          description: "{{ $value | humanizePercentage }} of queries have safety scores below 40"
+
+      # API failure rate
+      - alert: HighAPIFailureRate
+        expr: rate(trustcare_external_api_requests_total{status!="success"}[5m]) / rate(trustcare_external_api_requests_total[5m]) > 0.05
+        for: 2m
+        labels:
+          severity: warning
+          service: trustcare-bridge
+        annotations:
+          summary: "High API failure rate"
+          description: "{{ $value | humanizePercentage }} of external API calls are failing"
+
+      # Memory usage
+      - alert: HighMemoryUsage
+        expr: trustcare_memory_usage_bytes{type="heap_used"} / trustcare_memory_usage_bytes{type="heap_total"} > 0.85
+        for: 5m
+        labels:
+          severity: warning
+          service: trustcare-bridge
+        annotations:
+          summary: "High memory usage"
+          description: "Memory usage is {{ $value | humanizePercentage }} of total heap"
+
+      # Connection count
+      - alert: HighConnectionCount
+        expr: trustcare_websocket_connections > 900
+        for: 2m
+        labels:
+          severity: warning
+          service: trustcare-bridge
+        annotations:
+          summary: "High WebSocket connection count"
+          description: "WebSocket connections: {{ $value }}, approaching limit of 1000"
+
+      # Cache hit ratio
+      - alert: LowCacheHitRatio
+        expr: trustcare_cache_hit_ratio < 0.6
+        for: 5m
+        labels:
+          severity: warning
+          service: trustcare-bridge
+        annotations:
+          summary: "Low cache hit ratio"
+          description: "Cache hit ratio is {{ $value | humanizePercentage }}, below threshold of 60%"
+
+      # Queue size
+      - alert: HighQueueSize
+        expr: trustcare_queue_size > 50
+        for: 2m
+        labels:
+          severity: warning
+          service: trustcare-bridge
+        annotations:
+          summary: "High processing queue size"
+          description: "Queue size is {{ $value }}, indicating potential bottleneck"
+
+  - name: trustcare_medical_alerts
+    rules:
+      # Emergency alerts
+      - alert: EmergencyAlert
+        expr: increase(trustcare_alerts_total{severity="critical"}[1m]) > 0
+        for: 0s
+        labels:
+          severity: critical
+          service: trustcare-bridge
+          type: medical_emergency
+        annotations:
+          summary: "Medical emergency alert triggered"
+          description: "A critical medical alert has been triggered"
+
+      # High number of doctor reviews
+      - alert: HighDoctorReviewBacklog
+        expr: trustcare_queue_size{queue_type="doctor_review"} > 20
+        for: 5m
+        labels:
+          severity: warning
+          service: trustcare-bridge
+        annotations:
+          summary: "High doctor review backlog"
+          description: "{{ $value }} queries are pending doctor review"
+
+      # Low average safety score
+      - alert: LowAverageSafetyScore
+        expr: trustcare_avg_safety_score < 70
+        for: 10m
+        labels:
+          severity: warning
+          service: trustcare-bridge
+        annotations:
+          summary: "Low average safety score"
+          description: "Average safety score is {{ $value }}, below threshold of 70"
+
+  - name: trustcare_infrastructure_alerts
+    rules:
+      # Disk space
+      - alert: HighDiskUsage
+        expr: (node_filesystem_size_bytes{fstype!="tmpfs"} - node_filesystem_avail_bytes{fstype!="tmpfs"}) / node_filesystem_size_bytes{fstype!="tmpfs"} > 0.85
+        for: 5m
+        labels:
+          severity: warning
+          service: infrastructure
+        annotations:
+          summary: "High disk usage"
+          description: "Disk usage is {{ $value | humanizePercentage }} on {{ $labels.device }}"
+
+      # CPU usage
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: infrastructure
+        annotations:
+          summary: "High CPU usage"
+          description: "CPU usage is {{ $value }}% on {{ $labels.instance }}"
+
+      # Redis connectivity
+      - alert: RedisDown
+        expr: redis_up == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: redis
+        annotations:
+          summary: "Redis is down"
+          description: "Redis service is not responding"
+
+      # Container restart
+      - alert: ContainerRestarted
+        expr: increase(container_start_time_seconds{name=~"trustcare.*"}[5m]) > 0
+        for: 0s
+        labels:
+          severity: warning
+          service: docker
+        annotations:
+          summary: "Container restarted"
+          description: "Container {{ $labels.name }} has restarted"
+
+  - name: trustcare_business_alerts
+    rules:
+      # Low daily active patients
+      - alert: LowDailyActivePatients
+        expr: trustcare_unique_patients_daily < 10
+        for: 30m
+        labels:
+          severity: warning
+          service: trustcare-bridge
+          type: business
+        annotations:
+          summary: "Low daily active patients"
+          description: "Only {{ $value }} unique patients served today"
+
+      # No queries processed
+      - alert: NoQueriesProcessed
+        expr: increase(trustcare_queries_total[30m]) == 0
+        for: 30m
+        labels:
+          severity: warning
+          service: trustcare-bridge
+          type: business
+        annotations:
+          summary: "No medical queries processed"
+          description: "No medical queries have been processed in the last 30 minutes"
+
+      # High query failure rate
+      - alert: HighQueryFailureRate
+        expr: rate(trustcare_queries_total{status="failed"}[5m]) / rate(trustcare_queries_total[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: critical
+          service: trustcare-bridge
+          type: business
+        annotations:
+          summary: "High query failure rate"
+          description: "{{ $value | humanizePercentage }} of queries are failing"

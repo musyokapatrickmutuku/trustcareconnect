@@ -1,0 +1,75 @@
+# Prometheus configuration for TrustCareConnect Bridge Service monitoring
+
+global:
+  scrape_interval: 15s     # Default scrape interval
+  evaluation_interval: 15s # Evaluate rules every 15 seconds
+  # scrape_timeout is set to the global default (10s).
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - alertmanager:9093
+
+# Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
+rule_files:
+  - "trustcare_rules.yml"
+
+# Scrape configuration
+scrape_configs:
+  # TrustCare Bridge Service
+  - job_name: 'trustcare-bridge'
+    static_configs:
+      - targets: ['trustcare-bridge:3001']
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+    scrape_timeout: 5s
+    honor_labels: true
+    params:
+      format: ['prometheus']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: trustcare-bridge:3001
+
+  # Node.js process metrics
+  - job_name: 'trustcare-bridge-node'
+    static_configs:
+      - targets: ['trustcare-bridge:3001']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: 'nodejs_.*'
+        target_label: service
+        replacement: 'trustcare-bridge'
+
+  # Redis metrics (if exposed)
+  - job_name: 'trustcare-redis'
+    static_configs:
+      - targets: ['redis:6379']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  # Nginx metrics (if nginx-prometheus-exporter is configured)
+  - job_name: 'trustcare-nginx'
+    static_configs:
+      - targets: ['nginx:9113']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  # System metrics via node_exporter
+  - job_name: 'node'
+    static_configs:
+      - targets: ['node-exporter:9100']
+    scrape_interval: 30s
+
+  # Docker container metrics via cAdvisor
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+    scrape_interval: 30s

@@ -1,0 +1,40 @@
+{
+  "services": [
+    {
+      "name": "Database",
+      "health_url": "postgresql://localhost:5432",
+      "max_attempts": 15,
+      "wait_time": 5
+    },
+    {
+      "name": "Redis",
+      "health_url": "redis://localhost:6379",
+      "max_attempts": 15,
+      "wait_time": 5
+    },
+    {
+      "name": "Bridge Service",
+      "health_url": "https://bridge.trustcareconnect.com/health",
+      "max_attempts": 30,
+      "wait_time": 10
+    },
+    {
+      "name": "WebSocket Service",
+      "health_url": "https://bridge.trustcareconnect.com/ws-info",
+      "max_attempts": 25,
+      "wait_time": 8
+    },
+    {
+      "name": "Load Balancer",
+      "health_url": "https://bridge.trustcareconnect.com/health",
+      "max_attempts": 20,
+      "wait_time": 5
+    },
+    {
+      "name": "Metrics Endpoint",
+      "health_url": "https://bridge.trustcareconnect.com/metrics",
+      "max_attempts": 15,
+      "wait_time": 5
+    }
+  ]
+}

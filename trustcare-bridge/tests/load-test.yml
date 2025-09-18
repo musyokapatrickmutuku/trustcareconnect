@@ -1,0 +1,240 @@
+# Artillery Load Test Configuration for TrustCareConnect Bridge Service
+# This configuration tests the service under various load conditions
+
+config:
+  target: 'http://localhost:3001'
+  phases:
+    # Warm-up phase
+    - duration: 30
+      arrivalRate: 1
+      name: "Warm-up"
+
+    # Gradual ramp-up
+    - duration: 60
+      arrivalRate: 5
+      rampTo: 20
+      name: "Ramp-up"
+
+    # Sustained load
+    - duration: 120
+      arrivalRate: 20
+      name: "Sustained load"
+
+    # Peak load
+    - duration: 60
+      arrivalRate: 50
+      name: "Peak load"
+
+    # Stress test
+    - duration: 30
+      arrivalRate: 100
+      name: "Stress test"
+
+    # Cool down
+    - duration: 30
+      arrivalRate: 5
+      name: "Cool down"
+
+  processor: './load-test-functions.js'
+
+  # Performance thresholds
+  ensure:
+    - http.response_time.p95: 2000  # 95th percentile under 2 seconds
+    - http.response_time.p99: 5000  # 99th percentile under 5 seconds
+    - http.request_rate: 40         # At least 40 requests per second
+    - http.codes.200: 95            # 95% success rate minimum
+
+  # Variables for dynamic data
+  variables:
+    patientIds:
+      - "P001"
+      - "P002"
+      - "P003"
+      - "P004"
+      - "P005"
+
+    urgencyLevels:
+      - "LOW"
+      - "MEDIUM"
+      - "HIGH"
+
+    channels:
+      - "websocket"
+      - "rest"
+      - "mobile"
+
+scenarios:
+  # Primary scenario: Medical query processing
+  - name: "Medical Query Load Test"
+    weight: 70
+    flow:
+      - think: 1
+
+      # Health check
+      - get:
+          url: "/health"
+          capture:
+            - json: "$.status"
+              as: "healthStatus"
+          expect:
+            - statusCode: 200
+            - contentType: json
+
+      # Submit medical query
+      - post:
+          url: "/api/medical-query"
+          headers:
+            Content-Type: "application/json"
+          json:
+            patientId: "{{ $randomString() }}"
+            query: "{{ generateMedicalQuery() }}"
+            vitalSigns:
+              bloodGlucose: "{{ $randomInt(70, 300) }}"
+              bloodPressure: "{{ generateBloodPressure() }}"
+              heartRate: "{{ $randomInt(60, 120) }}"
+              temperature: "{{ $randomFloat(36.0, 39.5) }}"
+            context:
+              medicalHistory: "{{ generateMedicalHistory() }}"
+              medications: "{{ generateMedications() }}"
+              urgency: "{{ urgencyLevels[$randomInt(0, 2)] }}"
+              channel: "{{ channels[$randomInt(0, 2)] }}"
+          capture:
+            - json: "$.queryId"
+              as: "queryId"
+            - json: "$.safetyScore"
+              as: "safetyScore"
+            - json: "$.urgency"
+              as: "urgency"
+          expect:
+            - statusCode: 200
+            - hasProperty: "queryId"
+            - hasProperty: "safetyScore"
+
+      - think: 2
+
+      # Check metrics after query
+      - get:
+          url: "/metrics"
+          expect:
+            - statusCode: 200
+
+  # Secondary scenario: Patient history retrieval
+  - name: "Patient History Load Test"
+    weight: 20
+    flow:
+      - think: 1
+
+      # Get patient history
+      - get:
+          url: "/api/history/{{ patientIds[$randomInt(0, 4)] }}"
+          qs:
+            limit: "{{ $randomInt(10, 50) }}"
+            offset: "{{ $randomInt(0, 20) }}"
+          expect:
+            - statusCode: 200
+            - contentType: json
+
+      - think: 1
+
+  # Tertiary scenario: Service monitoring
+  - name: "Service Monitoring Load Test"
+    weight: 10
+    flow:
+      - think: 0.5
+
+      # Check various monitoring endpoints
+      - get:
+          url: "/health"
+          expect:
+            - statusCode: 200
+
+      - get:
+          url: "/metrics"
+          expect:
+            - statusCode: 200
+
+      - get:
+          url: "/ws-info"
+          expect:
+            - statusCode: 200
+
+      - get:
+          url: "/connections"
+          expect:
+            - statusCode: 200
+
+# WebSocket load testing scenario
+websocket:
+  target: 'ws://localhost:8080'
+  phases:
+    - duration: 60
+      arrivalRate: 5
+      name: "WebSocket connections"
+
+    - duration: 120
+      arrivalRate: 10
+      name: "WebSocket sustained"
+
+    - duration: 60
+      arrivalRate: 20
+      name: "WebSocket peak"
+
+  scenarios:
+    - name: "WebSocket Medical Query Flow"
+      weight: 100
+      engine: ws
+      flow:
+        # Connect to WebSocket
+        - connect:
+            subprotocols: []
+
+        # Wait for welcome message
+        - think: 1
+
+        # Subscribe to updates
+        - send:
+            message: |
+              {
+                "type": "subscribe_updates",
+                "payload": {
+                  "patientId": "{{ patientIds[$randomInt(0, 4)] }}"
+                },
+                "requestId": "{{ $randomString() }}"
+              }
+
+        # Wait for subscription confirmation
+        - wait: 1
+
+        # Send medical query
+        - send:
+            message: |
+              {
+                "type": "medical_query",
+                "payload": {
+                  "patientId": "{{ patientIds[$randomInt(0, 4)] }}",
+                  "query": "{{ generateWebSocketQuery() }}",
+                  "vitalSigns": {
+                    "bloodGlucose": {{ $randomInt(70, 300) }},
+                    "heartRate": {{ $randomInt(60, 120) }}
+                  }
+                },
+                "requestId": "{{ $randomString() }}"
+              }
+
+        # Wait for response
+        - wait: 5
+
+        # Send ping to test connection
+        - send:
+            message: |
+              {
+                "type": "ping",
+                "payload": {},
+                "requestId": "{{ $randomString() }}"
+              }
+
+        # Wait for pong
+        - wait: 1
+
+        # Keep connection alive for a bit
+        - think: 10

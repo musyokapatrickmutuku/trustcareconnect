@@ -1,0 +1,34 @@
+{
+  "services": [
+    {
+      "name": "Database",
+      "health_url": "http://localhost:5432",
+      "max_attempts": 10,
+      "wait_time": 5
+    },
+    {
+      "name": "Redis",
+      "health_url": "http://localhost:6379",
+      "max_attempts": 10,
+      "wait_time": 5
+    },
+    {
+      "name": "Bridge Service",
+      "health_url": "http://localhost:3002/health",
+      "max_attempts": 20,
+      "wait_time": 10
+    },
+    {
+      "name": "WebSocket Service",
+      "health_url": "http://localhost:8081/ws-info",
+      "max_attempts": 15,
+      "wait_time": 8
+    },
+    {
+      "name": "Metrics Endpoint",
+      "health_url": "http://localhost:3002/metrics",
+      "max_attempts": 10,
+      "wait_time": 5
+    }
+  ]
+}

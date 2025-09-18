@@ -120,6 +120,7 @@ actor TrustCareConnect {
 
     // Configuration
     private stable var NOVITA_API_KEY: Text = "";
+    private stable var BRIDGE_SECRET_KEY: Text = "";
     
     // Storage maps using stable memory
     private stable var nextPatientId: Nat = 1;
@@ -139,10 +140,16 @@ actor TrustCareConnect {
     private stable var enhancedPatientsEntries: [(PatientId, PatientData)] = [];
     private stable var enhancedDoctorsEntries: [(DoctorId, DoctorData)] = [];
     private stable var enhancedQueriesEntries: [(QueryId, QueryData)] = [];
+
+    // WebSocket Bridge storage
+    private stable var bridgeQueriesEntries: [(Text, BridgeResponse)] = [];
     
     private var enhancedPatients = Map.fromIter<PatientId, PatientData>(enhancedPatientsEntries.vals(), enhancedPatientsEntries.size(), Text.equal, Text.hash);
     private var enhancedDoctors = Map.fromIter<DoctorId, DoctorData>(enhancedDoctorsEntries.vals(), enhancedDoctorsEntries.size(), Text.equal, Text.hash);
     private var enhancedQueries = Map.fromIter<QueryId, QueryData>(enhancedQueriesEntries.vals(), enhancedQueriesEntries.size(), Text.equal, Text.hash);
+
+    // WebSocket Bridge HashMap
+    private var bridgeQueries = Map.fromIter<Text, BridgeResponse>(bridgeQueriesEntries.vals(), bridgeQueriesEntries.size(), Text.equal, Text.hash);
     
     // Initialize AI and query processing components
     private let aiProcessor = QueryProcessor.AIProcessor();
@@ -157,6 +164,7 @@ actor TrustCareConnect {
         enhancedPatientsEntries := Iter.toArray(enhancedPatients.entries());
         enhancedDoctorsEntries := Iter.toArray(enhancedDoctors.entries());
         enhancedQueriesEntries := Iter.toArray(enhancedQueries.entries());
+        bridgeQueriesEntries := Iter.toArray(bridgeQueries.entries());
     };
 
     // Post-upgrade hook to restore state
@@ -167,6 +175,7 @@ actor TrustCareConnect {
         enhancedPatientsEntries := [];
         enhancedDoctorsEntries := [];
         enhancedQueriesEntries := [];
+        bridgeQueriesEntries := [];
     };
 
     // Helper function to generate patient ID
@@ -790,6 +799,18 @@ actor TrustCareConnect {
         requiresReview: Bool;
     };
 
+    // WebSocket Bridge Support Types
+    type BridgeResponse = {
+        queryId: Text;
+        timestamp: Int;
+        bridgeProcessed: Bool;
+        safetyScore: ?Nat;
+        urgency: ?Text;
+        status: Text; // "pending", "processing", "completed", "failed"
+        response: ?Text;
+        errorMessage: ?Text;
+    };
+
     // Main MVP function for processing medical queries
     public func processMedicalQuery(
         patientId: Text,
@@ -909,6 +930,254 @@ actor TrustCareConnect {
     // Set API key for Novita AI (admin function)
     public func setApiKey(key: Text): async () {
         NOVITA_API_KEY := key;
+    };
+
+    // Set bridge secret key (admin function)
+    public func setBridgeSecretKey(key: Text): async () {
+        BRIDGE_SECRET_KEY := key;
+    };
+
+    // =======================
+    // WEBSOCKET BRIDGE FUNCTIONS
+    // =======================
+
+    // Helper function to verify bridge access
+    private func verifyBridgeAccess(secretKey: Text): Bool {
+        Text.size(BRIDGE_SECRET_KEY) > 0 and secretKey == BRIDGE_SECRET_KEY
+    };
+
+    // Register a new bridge query (requires authentication)
+    public func registerBridgeQuery(queryId: Text, secretKey: Text): async Result.Result<Text, Text> {
+        // Verify access control
+        if (not verifyBridgeAccess(secretKey)) {
+            return #err("Unauthorized: Invalid or missing bridge secret key");
+        };
+        // Check if query already exists
+        switch (bridgeQueries.get(queryId)) {
+            case (?existingQuery) {
+                #err("Bridge query with ID " # queryId # " already exists")
+            };
+            case null {
+                let currentTime = Time.now();
+                let bridgeResponse: BridgeResponse = {
+                    queryId = queryId;
+                    timestamp = currentTime;
+                    bridgeProcessed = false;
+                    safetyScore = null;
+                    urgency = null;
+                    status = "pending";
+                    response = null;
+                    errorMessage = null;
+                };
+
+                bridgeQueries.put(queryId, bridgeResponse);
+                #ok("Bridge query registered successfully: " # queryId)
+            };
+        }
+    };
+
+    // Store bridge response with safety score and urgency (requires authentication)
+    public func storeBridgeResponse(
+        queryId: Text,
+        response: Text,
+        safetyScore: Float,
+        urgency: Text,
+        secretKey: Text
+    ): async Result.Result<Text, Text> {
+        // Verify access control
+        if (not verifyBridgeAccess(secretKey)) {
+            return #err("Unauthorized: Invalid or missing bridge secret key");
+        };
+        // Validate inputs
+        if (Text.size(response) == 0) {
+            return #err("Response cannot be empty");
+        };
+
+        let urgencyValid = (urgency == "LOW" or urgency == "MEDIUM" or urgency == "HIGH");
+        if (not urgencyValid) {
+            return #err("Urgency must be LOW, MEDIUM, or HIGH");
+        };
+
+        let safetyScoreInt = Float.toInt(safetyScore);
+        if (safetyScoreInt < 0 or safetyScoreInt > 100) {
+            return #err("Safety score must be between 0 and 100");
+        };
+
+        // Check if bridge query exists
+        switch (bridgeQueries.get(queryId)) {
+            case null {
+                #err("Bridge query with ID " # queryId # " not found")
+            };
+            case (?existingBridge) {
+                let updatedBridge: BridgeResponse = {
+                    queryId = existingBridge.queryId;
+                    timestamp = existingBridge.timestamp;
+                    bridgeProcessed = true;
+                    safetyScore = ?Int.abs(safetyScoreInt);
+                    urgency = ?urgency;
+                    status = "completed";
+                    response = ?response;
+                    errorMessage = null;
+                };
+
+                bridgeQueries.put(queryId, updatedBridge);
+                #ok("Bridge response stored successfully for query: " # queryId)
+            };
+        }
+    };
+
+    // Get bridge status for a query
+    public query func getBridgeStatus(queryId: Text): async ?BridgeResponse {
+        bridgeQueries.get(queryId)
+    };
+
+    // Webhook endpoint for bridge callbacks
+    public func bridgeWebhook(
+        queryId: Text,
+        status: Text,
+        response: ?Text,
+        safetyScore: ?Float,
+        urgency: ?Text,
+        errorMessage: ?Text,
+        secretKey: Text
+    ): async Result.Result<Text, Text> {
+        // Verify access control
+        if (secretKey != BRIDGE_SECRET_KEY) {
+            return #err("Unauthorized: Invalid secret key");
+        };
+
+        // Validate status
+        let validStatuses = ["pending", "processing", "completed", "failed"];
+        let statusValid = Array.find<Text>(validStatuses, func(s: Text): Bool { s == status }) != null;
+        if (not statusValid) {
+            return #err("Invalid status. Must be: pending, processing, completed, or failed");
+        };
+
+        // Check if bridge query exists
+        switch (bridgeQueries.get(queryId)) {
+            case null {
+                #err("Bridge query with ID " # queryId # " not found")
+            };
+            case (?existingBridge) {
+                // Validate safety score if provided
+                let validatedSafetyScore = switch (safetyScore) {
+                    case null { null };
+                    case (?score) {
+                        let scoreInt = Float.toInt(score);
+                        if (scoreInt >= 0 and scoreInt <= 100) {
+                            ?Int.abs(scoreInt)
+                        } else {
+                            return #err("Safety score must be between 0 and 100")
+                        }
+                    };
+                };
+
+                // Validate urgency if provided
+                let validatedUrgency = switch (urgency) {
+                    case null { null };
+                    case (?urg) {
+                        if (urg == "LOW" or urg == "MEDIUM" or urg == "HIGH") {
+                            ?urg
+                        } else {
+                            return #err("Urgency must be LOW, MEDIUM, or HIGH")
+                        }
+                    };
+                };
+
+                let updatedBridge: BridgeResponse = {
+                    queryId = existingBridge.queryId;
+                    timestamp = existingBridge.timestamp;
+                    bridgeProcessed = (status == "completed");
+                    safetyScore = validatedSafetyScore;
+                    urgency = validatedUrgency;
+                    status = status;
+                    response = response;
+                    errorMessage = errorMessage;
+                };
+
+                bridgeQueries.put(queryId, updatedBridge);
+                #ok("Webhook processed successfully for query: " # queryId # " with status: " # status)
+            };
+        }
+    };
+
+    // Clean up old bridge queries (older than 24 hours)
+    public func cleanupOldBridgeQueries(secretKey: Text): async Result.Result<Text, Text> {
+        // Verify access control
+        if (not verifyBridgeAccess(secretKey)) {
+            return #err("Unauthorized: Invalid or missing bridge secret key");
+        };
+
+        let currentTime = Time.now();
+        let twentyFourHoursAgo = currentTime - (24 * 60 * 60 * 1000_000_000); // 24 hours in nanoseconds
+
+        let allBridgeQueries = Iter.toArray(bridgeQueries.entries());
+        var deletedCount: Nat = 0;
+
+        for ((queryId, bridgeResponse) in allBridgeQueries.vals()) {
+            if (bridgeResponse.timestamp < twentyFourHoursAgo) {
+                bridgeQueries.delete(queryId);
+                deletedCount += 1;
+            };
+        };
+
+        #ok("Cleaned up " # Nat.toText(deletedCount) # " old bridge queries (older than 24 hours)")
+    };
+
+    // Get all bridge queries with optional status filter (for monitoring)
+    public query func getAllBridgeQueries(statusFilter: ?Text): async [(Text, BridgeResponse)] {
+        let allQueries = Iter.toArray(bridgeQueries.entries());
+
+        switch (statusFilter) {
+            case null { allQueries };
+            case (?filter) {
+                Array.filter<(Text, BridgeResponse)>(allQueries, func((id: Text, bridge: BridgeResponse)): Bool {
+                    bridge.status == filter
+                })
+            };
+        }
+    };
+
+    // Get bridge query statistics
+    public query func getBridgeQueryStats(): async {
+        totalQueries: Nat;
+        pendingQueries: Nat;
+        processingQueries: Nat;
+        completedQueries: Nat;
+        failedQueries: Nat;
+        oldestQueryAge: ?Int;
+    } {
+        let allQueries = Iter.toArray(bridgeQueries.vals());
+        let currentTime = Time.now();
+
+        let pendingCount = Array.filter<BridgeResponse>(allQueries, func(br: BridgeResponse): Bool { br.status == "pending" }).size();
+        let processingCount = Array.filter<BridgeResponse>(allQueries, func(br: BridgeResponse): Bool { br.status == "processing" }).size();
+        let completedCount = Array.filter<BridgeResponse>(allQueries, func(br: BridgeResponse): Bool { br.status == "completed" }).size();
+        let failedCount = Array.filter<BridgeResponse>(allQueries, func(br: BridgeResponse): Bool { br.status == "failed" }).size();
+
+        // Find oldest query
+        let oldestQuery = Array.foldLeft<BridgeResponse, ?BridgeResponse>(allQueries, null, func(acc: ?BridgeResponse, current: BridgeResponse): ?BridgeResponse {
+            switch (acc) {
+                case null { ?current };
+                case (?existing) {
+                    if (current.timestamp < existing.timestamp) { ?current } else { ?existing }
+                };
+            }
+        });
+
+        let oldestAge = switch (oldestQuery) {
+            case null { null };
+            case (?oldest) { ?(currentTime - oldest.timestamp) };
+        };
+
+        {
+            totalQueries = allQueries.size();
+            pendingQueries = pendingCount;
+            processingQueries = processingCount;
+            completedQueries = completedCount;
+            failedQueries = failedCount;
+            oldestQueryAge = oldestAge;
+        }
     };
 
     // Initialize test patients as specified in CLAUDE.md
