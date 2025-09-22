@@ -2,7 +2,7 @@
 
 > AI-enhanced healthcare communication platform with real HTTP outcalls to AI models, built on Internet Computer Protocol (ICP)
 
-[![CI Status](https://github.com/your-username/trustcareconnect/workflows/CI/badge.svg)](https://github.com/your-username/trustcareconnect/actions)
+[![CI Status](https://github.com/musyokapatrickmutuku/trustcareconnect/workflows/CI/badge.svg)](https://github.com/musyokapatrickmutuku/trustcareconnect/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node Version](https://img.shields.io/badge/node-%3E%3D16.0.0-brightgreen)](https://nodejs.org/)
 
@@ -22,14 +22,14 @@ TrustCareConnect is a **production-ready** healthcare communication platform tha
 ## 🏗️ Architecture
 
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   React Frontend│◄──►│   ICP Backend   │◄──►│  Novita AI API  │
-│                 │    │                 │    │                 │
-│ - Patient Portal│    │ - HTTP Outcalls │    │ - BaiChuan M2   │
-│ - Doctor Portal │    │ - Motoko Smart  │    │   32B Model     │
-│ - Query Mgmt    │    │   Contracts     │    │ - Real AI       │
-│ - Local Dev     │    │ - Data Storage  │    │   Responses     │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
+┌─────────────────┐    ┌───────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│ React/JS Frontend├─►│ trustcare-bridge  │◄─►│   ICP Backend   │◄─►│  Novita AI API  │
+│                 │    │ (Node.js)         │    │                 │    │                 │
+│ - Patient Portal│    │ - WebSocket/HTTP  │    │ - HTTP Outcalls │    │ - BaiChuan M2   │
+│ - Doctor Portal │    │ - API Gateway     │    │ - Motoko Smart  │    │   32B Model     │
+│ - Query Mgmt    │    │ - Novita Client   │    │   Contracts     │    │ - Real AI       │
+│ - Local Dev     │    │ - ICP Client      │    │ - Data Storage  │    │   Responses     │
+└─────────────────┘    └───────────────────┘    └─────────────────┘    └─────────────────┘
 ```
 
 ## 🚀 Quick Start - ONE COMMAND SETUP! ✅
@@ -42,98 +42,36 @@ TrustCareConnect is a **production-ready** healthcare communication platform tha
 # Clone and run automated setup
 git clone https://github.com/musyokapatrickmutuku/trustcareconnect.git
 cd trustcareconnect
-./setup.sh
+./quickstart.sh
 ```
 
 **For Windows Users:**
-```batch
-git clone https://github.com/musyokapatrickmutuku/trustcareconnect.git
-cd trustcareconnect
-setup.bat
-```
+> Note: The `quickstart.sh` script is a bash script. We recommend using a bash-like environment like Git Bash or Windows Subsystem for Linux (WSL) to run the script.
 
 **That's it! The script automatically:**
 - ✅ Checks all prerequisites (Node.js, npm, DFX)
-- ✅ Installs dependencies
+- ✅ Installs dependencies for all packages
 - ✅ Starts DFX replica
 - ✅ Deploys backend canister
+- ✅ Starts the `trustcare-bridge` service
 - ✅ Configures environment variables
-- ✅ Loads comprehensive test data (5 patients, 2 doctors)
-- ✅ Starts frontend server
-- ✅ Provides all test credentials
 
-### 🔐 **AUTO-LOADED TEST CREDENTIALS**
-
-**The setup script automatically creates these accounts for immediate testing:**
-
-#### 👥 Patient Accounts (Ready to Login)
-- **Sarah Johnson**: `sarah.johnson@email.com` / `SarahDiabetes2024!` (Type 2, well-controlled)
-- **Michael Rodriguez**: `mike.rodriguez@student.edu` / `MikeType1Diabetes!` (Type 1, college student)  
-- **Carlos Mendoza**: `carlos.mendoza@gmail.com` / `CarlosType2_2024!` (Type 2, cardiac history)
-- **Priya Patel**: `priya.patel@work.com` / `PriyaDiabetes2024!` (Type 2, pregnant)
-- **Dorothy Williams**: `dorothy.williams@senior.net` / `Dorothy2024Senior!` (Type 2, elderly)
-
-#### 👨‍⚕️ Doctor Accounts (Ready to Login)
-- **Dr. Maria Rodriguez**: `dr.rodriguez@trustcare.com` / `DrMaria2024Endo!` (3 patients assigned)
-- **Dr. James Thompson**: `dr.thompson@trustcare.com` / `DrJames2024Endo!` (2 patients assigned)
-
-#### 💬 Sample Queries (Pre-Created)
-- **Sarah**: "Morning Blood Sugar Higher Than Usual" ✅ AI Response Generated
-- **Michael**: "Blood Sugar Issues During College Exams" ✅ AI Response Generated  
-- Ready for doctor review and patient testing
-
-**After setup completes:**
-1. Open http://u6s2n-gx777-77774-qaaba-cai.localhost:4943/ (Primary Frontend)
-2. Alternative: http://127.0.0.1:4943/?canisterId=u6s2n-gx777-77774-qaaba-cai
-3. Use any credentials above to login immediately
-4. Test the complete healthcare workflow!
-
-### Prerequisites (Auto-Checked)
+### Prerequisites (Auto-Checked by `quickstart.sh`)
 
 **Required Dependencies:**
 - **Node.js**: ≥ 16.0.0 (Tested with v20.x) ✅
 - **npm**: ≥ 8.0.0 (Latest version recommended) ✅  
-- **DFX**: ≥ 0.28.0 (Internet Computer SDK) ✅
+- **DFX**: ≥ 0.15.0 (Internet Computer SDK) ✅
 - **Git**: For cloning the repository ✅
+- **Docker**: For running the `trustcare-bridge` service ✅
 
 ---
 
-## 🔧 Troubleshooting & Manual Setup
+## 🔧 Manual Setup
 
 **If the automated setup encounters issues, or if you prefer manual control:**
 
-### 📖 Complete Manual Setup Guide
-👉 **[MANUAL-STARTUP-GUIDE.md](./MANUAL-STARTUP-GUIDE.md)**
-
-This comprehensive guide includes:
-- ✅ Step-by-step manual startup procedures
-- 🚨 Common failure scenarios and solutions
-- 🔍 Advanced troubleshooting techniques
-- 🆘 Recovery procedures for edge cases
-- 📝 Environment-specific fixes (WSL, macOS, Linux)
-
-### Quick Troubleshooting
-```bash
-# If setup script fails with npm issues:
-rm -rf node_modules package-lock.json
-npm cache clean --force
-npm install --legacy-peer-deps
-
-# If DFX replica won't start:
-dfx stop
-dfx start --background --clean
-
-# If frontend won't start:
-cd packages/frontend
-npm install react-dev-utils@12.0.1 --save-dev
-npm start
-```
-
----
-
-### Manual Installation Instructions (If Preferred)
-
-#### Step 1: Install DFX (Internet Computer SDK)
+### Step 1: Install DFX (Internet Computer SDK)
 
 ```bash
 # Install DFX
@@ -144,10 +82,10 @@ echo 'export PATH="$HOME/bin:$PATH"' >> ~/.bashrc
 source ~/.bashrc
 
 # Verify installation
-dfx --version  # Should show 0.28.0 or higher
+dfx --version
 ```
 
-#### Step 2: Clone and Setup Project
+### Step 2: Clone and Setup Project
 
 ```bash
 # Clone the repository
@@ -156,12 +94,9 @@ cd trustcareconnect
 
 # Install project dependencies  
 npm install
-
-# Create dfx.json if it doesn't exist (it should exist)
-# The project includes proper dfx configuration
 ```
 
-#### Step 3: Start Local IC Replica
+### Step 3: Start Local IC Replica
 
 ```bash
 # Start DFX local replica (required for backend)
@@ -171,344 +106,137 @@ dfx start --background --clean
 dfx ping  # Should return healthy status
 ```
 
-#### Step 4: Deploy Backend Canister
+### Step 4: Deploy Backend Canister
 
 ```bash
 # Deploy the backend canister
 dfx deploy backend
 
-# Verify deployment
-dfx canister call backend healthCheck
-# Should return: "TrustCareConnect backend is running! Patients: 0, Doctors: 0, Queries: 0"
+# The canister ID will be written to a .env file in the root directory
+# You can also get the canister ID with:
+dfx canister id backend
 ```
 
-#### Step 5: Start Frontend Application
+### Step 5: Start the `trustcare-bridge`
 
 ```bash
-# Navigate to project root (if not already there)
-cd /path/to/trustcareconnect
+# Navigate to the bridge directory
+cd trustcare-bridge
 
-# Start the frontend development server
+# Install dependencies
+npm install
+
+# Start the bridge
+npm run dev
+```
+
+### Step 6: Start Frontend Application
+
+This project contains two frontends:
+*   `frontend-simple`: A basic HTML/JS frontend for testing and interacting with the bridge.
+*   `packages/frontend`: A more advanced React-based frontend (work in progress).
+
+To start the simple frontend:
+```bash
+# Navigate to the simple frontend directory
+cd frontend-simple
+
+# Start the server
 npm start
-
-# The application will automatically open at http://localhost:3000
 ```
 
-### 🎯 Verification Steps
-
-After completing the setup, verify everything is working:
-
-```bash
-# 1. Check DFX replica health
-dfx ping
-
-# 2. Test backend canister
-dfx canister call backend healthCheck
-
-# 3. Check frontend compilation (should show "Compiled successfully!")
-# Open http://localhost:3000 in your browser
-
-# 4. Test complete workflow
-dfx canister call backend registerDoctor '("Dr. Emily Chen", "Endocrinology")'
-dfx canister call backend registerPatient '("Sarah Johnson", "Diabetes Type 2", "sarah.johnson@email.com")'  
-dfx canister call backend assignPatientToDoctor '("patient_1", "doctor_1")'
-dfx canister call backend submitQuery '("patient_1", "Morning Blood Sugar", "My blood sugar is 180 mg/dL this morning, should I be concerned?")'
-
-# 5. Check query processing (should show AI draft response)
-dfx canister call backend getQuery '("query_1")'
-```
+The application will be available at `http://localhost:3000`.
 
 ## 🔧 Environment Configuration
 
-The project includes pre-configured environment files. Key configurations:
+The project uses a `.env` file for environment variables. The `dfx.json` is configured to automatically output the canister IDs to a `.env` file in the root directory after deployment.
 
-### `.env` (Root Level)
+**`trustcare-bridge/.env.example`:**
 ```bash
+# TrustCareConnect Bridge Configuration
 NODE_ENV=development
-REACT_APP_IC_HOST=http://127.0.0.1:4943
-REACT_APP_BACKEND_CANISTER_ID=uxrrr-q7777-77774-qaaaq-cai
-CANISTER_ID_BACKEND=uxrrr-q7777-77774-qaaaq-cai
-REACT_APP_NETWORK=local
-DFX_NETWORK=local
-REACT_APP_DEBUG_MODE=true
-```
+PORT=3001
+WS_PORT=8080
+LOG_LEVEL=debug
 
-### `.env.local` (Frontend Package)
-```bash
-REACT_APP_IC_HOST=http://127.0.0.1:4943
-REACT_APP_BACKEND_CANISTER_ID=uxrrr-q7777-77774-qaaaq-cai
-REACT_APP_NETWORK=local
-REACT_APP_DEBUG_MODE=true
+# Novita AI Configuration (REQUIRED)
+NOVITA_API_KEY=your_novita_api_key_here
+NOVITA_BASE_URL=https://api.novita.ai/openai/v1
+
+# ICP Configuration (will be updated automatically)
+ICP_HOST=http://localhost:4943
+ICP_AGENT_HOST=http://127.0.0.1:4943
+DFX_NETWORK=local
+
+# Security
+JWT_SECRET=dev-jwt-secret-change-in-production
+BRIDGE_SECRET_KEY=dev-bridge-secret-change-in-production
+
+# WebSocket Configuration
+WS_HEARTBEAT_INTERVAL=30000
+WS_CONNECTION_TIMEOUT=60000
+MAX_CONCURRENT_CONNECTIONS=1000
+
+# Rate Limiting
+RATE_LIMIT_WINDOW_MS=900000
+RATE_LIMIT_MAX_REQUESTS=100
 ```
 
 **Important Notes:**
-- The canister ID will be different in your local setup
-- After deploying, update the canister ID in environment files
-- For production, change `REACT_APP_IC_HOST` to `https://ic0.app`
+- You need to create a `.env` file in the `trustcare-bridge` directory and add your `NOVITA_API_KEY`.
+- The canister ID will be automatically populated in the root `.env` file after running `dfx deploy`.
 
 ## 📁 Project Structure
 
 ```
 trustcareconnect/
 ├── dfx.json                     # DFX project configuration
+├── quickstart.sh                # One-command setup script
+├── trustcare-bridge/            # WebSocket/HTTP bridge service
+│   ├── src/
+│   │   ├── bridge-server.js    # Main WebSocket and HTTP server
+│   │   ├── icp-client.js       # Client for the IC canister
+│   │   └── novita-client.js    # Client for the Novita AI API
+│   └── package.json
 ├── packages/
 │   ├── backend/                 # ICP Motoko backend
 │   │   ├── src/
 │   │   │   ├── main.mo         # Main canister with HTTP outcalls
-│   │   │   ├── types.mo        # Type definitions  
-│   │   │   └── queryProcessor.mo  # AI processing logic
+│   │   │   └── types.mo        # Type definitions
 │   │   └── dfx.json
-│   └── frontend/               # React frontend application
+│   └── frontend/               # React frontend application (WIP)
 │       ├── src/
+│       │   ├── App.tsx         # Main application component
 │       │   ├── components/     # React components
-│       │   ├── services/       # API integration
-│       │   ├── declarations/   # Generated canister interfaces
-│       │   └── utils/          # Utility functions
+│       │   └── pages/          # Application pages
 │       └── package.json
-├── src/                        # Alternative source structure  
-├── .env                        # Environment configuration
-├── .env.local                  # Local environment overrides
-├── patients.txt                # Sample patient data
+├── frontend-simple/             # Simple HTML/JS frontend
+│   ├── index.html
+│   └── app.js
 └── README.md                   # This file
 ```
 
-## 🤖 AI Integration - HTTP Outcalls
+## 🧪 Testing
 
-### Real AI Model Integration
-
-The platform uses **real HTTP outcalls** from ICP canisters to external AI services:
-
-- **Primary AI Model**: BaiChuan M2 32B via Novita AI API
-- **HTTP Outcall Technology**: ICP management canister integration
-- **Fallback System**: Enhanced clinical decision support system
-- **Security**: Proper API key management and error handling
-
-### Sample Query Flow
-
-1. **Patient submits query**: "My blood sugar is 200 mg/dL, what should I do?"
-2. **Backend processes**: Extracts patient medical context
-3. **HTTP Outcall**: Sends context + query to BaiChuan M2 32B
-4. **AI Response**: Receives comprehensive medical analysis
-5. **Doctor Review**: AI response queued for physician approval
-6. **Patient Delivery**: Final approved response sent to patient
-
-## 🧪 Testing - FULLY VERIFIED ✅
-
-### Automated Test Data Setup
-
-The platform includes comprehensive test data from `patients.txt`:
+The `trustcare-bridge` contains a suite of tests.
 
 ```bash
-# Sample Patients Available:
-# P001: Sarah Michelle Johnson (Type 2 Diabetes, well-controlled)
-# P002: Michael David Rodriguez (Type 1 Diabetes, college student)  
-# P003: Carlos Eduardo Mendoza (Type 2 Diabetes with complications)
-# P004: Priya Sharma-Patel (Type 2 Diabetes, young professional)
-# P005: Dorothy Mae Williams (Type 2 Diabetes, elderly patient)
-```
+# Navigate to the bridge directory
+cd trustcare-bridge
 
-### Complete End-to-End Testing
-
-```bash
-# 1. Register test doctor
-dfx canister call backend registerDoctor '("Dr. Emily Chen", "Endocrinology")'
-
-# 2. Register test patient  
-dfx canister call backend registerPatient '("Sarah Michelle Johnson", "Diabetes Type 2", "sarah.johnson@email.com")'
-
-# 3. Assign patient to doctor
-dfx canister call backend assignPatientToDoctor '("patient_1", "doctor_1")'
-
-# 4. Submit query with AI processing
-dfx canister call backend submitQuery '("patient_1", "Morning Blood Sugar Higher Than Usual", "I have been feeling more tired lately and my morning blood sugars are higher than usual (around 180-200 mg/dL). Should I be concerned? I am usually around 130 mg/dL in the morning. This has been happening for about a week.")'
-
-# 5. Check AI-generated response
-dfx canister call backend getQuery '("query_1")'
-
-# 6. Doctor workflow
-dfx canister call backend takeQuery '("query_1", "doctor_1")'
-dfx canister call backend respondToQuery '("query_1", "doctor_1", "Based on your symptoms and elevated readings, I recommend adjusting your medication timing and monitoring more closely. Please schedule a follow-up appointment.")'
-
-# 7. System status
-dfx canister call backend healthCheck
-```
-
-## 🛠️ Troubleshooting - ISSUES RESOLVED ✅
-
-### Recently Fixed Issues
-
-#### ✅ Frontend Deployment Configuration Fixed
-**Problem**: Frontend deployment hanging during asset processing
-**Solution**: Updated dfx.json to point to dist/ directory instead of entire frontend source
-```json
-// Fixed in dfx.json
-"frontend": {
-  "source": ["packages/frontend/dist/"],
-  "frontend": {
-    "entrypoint": "packages/frontend/dist/index.html"
-  }
-}
-```
-
-#### ✅ Certificate Verification Error
-**Problem**: `Certificate verification error: "Invalid signature"`
-**Solution**: Disabled certificate verification for local development
-```javascript
-// Fixed in src/services/api.js
-agentOptions.verifyQuerySignatures = false; // For local development
-```
-
-#### ✅ Deployment Process Optimization
-**Problem**: Long deployment times and stuck processes
-**Solution**: Implemented proper deployment workflow
-- Fixed dfx.json configuration to use built assets only
-- Added process cleanup and cache clearing procedures
-- Reduced deployment time from hours to minutes
-
-#### ✅ Node Signature Error
-**Problem**: `Query response did not contain any node signatures`  
-**Solution**: Proper HttpAgent configuration for local replica
-- Added root key fetching for local development
-- Configured host properly for local DFX replica
-
-#### ✅ TypeScript Compilation Errors
-**Problem**: `Cannot find module 'axios'`
-**Solution**: Removed axios dependency and updated error handler
-- Updated error handling without external dependencies
-- Fixed all TypeScript compilation issues
-
-### Common Setup Issues & Solutions
-
-#### DFX Installation Issues
-```bash
-# For WSL/Ubuntu users:
-curl -fsSL https://internetcomputer.org/install.sh | sh
-export PATH="$HOME/bin:$PATH"
-
-# For macOS users:
-brew install dfx
-
-# Verify installation:
-dfx --version
-```
-
-#### Port Conflicts
-```bash
-# If port 3000 is already in use:
-lsof -ti:3000 | xargs kill -9
-npm start
-
-# If DFX port 4943 is in use:
-dfx stop
-dfx start --background --clean
-```
-
-#### Environment Variable Issues
-```bash
-# Check if canister ID is set correctly:
-echo $CANISTER_ID_BACKEND
-
-# If empty, export manually:
-export CANISTER_ID_BACKEND=$(dfx canister id backend)
-```
-
-### Health Check Commands
-
-```bash
-# Verify all services are running:
-dfx ping                                    # ✅ DFX replica healthy
-dfx canister call backend healthCheck       # ✅ Backend canister responding  
-curl http://localhost:3000                  # ✅ Frontend serving
-dfx canister status backend                 # ✅ Canister status and cycles
+# Run tests
+npm test
 ```
 
 ## 🚢 Production Deployment
 
-### Mainnet Deployment
-
-```bash
-# 1. Deploy to Internet Computer mainnet
-dfx deploy --network ic --with-cycles 5000000000000
-
-# 2. Update environment for production
-# Update .env files with mainnet canister ID
-REACT_APP_IC_HOST=https://ic0.app
-REACT_APP_BACKEND_CANISTER_ID=[your-mainnet-canister-id]
-
-# 3. Build production frontend
-npm run build
-
-# 4. Test production deployment
-dfx canister --network ic call backend healthCheck
-```
-
-### Production Configuration Checklist
-
-- ✅ Backend canister deployed with sufficient cycles
-- ✅ Frontend environment configured for mainnet
-- ✅ Certificate verification enabled for production
-- ⚠️ **TODO**: Configure real API keys for production AI models
-- ⚠️ **TODO**: Set up cycle monitoring and alerts
-- ⚠️ **TODO**: Configure production CORS policies
-
-## 🎮 Demo Usage
-
-### Application Access URLs
-
-**Primary Frontend Access:**
-- http://u6s2n-gx777-77774-qaaba-cai.localhost:4943/
-
-**Alternative Frontend Access:**
-- http://127.0.0.1:4943/?canisterId=u6s2n-gx777-77774-qaaba-cai
-
-**Backend API Access:**
-- http://uxrrr-q7777-77774-qaaaq-cai.localhost:4943/
-
-**Candid UI for Backend Testing:**
-- http://127.0.0.1:4943/_/candid?id=uxrrr-q7777-77774-qaaaq-cai
-
-### Patient Portal Features
-- **Registration**: Complete patient profiles with medical history
-- **Query Submission**: Natural language medical questions
-- **AI Responses**: View AI-generated draft responses
-- **Status Tracking**: Real-time query status updates
-
-### Doctor Portal Features
-- **Patient Management**: View assigned patients
-- **Query Review**: Review AI-generated draft responses
-- **Response Editing**: Modify and approve AI recommendations
-- **Clinical Decision Support**: Enhanced medical context
-
-### Sample Queries to Test
-- "My blood sugar reading is 250 mg/dL this morning, what should I do?"
-- "I've been feeling dizzy and think my blood sugar might be low"
-- "Can I adjust my Metformin timing if I experience stomach upset?"
-- "My HbA1c results came back at 8.2%, what does this mean?"
+The `deploy.sh` script in the root directory can be used for production deployment. Please review the script and the `trustcare-bridge/DEPLOYMENT.md` file for more details.
 
 ## 📚 API Reference
 
 ### Backend Canister Methods
 
-```motoko
-// Patient Management
-registerPatient(name: Text, condition: Text, email: Text) : async PatientId
-getPatient(patientId: PatientId) : async ?Patient
-assignPatientToDoctor(patientId: PatientId, doctorId: DoctorId) : async Result
-
-// Doctor Management  
-registerDoctor(name: Text, specialization: Text) : async DoctorId
-getDoctor(doctorId: DoctorId) : async ?Doctor
-
-// Query Management
-submitQuery(patientId: PatientId, title: Text, description: Text) : async Result<QueryId>
-getQuery(queryId: QueryId) : async ?MedicalQuery
-takeQuery(queryId: QueryId, doctorId: DoctorId) : async Result
-respondToQuery(queryId: QueryId, doctorId: DoctorId, response: Text) : async Result
-
-// System Functions
-healthCheck() : async Text
-getStats() : async SystemStats
-```
+Please refer to the Candid UI for the latest API reference. You can access it at: `http://127.0.0.1:4943/_/candid?id=<your-backend-canister-id>`
 
 ## 🤝 Contributing
 

@@ -110,7 +110,7 @@ curl http://localhost:3001/ws-info
 
 ## 🏗️ ICP Canister Test
 ```bash
-dfx canister call assist_backend getBridgeStatus '("test-query-id")'
+dfx canister call backend getBridgeStatus '("test-query-id")'
 ```
 
 **Expected Response:**

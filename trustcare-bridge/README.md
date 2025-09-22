@@ -75,7 +75,7 @@ npm run dev
 
 3. **Test the service:**
 ```bash
-curl http://localhost:8080/health
+curl http://localhost:3001/health
 ```
 
 ### Docker Deployment
@@ -339,7 +339,7 @@ console.log('AI Response:', response);
 ### Health Check Endpoint
 
 ```bash
-curl http://localhost:8080/health
+curl http://localhost:3001/health
 ```
 
 Response:
@@ -355,7 +355,7 @@ Response:
 ### WebSocket Info Endpoint
 
 ```bash
-curl http://localhost:8080/ws-info
+curl http://localhost:3001/ws-info
 ```
 
 Response:

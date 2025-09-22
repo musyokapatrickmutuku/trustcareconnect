@@ -12,7 +12,7 @@ All notable changes to this project will be documented in this file.
 
 ### ✨ New Features
 - **Real AI Integration**: HTTP outcalls to BaiChuan M2 32B via Novita AI API
-- **Enhanced Patient Data**: Comprehensive medical history integration from `patients.txt`
+
 - **Clinical Decision Support**: Structured medical response format
 - **Production Environment Configuration**: Ready for mainnet deployment
 
@@ -100,13 +100,13 @@ agentOptions.verifyQuerySignatures = false;
 
 #### Documentation
 - `SETUP-GUIDE.md`: Complete installation guide for new developers
-- `DEPLOYMENT-CONFIG.md`: Comprehensive deployment configuration
+
 - `CHANGELOG.md`: This changelog documenting all changes
 
 #### Configuration Files
 - `dfx.json`: Proper DFX project configuration
 - Updated `.env` files: Complete environment variable setup
-- `test_patient_setup.js`: Comprehensive testing script
+
 
 ### 🧪 Testing Verification
 
@@ -207,7 +207,7 @@ agentOptions.verifyQuerySignatures = false;
 
 #### Environment Variables
 Some environment variables were renamed for clarity:
-- `CANISTER_ID_BACKEND` now required for proper operation
+- `ICP_CANISTER_ID` now required for proper operation of the `trustcare-bridge`
 - `REACT_APP_IC_HOST` must be set correctly for each environment
 - `REACT_APP_NETWORK` determines certificate verification behavior
 
@@ -259,12 +259,7 @@ dfx canister call backend healthCheck
 - **Testing**: Comprehensive end-to-end validation
 - **Documentation**: Complete setup and deployment guides
 
-### 📞 Support
 
-For questions or issues related to this release:
-- **GitHub Issues**: https://github.com/musyokapatrickmutuku/trustcareconnect/issues
-- **Documentation**: See SETUP-GUIDE.md and README.md
-- **Email**: support@trustcareconnect.com
 
 ---
 
